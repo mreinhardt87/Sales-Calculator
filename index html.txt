@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Sales Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .deal-card {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+        .checkbox-label:hover {
+            background-color: #f9fafb;
+        }
+        input[type="checkbox"]:checked + .checkbox-label {
+             border-color: #3b82f6;
+             background-color: #eff6ff;
+        }
+        input[type="checkbox"]:disabled + .checkbox-label {
+            cursor: not-allowed;
+            background-color: #f9fafb;
+            color: #9ca3af;
+        }
+        input[type="checkbox"] {
+            display: none;
+        }
+        .checkmark {
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 2px solid #9ca3af;
+            border-radius: 0.25rem;
+            margin-right: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+        input[type="checkbox"]:checked + .checkbox-label .checkmark {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+        }
+        input[type="checkbox"]:disabled + .checkbox-label .checkmark {
+            background-color: #e5e7eb;
+            border-color: #d1d5db;
+        }
+        .checkmark svg {
+            display: none;
+        }
+        input[type="checkbox"]:checked + .checkbox-label .checkmark svg {
+            display: block;
+        }
+        .red-hot-ticket {
+            border-color: #ef4444;
+            background-image: linear-gradient(to right, #fef2f2, #fff1f2);
+        }
+        /* Stop browsers from adding spinners to number inputs */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div class="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="max-w-md w-full mx-auto">
+            <!-- Main Deal Card -->
+            <div class="deal-card bg-white rounded-xl overflow-hidden">
+                <!-- Header Section -->
+                <div class="p-6 bg-gray-800 text-white text-center">
+                    <h1 id="header-title" class="text-2xl font-bold">Sales Calculator</h1>
+                    <p id="header-subtitle" class="font-semibold mt-1">Configure your transaction below</p>
+                </div>
+
+                <!-- Cost Breakdown Section -->
+                <div class="p-6">
+                    <!-- Controls Section -->
+                    <div class="mb-4">
+                         <div>
+                            <label for="plan-select" class="block text-sm font-medium text-gray-700 mb-1">Select Plan:</label>
+                            <select id="plan-select" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" onchange="updateCalculator()">
+                                <option value="40">Base 5G - $40 Plan</option>
+                                <option value="50" selected>Total 5G - $50 Plan</option>
+                                <option value="60">Total 5G+ - $60 Plan</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Universal Device Count -->
+                     <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="byod-lines" class="block text-sm font-medium text-gray-700">BYOD Lines:</label>
+                            <select id="byod-lines" class="mt-1 w-full p-2 border border-gray-300 rounded-md" onchange="updateLineDropdowns()">
+                                <!-- Options dynamically populated -->
+                            </select>
+                        </div>
+                        <div>
+                            <label for="new-device-lines" class="block text-sm font-medium text-gray-700">New Device Lines:</label>
+                            <select id="new-device-lines" class="mt-1 w-full p-2 border border-gray-300 rounded-md" onchange="updateLineDropdowns(true)">
+                                <!-- Options dynamically populated -->
+                            </select>
+                        </div>
+                    </div>
+                    <div id="new-device-selectors" class="space-y-2 mb-4"></div>
+                     <div class="mb-4">
+                        <label for="protect-lines" class="block text-sm font-medium text-gray-700">Total Protect Lines:</label>
+                        <select id="protect-lines" class="mt-1 w-full p-2 border border-gray-300 rounded-md" onchange="updateCalculator()">
+                            <!-- Options dynamically populated -->
+                        </select>
+                    </div>
+                     <div class="mb-4">
+                        <label for="ported-lines" class="block text-sm font-medium text-gray-700">Number of Ported Lines:</label>
+                        <select id="ported-lines" class="mt-1 w-full p-2 border border-gray-300 rounded-md" onchange="updateCalculator()">
+                            <!-- Options dynamically populated -->
+                        </select>
+                    </div>
+                     <div class="mb-4">
+                        <label for="accessory-bundles" class="block text-sm font-medium text-gray-700">Accessory Bundles: (Case, Glass Protector & Wall Charger)</label>
+                        <select id="accessory-bundles" class="mt-1 w-full p-2 border border-gray-300 rounded-md" onchange="updateCalculator()">
+                            <!-- Options dynamically populated -->
+                        </select>
+                    </div>
+                     <div class="mb-4">
+                        <label for="tablet-select" class="block text-sm font-medium text-gray-700">Add Tablet:</label>
+                        <select id="tablet-select" class="mt-1 w-full p-2 border border-gray-300 rounded-md" onchange="updateCalculator()">
+                            <!-- Options dynamically populated -->
+                        </select>
+                    </div>
+                    
+                    <!-- Port-in and ID Validation Checkboxes -->
+                    <div class="mb-4 space-y-2">
+                        <div>
+                            <input type="checkbox" id="id-verified" checked onchange="updateCalculator()">
+                            <label for="id-verified" class="checkbox-label text-sm py-2">
+                                <span class="checkmark"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></span>
+                                <span>ID Verified (Veriff)</span>
+                            </label>
+                        </div>
+                         <div>
+                            <input type="checkbox" id="port-in" checked onchange="updateCalculator()">
+                            <label for="port-in" class="checkbox-label text-sm py-2">
+                                <span class="checkmark"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></span>
+                                <span>External Port-in</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Promo Box -->
+                    <div id="promo-box" class="hidden mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p id="promo-box-text" class="text-sm text-blue-800"></p>
+                    </div>
+
+                    <!-- Interactive "Due Today" Section -->
+                    <h2 class="text-lg font-semibold text-gray-700 mb-4 border-t pt-4">Calculate Amount Due Today:</h2>
+                    <div class="space-y-3">
+                        <!-- Device Cost (hidden by default) -->
+                        <div id="device-cost-container" class="hidden">
+                            <input type="checkbox" id="device-cost" data-amount="0" disabled>
+                            <label for="device-cost" class="checkbox-label">
+                                <span class="checkmark"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></span>
+                                <span id="device-cost-label" class="flex-grow">Mobile Device Cost</span>
+                                <span id="device-cost-amount" class="font-bold text-gray-800">$0.00</span>
+                            </label>
+                        </div>
+                    
+                        <!-- First Month Service Checkbox -->
+                        <div id="service-container">
+                            <input type="checkbox" id="service" data-amount="55" onchange="updateCalculator()">
+                            <label for="service" class="checkbox-label">
+                                <span class="checkmark"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></span>
+                                <span id="service-label" class="flex-grow">First Month Mobile Service</span>
+                                <span id="service-amount" class="font-bold text-gray-800">$55.00</span>
+                            </label>
+                        </div>
+
+                        <!-- Total Protect Checkbox -->
+                        <div id="total-protect-container">
+                            <input type="checkbox" id="total-protect" data-amount="5" onchange="updateCalculator()">
+                            <label for="total-protect" class="checkbox-label">
+                                <span class="checkmark"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></span>
+                                <span id="protect-label" class="flex-grow">Total Protect (Mobile)</span>
+                                <span id="protect-amount" class="font-bold text-gray-800">$5.00</span>
+                            </label>
+                        </div>
+                        
+                        <!-- Accessory Bundle Cost -->
+                        <div id="accessory-bundle-container" class="hidden">
+                            <input type="checkbox" id="accessory-bundle-cost" data-amount="0" disabled>
+                            <label for="accessory-bundle-cost" class="checkbox-label">
+                                <span class="checkmark"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></span>
+                                <span id="accessory-bundle-label" class="flex-grow">Accessory Bundle (Case, Screen protector & Wall charger)</span>
+                                <span id="accessory-bundle-amount" class="font-bold text-gray-800">$0.00</span>
+                            </label>
+                        </div>
+                        
+                        <!-- Promotional Months -->
+                        <div id="promo-months-container" class="hidden">
+                            <input type="checkbox" id="promo-months" data-amount="0" onchange="updateCalculator()">
+                            <label for="promo-months" class="checkbox-label">
+                                <span class="checkmark"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></span>
+                                <span id="promo-months-label" class="flex-grow">Promotional Months</span>
+                                <span id="promo-months-amount" class="font-bold text-gray-800">$0.00</span>
+                            </label>
+                        </div>
+                        
+                        <!-- Home Internet Section -->
+                        <div>
+                            <input type="checkbox" id="home-internet" data-amount="45" onchange="updateCalculator()">
+                            <label for="home-internet" class="checkbox-label">
+                                <span class="checkmark"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></span>
+                                <span id="internet-label" class="flex-grow">Home Internet Service (1st Month)</span>
+                                <span id="internet-amount" class="font-bold text-gray-800">$45.00</span>
+                            </label>
+                        </div>
+
+                         <!-- Home Router Device Cost (hidden by default) -->
+                        <div id="router-cost-container" class="hidden">
+                            <input type="checkbox" id="router-cost" data-amount="24.99" disabled>
+                            <label for="router-cost" class="checkbox-label">
+                                <span class="checkmark"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></span>
+                                <span id="router-cost-label" class="flex-grow">Home Router Device</span>
+                                <span id="router-cost-amount" class="font-bold text-gray-800">$24.99</span>
+                            </label>
+                        </div>
+                        
+                        <!-- Tablet Service Cost -->
+                        <div id="tablet-service-container" class="hidden">
+                            <input type="checkbox" id="tablet-service" data-amount="0" disabled>
+                            <label for="tablet-service" class="checkbox-label">
+                                <span class="checkmark"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></span>
+                                <span id="tablet-service-label" class="flex-grow">Tablet Service</span>
+                                <span id="tablet-service-amount" class="font-bold text-gray-800">$0.00</span>
+                            </label>
+                        </div>
+
+                        <!-- Access Fee Checkbox -->
+                        <div id="access-fee-container">
+                            <input type="checkbox" id="access" data-amount="25" onchange="updateCalculator()">
+                            <label for="access" class="checkbox-label">
+                                 <span class="checkmark"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></span>
+                                <span id="access-label" class="flex-grow">Access Fee (Mobile)</span>
+                                <span id="access-amount" class="font-bold text-gray-800">$25.00</span>
+                            </label>
+                        </div>
+
+                        <!-- Red Hot Ticket -->
+                        <div id="red-hot-ticket-container" class="hidden">
+                            <input type="checkbox" id="red-hot-ticket" onchange="updateCalculator()">
+                            <label for="red-hot-ticket" class="checkbox-label red-hot-ticket">
+                                <span class="checkmark"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></span>
+                                <span class="flex-grow font-bold text-red-600">Apply Red Hot Ticket! (Up to $120 off)</span>
+                            </label>
+                        </div>
+
+                        <!-- Sales Tax Section -->
+                        <div>
+                            <input type="checkbox" id="sales-tax" checked onchange="updateCalculator()">
+                            <label for="sales-tax" class="checkbox-label">
+                                <span class="checkmark"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></span>
+                                <div class="flex-grow flex items-center" onclick="event.preventDefault()">
+                                    <span>Sales Tax at</span>
+                                    <input type="number" id="tax-rate-input" value="10.3" step="0.1" class="w-20 mx-2 p-1 text-center rounded border bg-white border-gray-300" oninput="updateCalculator()">
+                                    <span>%</span>
+                                </div>
+                                <span id="tax-amount" class="font-bold text-gray-800">$28.84</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Total Section -->
+                    <div class="mt-6 pt-4 border-t-2 border-dashed">
+                        <div class="flex justify-between items-center text-xl font-bold text-gray-800">
+                            <span>Total Due Today:</span>
+                            <span id="total-due" class="text-blue-600">$113.84</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2 text-center">This calculator is to estimate only. Today's cost may vary slightly.</p>
+                    </div>
+                </div>
+            </div>
+            <button id="reset-button" onclick="resetCalculator()" class="w-full mt-4 p-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                Reset Calculator
+            </button>
+        </div>
+        
+        <!-- Price Plan Breakdown -->
+        <div class="deal-card bg-white rounded-xl overflow-hidden self-start">
+             <div class="p-6 bg-gray-800 text-white text-center">
+                <h1 id="breakdown-title" class="text-2xl font-bold">Monthly Plan Cost</h1>
+                <p class="font-semibold mt-1">Month 2 & Beyond with AutoPay</p>
+            </div>
+            <div id="price-breakdown" class="p-6 space-y-4">
+                <!-- Breakdown content will be generated here -->
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Data for different phone promotions based on the provided PDF
+        const dealData = {
+            'iphone-13': { name: 'Apple iPhone 13 128GB', retailPrice: 529.00, promoPrice: 0.00, portOnlyPrice: 299.99, veriffOnlyPrice: 99.99, promoMonths: 3 },
+            'iphone-14': { name: 'Apple iPhone 14 128GB', retailPrice: 629.00, promoPrice: 99.99, portOnlyPrice: 529.99, veriffOnlyPrice: 199.99, promoMonths: 3 },
+            'iphone-14-plus': { name: 'Apple iPhone 14 Plus 128GB', retailPrice: 729.00, promoPrice: 199.99, portOnlyPrice: 499.99, veriffOnlyPrice: 299.99, promoMonths: 1 },
+            'iphone-15': { name: 'Apple iPhone 15 128GB', retailPrice: 729.00, promoPrice: 479.99, portOnlyPrice: 679.99, veriffOnlyPrice: 479.99, promoMonths: 1 },
+            'iphone-16e': { name: 'Apple iPhone 16e 128GB', retailPrice: 599.99, promoPrice: 299.99, portOnlyPrice: 599.99, veriffOnlyPrice: 399.99, noHasslePrice: 599.99, promoMonths: 2 },
+            'samsung-a15': { name: 'Samsung Galaxy A15 5G', retailPrice: 79.99, promoPrice: 0.00, portOnlyPrice: 59.99, veriffOnlyPrice: 0.00, promoMonths: 1 },
+            'samsung-a16': { name: 'Samsung Galaxy A16 (5G)', retailPrice: 129.00, promoPrice: 0.00, portOnlyPrice: 0.00, veriffOnlyPrice: 0.00, noHasslePrice: 0.00, promoMonths: 1 },
+            'samsung-a25': { name: 'Samsung Galaxy A25 5G', retailPrice: 199.99, promoPrice: 14.99, portOnlyPrice: 49.99, veriffOnlyPrice: 14.99, promoMonths: 1 },
+            'samsung-a26': { name: 'Samsung Galaxy A26 5G', retailPrice: 199.99, promoPrice: 0.00, portOnlyPrice: 199.99, veriffOnlyPrice: 49.99, noHasslePrice: 149.99, promoMonths: 1 },
+            'samsung-a36': { name: 'Samsung Galaxy A36 (5G)', retailPrice: 279.99, promoPrice: 0.00, portOnlyPrice: 199.99, veriffOnlyPrice: 99.99, promoMonths: 1 },
+            'samsung-s24fe': { name: 'Samsung Galaxy S24FE (5G)', retailPrice: 699.99, promoPrice: 199.99, portOnlyPrice: 699.99, veriffOnlyPrice: 299.99, promoMonths: 2 },
+            'moto-g-5g-2025': { name: 'Motorola Moto G 5G 2025', retailPrice: 79.99, promoPrice: 0.00, portOnlyPrice: 0.00, veriffOnlyPrice: 0.00, noHasslePrice: 0.00, promoMonths: 1 },
+            'moto-g-stylus-5g-2024': { name: 'Moto G Stylus 5G 2024', retailPrice: 249.99, promoPrice: 0.00, portOnlyPrice: 49.99, veriffOnlyPrice: 24.99, promoMonths: 1 },
+            'moto-g-stylus-5g-2025': { name: 'Moto G Stylus 5G 2025', retailPrice: 199.00, promoPrice: 0.00, portOnlyPrice: 149.99, veriffOnlyPrice: 49.99, promoMonths: 1 },
+            'moto-edge-2024': { name: 'Motorola Edge 2024', retailPrice: 259.99, promoPrice: 0.00, portOnlyPrice: 149.99, veriffOnlyPrice: 49.99, promoMonths: 1 },
+            'moto-edge-2025': { name: 'Motorola Edge 2025', retailPrice: 259.99, promoPrice: 0.00, portOnlyPrice: 149.99, veriffOnlyPrice: 49.99, promoMonths: 1 },
+            'moto-razr-2025': { name: 'Motorola Razr 2025', retailPrice: 599.99, promoPrice: 199.99, portOnlyPrice: 599.99, veriffOnlyPrice: 299.99, promoMonths: 2 },
+            'moto-g-power-5g-2024': { name: 'Moto G Power 5G 2024', retailPrice: 199.00, promoPrice: 0.00, portOnlyPrice: 0.00, veriffOnlyPrice: 0.00, promoMonths: 1 },
+            'moto-g-power-5g-2025': { name: 'Moto G Power 5G 2025', retailPrice: 149.99, promoPrice: 0.00, portOnlyPrice: 49.99, veriffOnlyPrice: 0.00, promoMonths: 1 },
+            'tcl-50xe': { name: 'TCL 50XE 5G', retailPrice: 79.99, promoPrice: 0.00, portOnlyPrice: 79.99, veriffOnlyPrice: 14.99, promoMonths: 1 },
+            'tcl-50xl-nxtpaper': { name: 'TCL 50XL NXTPAPER 5G', retailPrice: 99.99, promoPrice: 0.00, portOnlyPrice: 49.99, veriffOnlyPrice: 14.99, promoMonths: 1 }
+        };
+
+        const tabletData = {
+            'none': { name: 'None', msrp: 0, serviceCost: 0, upfrontMonths: 0 },
+            'samsung-a9-plus': { name: 'Samsung A9+', msrp: 239.99, serviceCost: 20, upfrontMonths: 6 },
+            'tcl-tab-10': { name: 'TCL Tab 10 NXTPAPER 5G', msrp: 219.99, serviceCost: 20, upfrontMonths: 3 }
+        };
+        
+        const planBreakdownData = {
+            '40': [40, 80, 100, 100, 115],
+            '50': [50, 80, 110, 110, 125],
+            '60': [60, 90, 120, 120, 135]
+        };
+
+        // Main function to update the entire calculator UI and totals
+        function updateCalculator() {
+            // --- Read all user inputs ---
+            const basePlanPrice = parseInt(document.getElementById('plan-select').value);
+            const byodLines = parseInt(document.getElementById('byod-lines').value) || 0;
+            const newDeviceLines = parseInt(document.getElementById('new-device-lines').value) || 0;
+            const totalLines = byodLines + newDeviceLines;
+            
+            const idVerified = document.getElementById('id-verified').checked;
+            const portIn = document.getElementById('port-in').checked;
+            const homeInternetCheckbox = document.getElementById('home-internet');
+            const homeInternet = homeInternetCheckbox.checked;
+            const selectedTabletKey = document.getElementById('tablet-select').value;
+            const currentTablet = tabletData[selectedTabletKey];
+            const taxRateInput = document.getElementById('tax-rate-input');
+            const taxRate = parseFloat(taxRateInput.value) / 100 || 0;
+            const portedLines = parseInt(document.getElementById('ported-lines').value) || 0;
+            const redHotTicket = document.getElementById('red-hot-ticket').checked;
+            const accessoryBundles = parseInt(document.getElementById('accessory-bundles').value) || 0;
+
+            // --- Get all DOM elements ---
+            const headerTitle = document.getElementById('header-title');
+            const headerSubtitle = document.getElementById('header-subtitle');
+            
+            const deviceCostContainer = document.getElementById('device-cost-container');
+            const deviceCostCheckbox = document.getElementById('device-cost');
+            const deviceCostLabel = document.getElementById('device-cost-label');
+            const deviceCostAmount = document.getElementById('device-cost-amount');
+
+            const routerCostContainer = document.getElementById('router-cost-container');
+            const routerCostCheckbox = document.getElementById('router-cost');
+
+            const promoBox = document.getElementById('promo-box');
+            const promoBoxText = document.getElementById('promo-box-text');
+            const promoMonthsContainer = document.getElementById('promo-months-container');
+            const promoMonthsCheckbox = document.getElementById('promo-months');
+            const promoMonthsLabel = document.getElementById('promo-months-label');
+            const promoMonthsAmountSpan = document.getElementById('promo-months-amount');
+            
+            const serviceContainer = document.getElementById('service-container');
+            const serviceCheckbox = document.getElementById('service');
+            const serviceLabel = document.getElementById('service-label');
+            const serviceAmountSpan = document.getElementById('service-amount');
+
+            const protectLinesSelect = document.getElementById('protect-lines');
+            const protectContainer = document.getElementById('total-protect-container');
+            const protectCheckbox = document.getElementById('total-protect');
+            const protectLabel = document.getElementById('protect-label');
+            const protectAmountSpan = document.getElementById('protect-amount');
+            
+            const accessoryBundleContainer = document.getElementById('accessory-bundle-container');
+            const accessoryBundleCheckbox = document.getElementById('accessory-bundle-cost');
+            const accessoryBundleLabel = document.getElementById('accessory-bundle-label');
+            const accessoryBundleAmount = document.getElementById('accessory-bundle-amount');
+
+            const accessContainer = document.getElementById('access-fee-container');
+            const accessCheckbox = document.getElementById('access');
+            const accessLabel = document.getElementById('access-label');
+            const accessAmountSpan = document.getElementById('access-amount');
+
+            const taxCheckbox = document.getElementById('sales-tax');
+            const taxAmountSpan = document.getElementById('tax-amount');
+            
+            const tabletServiceContainer = document.getElementById('tablet-service-container');
+            const tabletServiceCheckbox = document.getElementById('tablet-service');
+            const tabletServiceLabel = document.getElementById('tablet-service-label');
+            const tabletServiceAmount = document.getElementById('tablet-service-amount');
+            
+            const redHotTicketContainer = document.getElementById('red-hot-ticket-container');
+            const redHotTicketCheckbox = document.getElementById('red-hot-ticket');
+
+            // --- Determine Device Costs & Promotions ---
+            let totalDeviceCost = 0;
+            let totalRetailForTax = 0;
+            let hasMultiMonthDevice = false;
+            let iphone13PromoCount = 0;
+
+            if (newDeviceLines > 0) {
+                for (let i = 1; i <= newDeviceLines; i++) {
+                    const selector = document.getElementById(`device-select-${i}`);
+                    const selectedKey = selector.value;
+                    const currentDeal = dealData[selectedKey];
+                    
+                    totalRetailForTax += currentDeal.retailPrice;
+                    if (currentDeal.promoMonths > 1) hasMultiMonthDevice = true;
+                    
+                    if (idVerified && portIn) {
+                        if (selectedKey === 'iphone-13') iphone13PromoCount++;
+                        totalDeviceCost += currentDeal.promoPrice;
+                    } else if (portIn) {
+                        totalDeviceCost += currentDeal.portOnlyPrice;
+                    } else if (idVerified) {
+                        totalDeviceCost += currentDeal.veriffOnlyPrice;
+                    } else {
+                        // "No Hassle" rule for certain devices
+                        if (currentDeal.noHasslePrice !== undefined) {
+                            totalDeviceCost += currentDeal.noHasslePrice;
+                        } else {
+                            totalDeviceCost += currentDeal.retailPrice;
+                        }
+                    }
+                }
+            }
+            
+            // --- Update Header ---
+            headerTitle.textContent = newDeviceLines > 0 ? 'New Device Promotion' : 'BYOD Only';
+            headerSubtitle.textContent = newDeviceLines > 0 ? `${newDeviceLines} Device${newDeviceLines > 1 ? 's' : ''} Selected` : 'Customer Device';
+
+
+            deviceCostContainer.style.display = totalDeviceCost > 0 ? 'block' : 'none';
+            deviceCostCheckbox.checked = totalDeviceCost > 0;
+            deviceCostCheckbox.dataset.amount = totalDeviceCost.toFixed(2);
+            deviceCostLabel.textContent = `Mobile Device Cost (${newDeviceLines} dev)`;
+            deviceCostAmount.textContent = `$${totalDeviceCost.toFixed(2)}`;
+            
+
+            // --- Calculate Service Cost ---
+            let baseServiceCost = 0;
+            const getLineCost = (lineNumber, planPrice) => {
+                if (lineNumber === 1) return planPrice;
+                if (planPrice === 40) { // Base 5G
+                    if (lineNumber === 2) return 40;
+                    if (lineNumber === 3) return 20;
+                } else { // Total 5G & 5G+
+                    if (lineNumber === 2 || lineNumber === 3) return 30;
+                }
+                if (lineNumber === 4) return 0;
+                if (lineNumber >= 5) return 15;
+                return 0;
+            };
+
+            if (totalLines > 0) {
+                const lineCosts = [];
+                for (let i = 1; i <= totalLines; i++) {
+                    lineCosts.push(getLineCost(i, basePlanPrice));
+                }
+
+                // Apply 50% discount to the first BYOD line's cost
+                if (portIn && byodLines > 0) {
+                    lineCosts[0] *= 0.5;
+                }
+                baseServiceCost = lineCosts.reduce((a, b) => a + b, 0);
+            }
+            
+            serviceContainer.style.display = totalLines > 0 ? 'block' : 'none';
+            serviceCheckbox.checked = totalLines > 0;
+            
+            // Add autopay charge
+            const autopayCharge = (basePlanPrice === 50 || basePlanPrice === 60) ? 5 : 0;
+            const serviceCostWithAutopay = baseServiceCost + autopayCharge;
+            
+            // --- Handle Red Hot Ticket ---
+            let showPromoBox = false;
+            let promoBoxMessage = '';
+            
+            const isIphone13PromoActive = iphone13PromoCount > 0 && idVerified && portIn;
+
+            if (portedLines >= 1 && !isIphone13PromoActive) {
+                redHotTicketContainer.style.display = 'block';
+                redHotTicketCheckbox.disabled = false;
+                showPromoBox = true;
+                promoBoxMessage = "Congratulations! You qualify for the Red Hot Ticket!";
+            } else {
+                redHotTicketContainer.style.display = 'none';
+                redHotTicketCheckbox.checked = false;
+                redHotTicketCheckbox.disabled = true;
+            }
+
+            let serviceDiscount = 0;
+            if (redHotTicket && !isIphone13PromoActive) {
+                let portedServiceCost = 0;
+                const portedLineCosts = [];
+                for (let i = 1; i <= portedLines; i++) {
+                    portedLineCosts.push(getLineCost(i, basePlanPrice));
+                }
+                if (portIn && byodLines > 0 && portedLines > 0) {
+                    portedLineCosts[0] *= 0.5;
+                }
+                portedServiceCost = portedLineCosts.reduce((a, b) => a + b, 0);
+                serviceDiscount = Math.min(portedServiceCost, 120);
+            }
+            
+            const finalServiceCost = serviceCostWithAutopay - serviceDiscount;
+
+            serviceCheckbox.dataset.amount = finalServiceCost.toFixed(2);
+            serviceLabel.textContent = `First Month Mobile Service (${totalLines} line${totalLines !== 1 ? 's' : ''})`;
+            serviceAmountSpan.textContent = `$${finalServiceCost.toFixed(2)}`;
+
+            // --- Handle Multi-Month Service Promo ---
+            if (hasMultiMonthDevice) {
+                promoMonthsContainer.classList.remove('hidden');
+                const ruleApplies = (iphone13PromoCount > 0 && totalLines === 1);
+
+                if (ruleApplies) {
+                    showPromoBox = true;
+                    promoBoxMessage = `This promo requires paying for ${dealData['iphone-13'].promoMonths} months of service upfront for a single line.`;
+                    promoMonthsCheckbox.checked = true;
+                    promoMonthsCheckbox.disabled = true;
+                } else {
+                    promoMonthsCheckbox.disabled = true;
+                    promoMonthsCheckbox.checked = false;
+                     if(totalLines > 1 && iphone13PromoCount > 0) {
+                        showPromoBox = true;
+                        promoBoxMessage = `The 3-month upfront payment is waived for 2 or more lines.`;
+                    }
+                }
+
+                const promoMonthsCost = basePlanPrice * (dealData['iphone-13'].promoMonths - 1);
+                promoMonthsCheckbox.dataset.amount = promoMonthsCost.toFixed(2);
+                promoMonthsLabel.textContent = `Promotional Months (2-3)`;
+                promoMonthsAmountSpan.textContent = `$${promoMonthsCost.toFixed(2)}`;
+            } else {
+                promoMonthsContainer.classList.add('hidden');
+                promoMonthsCheckbox.checked = false;
+            }
+
+            if(portIn && byodLines > 0) {
+                showPromoBox = true;
+                promoBoxMessage = promoBoxMessage ? promoBoxMessage + " Also, 50% off first BYOD line." : "50% off first BYOD line for Port-in.";
+            }
+
+            promoBox.style.display = showPromoBox ? 'block' : 'none';
+            promoBoxText.textContent = promoBoxMessage;
+
+            // --- Handle Home Internet & Tablets ---
+            const internetServiceCost = totalLines === 0 ? 60 : 45;
+            homeInternetCheckbox.dataset.amount = internetServiceCost.toFixed(2);
+            document.getElementById('internet-amount').textContent = `$${internetServiceCost.toFixed(2)}`;
+            
+            routerCostContainer.style.display = homeInternet ? 'block' : 'none';
+            routerCostCheckbox.checked = homeInternet;
+            
+            if (selectedTabletKey !== 'none') {
+                tabletServiceContainer.style.display = 'block';
+                tabletServiceCheckbox.checked = true;
+                const upfrontCost = currentTablet.serviceCost * currentTablet.upfrontMonths;
+                tabletServiceCheckbox.dataset.amount = upfrontCost.toFixed(2);
+                tabletServiceLabel.textContent = `${currentTablet.name} Service (${currentTablet.upfrontMonths} months)`;
+                tabletServiceAmount.textContent = `$${upfrontCost.toFixed(2)}`;
+            } else {
+                tabletServiceContainer.style.display = 'none';
+                tabletServiceCheckbox.checked = false;
+                tabletServiceCheckbox.dataset.amount = '0';
+            }
+
+
+            // --- Update Total Protect & Ported Lines Dropdowns ---
+            const currentProtectCount = parseInt(protectLinesSelect.value) || 0;
+            protectLinesSelect.innerHTML = '';
+            for (let i = 0; i <= totalLines; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                protectLinesSelect.appendChild(option);
+            }
+            if (currentProtectCount <= totalLines) {
+                protectLinesSelect.value = currentProtectCount;
+            } else {
+                protectLinesSelect.value = totalLines;
+            }
+            
+            const portedLinesSelect = document.getElementById('ported-lines');
+            const currentPortedCount = parseInt(portedLinesSelect.value) || 0;
+            portedLinesSelect.innerHTML = '';
+             for (let i = 0; i <= totalLines; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                portedLinesSelect.appendChild(option);
+            }
+             if (currentPortedCount <= totalLines) {
+                portedLinesSelect.value = currentPortedCount;
+            } else {
+                portedLinesSelect.value = totalLines;
+            }
+
+
+            protectContainer.style.display = totalLines > 0 ? 'block' : 'none';
+            const protectLinesCount = parseInt(protectLinesSelect.value) || 0;
+            const protectCost = 5 * protectLinesCount;
+            protectCheckbox.checked = protectCost > 0;
+            protectCheckbox.dataset.amount = protectCost.toFixed(2);
+            protectLabel.textContent = `Total Protect (${protectLinesCount} line${protectLinesCount !== 1 ? 's' : ''})`;
+            protectAmountSpan.textContent = `$${protectCost.toFixed(2)}`;
+            
+            // --- Accessory Bundles ---
+            const accessoryBundlesSelect = document.getElementById('accessory-bundles');
+            const currentAccessoryCount = parseInt(accessoryBundlesSelect.value) || 0;
+            accessoryBundlesSelect.innerHTML = '';
+            for (let i = 0; i <= totalLines; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                accessoryBundlesSelect.appendChild(option);
+            }
+            if (currentAccessoryCount <= totalLines) {
+                accessoryBundlesSelect.value = currentAccessoryCount;
+            } else {
+                accessoryBundlesSelect.value = totalLines;
+            }
+            
+            const accessoryCost = 75 * accessoryBundles;
+            accessoryBundleContainer.style.display = accessoryCost > 0 ? 'block' : 'none';
+            accessoryBundleCheckbox.checked = accessoryCost > 0;
+            accessoryBundleCheckbox.dataset.amount = accessoryCost.toFixed(2);
+            accessoryBundleLabel.textContent = `Accessory Bundle (${accessoryBundles} bundle${accessoryBundles !== 1 ? 's' : ''})`;
+            accessoryBundleAmount.textContent = `$${accessoryCost.toFixed(2)}`;
+
+
+            // --- Access Fee ---
+            accessContainer.style.display = totalLines > 0 ? 'block' : 'none';
+            accessCheckbox.checked = totalLines > 0;
+            const accessFee = Math.min(totalLines, 2) * 25;
+            accessCheckbox.dataset.amount = accessFee.toFixed(2);
+            accessLabel.textContent = `Access Fee (Mobile) (${totalLines} line${totalLines !== 1 ? 's' : ''})`;
+            accessAmountSpan.textContent = `$${accessFee.toFixed(2)}`;
+            
+            // --- Sales Tax Calculation ---
+            const homeRouterMsrp = 99.00;
+            const taxableHomeRouterAmount = homeInternet ? homeRouterMsrp : 0;
+            const taxableTabletAmount = currentTablet.msrp;
+            const taxableAccessoryAmount = accessoryCost;
+            const taxableAccessFee = (totalLines > 0 && accessCheckbox.checked) ? accessFee : 0;
+
+            const totalTaxableDeviceAmount = totalRetailForTax + taxableHomeRouterAmount + taxableTabletAmount + taxableAccessoryAmount;
+            const totalTax = (totalTaxableDeviceAmount * taxRate) + (taxableAccessFee * taxRate);
+            
+            taxCheckbox.dataset.amount = totalTax.toFixed(2);
+            taxAmountSpan.textContent = `$${totalTax.toFixed(2)}`;
+
+            const isTaxable = totalTaxableDeviceAmount > 0 || taxableAccessFee > 0;
+            taxCheckbox.disabled = !isTaxable;
+            taxRateInput.disabled = !isTaxable;
+            taxCheckbox.checked = isTaxable;
+
+
+            // --- Calculate Final Total ---
+            let total = 0;
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    const amount = checkbox.dataset.amount ? parseFloat(checkbox.dataset.amount) : 0;
+                    total += amount;
+                }
+            });
+            
+            document.getElementById('total-due').textContent = `$${total.toFixed(2)}`;
+            
+            updatePriceBreakdown();
+        }
+
+        function updatePriceBreakdown() {
+            const breakdownContainer = document.getElementById('price-breakdown');
+            const selectedPlan = document.getElementById('plan-select').value;
+            const prices = planBreakdownData[selectedPlan];
+            
+            breakdownContainer.innerHTML = '';
+            
+            prices.forEach((price, index) => {
+                const lineCount = index + 1;
+                const div = document.createElement('div');
+                div.className = 'flex justify-between items-center text-gray-600';
+                
+                const spanLabel = document.createElement('span');
+                spanLabel.textContent = `${lineCount} Line${lineCount > 1 ? 's' : ''}`;
+                
+                const spanPrice = document.createElement('span');
+                spanPrice.className = 'font-medium text-gray-900';
+                spanPrice.textContent = `$${price.toFixed(2)}`;
+                
+                div.appendChild(spanLabel);
+                div.appendChild(spanPrice);
+                breakdownContainer.appendChild(div);
+            });
+        }
+        
+        function updateLineDropdowns(isNewDeviceChange = false) {
+            const byodLinesSelect = document.getElementById('byod-lines');
+            const newDeviceLinesSelect = document.getElementById('new-device-lines');
+            const maxLines = 5;
+            
+            const byodCount = parseInt(byodLinesSelect.value) || 0;
+            const newDeviceCount = parseInt(newDeviceLinesSelect.value) || 0;
+            
+            const remainingForNew = maxLines - byodCount;
+            const remainingForByod = maxLines - newDeviceCount;
+            
+            // Update New Device Dropdown
+            const currentNewValue = newDeviceLinesSelect.value;
+            newDeviceLinesSelect.innerHTML = '';
+            for(let i = 0; i <= remainingForNew; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                newDeviceLinesSelect.appendChild(option);
+            }
+            newDeviceLinesSelect.value = Math.min(currentNewValue, remainingForNew);
+
+            // Update BYOD Dropdown
+            const currentByodValue = byodLinesSelect.value;
+            byodLinesSelect.innerHTML = '';
+            for(let i = 0; i <= remainingForByod; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                byodLinesSelect.appendChild(option);
+            }
+            byodLinesSelect.value = Math.min(currentByodValue, remainingForByod);
+            
+            if (isNewDeviceChange) {
+                generateDeviceSelectors();
+            } else {
+                updateCalculator();
+            }
+        }
+
+        function generateDeviceSelectors() {
+            const container = document.getElementById('new-device-selectors');
+            const newDeviceLines = parseInt(document.getElementById('new-device-lines').value) || 0;
+            container.innerHTML = ''; // Clear existing selectors
+
+            for (let i = 1; i <= newDeviceLines; i++) {
+                const selectWrapper = document.createElement('div');
+                const label = document.createElement('label');
+                label.htmlFor = `device-select-${i}`;
+                label.className = 'block text-sm font-medium text-gray-700 mb-1';
+                label.textContent = `Device for Line ${i}:`;
+                
+                const select = document.createElement('select');
+                select.id = `device-select-${i}`;
+                select.className = 'w-full p-2 border border-gray-300 rounded-md';
+                select.onchange = updateCalculator;
+
+                Object.keys(dealData).forEach(key => {
+                    const option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = dealData[key].name;
+                    select.appendChild(option);
+                });
+                
+                selectWrapper.appendChild(label);
+                selectWrapper.appendChild(select);
+                container.appendChild(selectWrapper);
+            }
+            updateCalculator();
+        }
+
+        function resetCalculator() {
+            document.getElementById('plan-select').value = '50';
+            document.getElementById('byod-lines').value = '0';
+            document.getElementById('new-device-lines').value = '0';
+            document.getElementById('protect-lines').value = '0';
+            document.getElementById('ported-lines').value = '0';
+            document.getElementById('tablet-select').value = 'none';
+            document.getElementById('id-verified').checked = true;
+            document.getElementById('port-in').checked = true;
+            document.getElementById('home-internet').checked = false;
+            document.getElementById('tax-rate-input').value = '10.3';
+            document.getElementById('accessory-bundles').value = '0';
+            updateLineDropdowns(true);
+        }
+
+
+        // --- Initial Load ---
+        function initializeApp() {
+            const tabletSelect = document.getElementById('tablet-select');
+            Object.keys(tabletData).forEach(key => {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = tabletData[key].name;
+                tabletSelect.appendChild(option);
+            });
+            
+            updateLineDropdowns(true);
+        }
+
+        window.onload = initializeApp;
+    </script>
+
+</body>
+</html>
