@@ -106,7 +106,7 @@
     </div>
 
     <!-- Main Calculator (Hidden by default) -->
-    <div id="calculator-container" class="max-w-4xl w-full grid-cols-1 md:grid-cols-2 gap-8 hidden">
+    <div id="calculator-container" class="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 gap-8 hidden">
         <div class="max-w-md w-full mx-auto">
             <!-- Main Deal Card -->
             <div class="deal-card bg-white rounded-xl overflow-hidden">
@@ -375,6 +375,35 @@
             '50': [50, 80, 110, 110, 125],
             '60': [60, 90, 120, 120, 135]
         };
+        
+        // --- Login Logic ---
+        document.getElementById('login-form').addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent page refresh
+            const companyName = document.getElementById('company-name').value;
+            const passcode = document.getElementById('passcode').value;
+            const errorElement = document.getElementById('login-error');
+
+            try {
+                const response = await fetch('/api/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ companyName, passcode })
+                });
+
+                if (response.ok) {
+                    document.getElementById('login-screen').classList.add('hidden');
+                    document.getElementById('calculator-container').classList.remove('hidden');
+                    document.getElementById('calculator-container').classList.add('grid');
+                    initializeApp();
+                } else {
+                    errorElement.classList.remove('hidden');
+                }
+            } catch (error) {
+                errorElement.textContent = 'An error occurred. Please try again.';
+                errorElement.classList.remove('hidden');
+            }
+        });
+
 
         // Main function to update the entire calculator UI and totals
         function updateCalculator() {
@@ -857,3 +886,4 @@
 
 </body>
 </html>
+
