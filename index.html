@@ -80,7 +80,33 @@
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
 
-    <div class="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 gap-8">
+    <!-- Login Screen -->
+    <div id="login-screen" class="max-w-md w-full">
+        <div class="deal-card bg-white rounded-xl overflow-hidden">
+            <div class="p-6 bg-gray-800 text-white text-center">
+                <h1 class="text-2xl font-bold">Sales Calculator Access</h1>
+            </div>
+            <div class="p-6">
+                <form id="login-form">
+                    <div class="mb-4">
+                        <label for="company-name" class="block text-sm font-medium text-gray-700">Company Name</label>
+                        <input type="text" id="company-name" class="mt-1 w-full p-2 border border-gray-300 rounded-md" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="passcode" class="block text-sm font-medium text-gray-700">Passcode</label>
+                        <input type="password" id="passcode" class="mt-1 w-full p-2 border border-gray-300 rounded-md" required>
+                    </div>
+                    <button type="submit" class="w-full p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                        Login
+                    </button>
+                    <p id="login-error" class="text-red-500 text-sm text-center mt-2 hidden">Invalid Company or Passcode.</p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Calculator (Hidden by default) -->
+    <div id="calculator-container" class="max-w-4xl w-full grid-cols-1 md:grid-cols-2 gap-8 hidden">
         <div class="max-w-md w-full mx-auto">
             <!-- Main Deal Card -->
             <div class="deal-card bg-white rounded-xl overflow-hidden">
