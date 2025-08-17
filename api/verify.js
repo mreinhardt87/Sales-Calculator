@@ -2,6 +2,11 @@
 // Vercel will run this code on its servers, never exposing it to the user's browser.
 
 export default function handler(request, response) {
+    // Ensure this function only handles POST requests
+    if (request.method !== 'POST') {
+        return response.status(405).json({ message: 'Method Not Allowed' });
+    }
+
     // 1. Define the correct company name (case-insensitive check)
     const validCompanyName = "Total Wireless";
 
@@ -577,4 +582,8 @@ export default function handler(request, response) {
         "jK2@lZ5xV8*b", "nC9!mQ1wE4$r", "tY7*uI2oP5#a", "sD4@fG7hJ1*k", "lZ8!xV3bN6$m", "qW1*eR4tY7#u", "iO2@pA5sD8*f", "gH9!jK2lZ5$x",
         "cV6*bN9mQ1#w", "eR4@tY7uI2*o", "pA5!sD8fG1$h", "jK2*lZ5xV8#b", "nC9@mQ1wE4*r", "tY7!uI2oP5$a", "sD4*fG7hJ1#k", "lZ8@xV3bN6*m",
         "qW1!eR4tY7$u", "iO2*pA5sD8#f", "gH9@jK2lZ5*x", "cV6!bN9mQ1$w", "eR4*tY7uI2#o", "pA5@sD8fG1*h", "jK2!lZ5xV8$b", "nC9*mQ1wE4#r",
-        "tY7@uI2oP5*a", "sD4!fG7hJ1$k", "lZ8*xV3bN6#m", "qW1@eR4tY7*u", "iO2!pA5sD8$f", "gH9*jK2lZ5#x", "cV6@bN9mQ1*w", "eR4!tY7uI2$
+        "tY7@uI2oP5*a", "sD4!fG7hJ1$k", "lZ8*xV3bN6#m", "qW1@eR4tY7*u", "iO2!pA5sD8$f", "gH9*jK2lZ5#x", "cV6@bN9mQ1*w", "eR4!tY7uI2$o",
+        "pA5*sD8fG1#h", "jK2@lZ5xV8*b", "nC9!mQ1wE4$r", "tY7*uI2oP5#a", "sD4@fG7hJ1*k", "lZ8!xV3bN6$m", "qW1*eR4tY7#u", "iO2@pA5sD8*f",
+        "gH9!jK2lZ5$x", "cV6*bN9mQ1#w", "eR4@tY7uI2*o", "pA5!sD8fG1$h", "jK2*lZ5xV8#b", "nC9@mQ1wE4*r", "tY7!uI2oP5$a", "sD4*fG7hJ1#k",
+        "lZ8@xV3bN6*m", "qW1!eR4tY7$u", "iO2*pA5sD8#f", "gH9@jK2lZ5*x", "cV6!bN9mQ1$w", "eR4*tY7uI2#o", "pA5@sD8fG1*h", "jK2!lZ5xV8$b",
+        "nC9*mQ1wE4#r", "tY7@uI2oP5*a", "sD4!fG7hJ1$k", "lZ8*xV3bN6#m", "qW1@eR4tY7*u", "iO2!pA5sD8$f", "gH9*jK2lZ5#x", "cV6@bN9Xct5!
