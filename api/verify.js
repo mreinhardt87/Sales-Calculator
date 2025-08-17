@@ -11,7 +11,7 @@ export default function handler(request, response) {
     const { companyName, passcode } = request.body;
 
     // 1. Define the correct company name (case-insensitive check)
-    const validCompanyName = "Total Wireless";
+    const validCompanyName = "Evergreen Mobile";
 
     // 2. Define the secure list of valid passcodes
     const validPasscodes = new Set([
@@ -808,4 +808,5 @@ export default function handler(request, response) {
         "eR4t+y5U", "iO2p=a3S", "dF7g!h8J", "kL1z@x9C", "vB3n#m5Q", "wE6r$t7Y", "uI9o%p0A", "sD2f&g4H",
         "jK5l*z6X", "cV8b-n1M", "qW3e_r5T", "yU7i+o9P", "aZ1x=c2V", "bN6m!q7W", "eR4t@y5U", "iO2p#a3S",
         "dF7g$h8J", "kL1z%x9C", "vB3n&m5Q", "wE6r*t7Y", "uI9o-p0A", "sD2f_g4H", "jK5l+z6X", "cV8b=n1M",
+
         "qW3e!r5T", "yU7i@o9P", "aZ1x#c2V", "bN6m$q7W", "eR4!P-aS",
