@@ -8,8 +8,13 @@ export default function handler(request, response) {
     }
 
     try {
-        // CORRECTLY get the company name and passcode from the request body
+        // Get the company name and passcode from the request body
         const { companyName, passcode } = request.body;
+        
+        // Add checks to ensure data was received correctly
+        if (!companyName || !passcode) {
+            return response.status(400).json({ message: 'Missing company name or passcode.' });
+        }
 
         // 1. Define the correct company name (case-insensitive check)
         const validCompanyName = "Total Wireless";
@@ -21,7 +26,7 @@ export default function handler(request, response) {
         ]);
 
         // 3. Check if the provided credentials are valid
-        if (companyName && companyName.toLowerCase() === validCompanyName.toLowerCase() && validPasscodes.has(passcode)) {
+        if (companyName.toLowerCase() === validCompanyName.toLowerCase() && validPasscodes.has(passcode)) {
             // If valid, send a success response
             response.status(200).json({ message: 'Login successful' });
         } else {
@@ -30,6 +35,7 @@ export default function handler(request, response) {
         }
     } catch (error) {
         // If there's any other error, send a server error response
+        console.error(error); // Log the actual error on the server for debugging
         response.status(500).json({ message: 'An internal server error occurred.' });
     }
 }
