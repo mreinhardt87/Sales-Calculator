@@ -320,7 +320,7 @@
                 <button id="reset-button" onclick="resetCalculator()" class="w-full mt-4 p-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                     Reset Calculator
                 </button>
-                <button id="logout-button" class="w-full mt-4 p-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 hidden">
+                <button id="logout-button" onclick="logout()" class="w-full mt-4 p-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 hidden">
                     Logout
                 </button>
             </div>
@@ -409,7 +409,7 @@
         });
 
         // --- Logout Logic ---
-        document.getElementById('logout-button').addEventListener('click', async () => {
+        async function logout() {
             const passcode = sessionStorage.getItem('userPasscode');
             if (passcode) {
                 try {
@@ -424,7 +424,7 @@
             }
             sessionStorage.removeItem('userPasscode');
             location.reload(); // Reload the page to show the login screen
-        });
+        }
 
 
         // Main function to update the entire calculator UI and totals
