@@ -129,7 +129,7 @@
                      <div class="grid grid-cols-2 gap-4 mb-4">
                         <div>
                             <label for="byod-lines" class="block text-sm font-medium text-gray-700">BYOD Lines:</label>
-                            <select id="byod-lines" class="mt-1 w-full p-2 border border-gray-300 rounded-md" onchange="updateLineDropdowns()">
+                            <select id="byod-lines" class="mt-1 w-full p-2 border border-gray-300 rounded-md" onchange="updateLineDropdowns(false)">
                                 <!-- Options dynamically populated -->
                             </select>
                         </div>
@@ -811,6 +811,7 @@
             let byodCount = parseInt(byodLinesSelect.value) || 0;
             let newDeviceCount = parseInt(newDeviceLinesSelect.value) || 0;
 
+            // This block ensures the total never exceeds maxLines
             if (byodCount + newDeviceCount > maxLines) {
                 if (isNewDeviceChange) {
                     byodCount = maxLines - newDeviceCount;
@@ -819,11 +820,11 @@
                 }
             }
 
-            // Store the potentially adjusted values
+            // Save the final correct counts before repopulating
             const finalByodCount = byodCount;
             const finalNewDeviceCount = newDeviceCount;
 
-            // Repopulate BYOD dropdown
+            // Repopulate BYOD dropdown with correct options
             byodLinesSelect.innerHTML = '';
             for (let i = 0; i <= (maxLines - finalNewDeviceCount); i++) {
                 const option = document.createElement('option');
@@ -833,7 +834,7 @@
             }
             byodLinesSelect.value = finalByodCount;
 
-            // Repopulate New Device dropdown
+            // Repopulate New Device dropdown with correct options
             newDeviceLinesSelect.innerHTML = '';
             for (let i = 0; i <= (maxLines - finalByodCount); i++) {
                 const option = document.createElement('option');
@@ -850,6 +851,7 @@
                 updateCalculator();
             }
         }
+
 
         function generateDeviceSelectors() {
             const container = document.getElementById('new-device-selectors');
