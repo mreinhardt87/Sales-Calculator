@@ -1,38 +1,57 @@
 // This is your secure serverless function.
-// Vercel will run this code on its servers, never exposing it to the user's browser.
+// It now connects to Google Firestore to manage sessions.
 
-export default function handler(request, response) {
-    // Ensure this function only handles POST requests
+import { initializeApp, cert, getApps } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
+
+// Initialize Firebase Admin SDK
+// Vercel will provide the credentials from the environment variable
+if (!getApps().length) {
+  initializeApp({
+    credential: cert(JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON))
+  });
+}
+
+const db = getFirestore();
+
+export default async function handler(request, response) {
     if (request.method !== 'POST') {
         return response.status(405).json({ message: 'Method Not Allowed' });
     }
 
     try {
-        // Get the passcode from the request body
         const { passcode } = request.body;
 
-        // Check if a passcode was provided
         if (!passcode) {
             return response.status(400).json({ message: 'Passcode is required.' });
         }
 
-        // Define the secure list of valid passcodes
-        const validPasscodes = new Set([
-            "8k2Jp!v9", "mFv4w#q7", "sL9g@z1X", "pW5h&e3R", "aZ1x*c2V", 
-            "bN6m$q7W", "eR4t%y5U", "iO2p&a3S", "dF7g!h8J", "kL1z@x9C"
-        ]);
+        // 1. Check if the passcode exists in the 'passcodes' collection
+        const passcodeRef = db.collection('passcodes').doc(passcode);
+        const passcodeDoc = await passcodeRef.get();
 
-        // Check if the provided passcode is valid
-        if (validPasscodes.has(passcode)) {
-            // If valid, send a success response
-            response.status(200).json({ message: 'Login successful' });
-        } else {
-            // If invalid, send an error response
-            response.status(401).json({ message: 'Invalid passcode' });
+        if (!passcodeDoc.exists) {
+            return response.status(401).json({ message: 'Invalid passcode' });
         }
+
+        // 2. Check if the passcode is already in use in the 'sessions' collection
+        const sessionRef = db.collection('sessions').doc(passcode);
+        const sessionDoc = await sessionRef.get();
+
+        if (sessionDoc.exists) {
+            // Passcode is already in use
+            return response.status(409).json({ message: 'This passcode is already in use.' });
+        } else {
+            // Passcode is valid and not in use, create a new session
+            await sessionRef.set({
+                loggedInAt: new Date().toISOString(),
+                // You could add more user info here if needed
+            });
+            return response.status(200).json({ message: 'Login successful' });
+        }
+
     } catch (error) {
-        // If there's any other error, send a server error response
-        console.error(error); // Log the actual error on the server for debugging
-        response.status(500).json({ message: 'An internal server error occurred.' });
+        console.error('Error verifying passcode:', error);
+        return response.status(500).json({ message: 'An internal server error occurred.' });
     }
 }
