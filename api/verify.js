@@ -27,7 +27,6 @@ export default async function handler(request, response) {
 
     try {
         const { passcode } = request.body;
-        console.log(`Received login attempt with passcode: ${passcode}`);
 
         if (!passcode) {
             console.log('Login failed: No passcode provided.');
