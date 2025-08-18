@@ -89,17 +89,13 @@
             <div class="p-6">
                 <form id="login-form">
                     <div class="mb-4">
-                        <label for="company-name" class="block text-sm font-medium text-gray-700">Company Name</label>
-                        <input type="text" id="company-name" class="mt-1 w-full p-2 border border-gray-300 rounded-md" required>
-                    </div>
-                    <div class="mb-4">
                         <label for="passcode" class="block text-sm font-medium text-gray-700">Passcode</label>
                         <input type="password" id="passcode" class="mt-1 w-full p-2 border border-gray-300 rounded-md" required>
                     </div>
                     <button type="submit" class="w-full p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
                         Login
                     </button>
-                    <p id="login-error" class="text-red-500 text-sm text-center mt-2 hidden">Invalid Company or Passcode.</p>
+                    <p id="login-error" class="text-red-500 text-sm text-center mt-2 hidden">Invalid Passcode.</p>
                 </form>
             </div>
         </div>
@@ -379,7 +375,6 @@
         // --- Login Logic ---
         document.getElementById('login-form').addEventListener('submit', async (event) => {
             event.preventDefault(); // Prevent page refresh
-            const companyName = document.getElementById('company-name').value;
             const passcode = document.getElementById('passcode').value;
             const errorElement = document.getElementById('login-error');
 
@@ -387,7 +382,7 @@
                 const response = await fetch('/api/verify', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ companyName, passcode })
+                    body: JSON.stringify({ passcode })
                 });
 
                 if (response.ok) {
@@ -881,7 +876,8 @@
             updateLineDropdowns(true);
         }
 
-        window.onload = initializeApp;
+        // We don't call initializeApp on page load anymore, 
+        // it's called after a successful login.
     </script>
 
 </body>
