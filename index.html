@@ -102,7 +102,7 @@
     </div>
 
     <!-- Main Calculator (Hidden by default) -->
-    <div id="calculator-container" class="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 gap-8 hidden">
+    <div id="calculator-container" class="max-w-4xl w-full grid-cols-1 md:grid-cols-2 gap-8 hidden">
         <div class="max-w-md w-full mx-auto">
             <!-- Main Deal Card -->
             <div class="deal-card bg-white rounded-xl overflow-hidden">
@@ -316,9 +316,14 @@
                     </div>
                 </div>
             </div>
-            <button id="reset-button" onclick="resetCalculator()" class="w-full mt-4 p-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                Reset Calculator
-            </button>
+            <div class="flex space-x-2">
+                <button id="reset-button" onclick="resetCalculator()" class="w-full mt-4 p-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                    Reset Calculator
+                </button>
+                <button id="logout-button" class="w-full mt-4 p-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 hidden">
+                    Logout
+                </button>
+            </div>
         </div>
         
         <!-- Price Plan Breakdown -->
@@ -386,17 +391,39 @@
                 });
 
                 if (response.ok) {
+                    sessionStorage.setItem('userPasscode', passcode); // Store passcode for logout
                     document.getElementById('login-screen').classList.add('hidden');
                     document.getElementById('calculator-container').classList.remove('hidden');
                     document.getElementById('calculator-container').classList.add('grid');
+                    document.getElementById('logout-button').classList.remove('hidden');
                     initializeApp();
                 } else {
+                    const data = await response.json();
+                    errorElement.textContent = data.message || 'Invalid Passcode.';
                     errorElement.classList.remove('hidden');
                 }
             } catch (error) {
                 errorElement.textContent = 'An error occurred. Please try again.';
                 errorElement.classList.remove('hidden');
             }
+        });
+
+        // --- Logout Logic ---
+        document.getElementById('logout-button').addEventListener('click', async () => {
+            const passcode = sessionStorage.getItem('userPasscode');
+            if (passcode) {
+                try {
+                    await fetch('/api/logout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ passcode })
+                    });
+                } catch (error) {
+                    console.error('Logout failed:', error);
+                }
+            }
+            sessionStorage.removeItem('userPasscode');
+            location.reload(); // Reload the page to show the login screen
         });
 
 
@@ -781,33 +808,39 @@
             const newDeviceLinesSelect = document.getElementById('new-device-lines');
             const maxLines = 5;
             
-            const byodCount = parseInt(byodLinesSelect.value) || 0;
-            const newDeviceCount = parseInt(newDeviceLinesSelect.value) || 0;
+            let byodCount = parseInt(byodLinesSelect.value) || 0;
+            let newDeviceCount = parseInt(newDeviceLinesSelect.value) || 0;
+
+            if (byodCount + newDeviceCount > maxLines) {
+                if (isNewDeviceChange) {
+                    newDeviceCount = maxLines - byodCount;
+                } else {
+                    byodCount = maxLines - newDeviceCount;
+                }
+            }
             
             const remainingForNew = maxLines - byodCount;
             const remainingForByod = maxLines - newDeviceCount;
             
             // Update New Device Dropdown
-            const currentNewValue = newDeviceLinesSelect.value;
             newDeviceLinesSelect.innerHTML = '';
-            for(let i = 0; i <= remainingForNew; i++) {
+            for(let i = 0; i <= remainingForByod; i++) {
                 const option = document.createElement('option');
                 option.value = i;
                 option.textContent = i;
                 newDeviceLinesSelect.appendChild(option);
             }
-            newDeviceLinesSelect.value = Math.min(currentNewValue, remainingForNew);
+            newDeviceLinesSelect.value = newDeviceCount;
 
             // Update BYOD Dropdown
-            const currentByodValue = byodLinesSelect.value;
             byodLinesSelect.innerHTML = '';
-            for(let i = 0; i <= remainingForByod; i++) {
+            for(let i = 0; i <= remainingForNew; i++) {
                 const option = document.createElement('option');
                 option.value = i;
                 option.textContent = i;
                 byodLinesSelect.appendChild(option);
             }
-            byodLinesSelect.value = Math.min(currentByodValue, remainingForByod);
+            byodLinesSelect.value = byodCount;
             
             if (isNewDeviceChange) {
                 generateDeviceSelectors();
