@@ -8,30 +8,27 @@ export default function handler(request, response) {
     }
 
     try {
-        // Get the company name and passcode from the request body
-        const { companyName, passcode } = request.body;
-        
-        // Add checks to ensure data was received correctly
-        if (!companyName || !passcode) {
-            return response.status(400).json({ message: 'Missing company name or passcode.' });
+        // Get the passcode from the request body
+        const { passcode } = request.body;
+
+        // Check if a passcode was provided
+        if (!passcode) {
+            return response.status(400).json({ message: 'Passcode is required.' });
         }
 
-        // 1. Define the correct company name (case-insensitive check)
-        const validCompanyName = "Total Wireless";
-
-        // 2. Define the secure list of valid passcodes
+        // Define the secure list of valid passcodes
         const validPasscodes = new Set([
             "8k2Jp!v9", "mFv4w#q7", "sL9g@z1X", "pW5h&e3R", "aZ1x*c2V", 
             "bN6m$q7W", "eR4t%y5U", "iO2p&a3S", "dF7g!h8J", "kL1z@x9C"
         ]);
 
-        // 3. Check if the provided credentials are valid
-        if (companyName.toLowerCase() === validCompanyName.toLowerCase() && validPasscodes.has(passcode)) {
+        // Check if the provided passcode is valid
+        if (validPasscodes.has(passcode)) {
             // If valid, send a success response
             response.status(200).json({ message: 'Login successful' });
         } else {
             // If invalid, send an error response
-            response.status(401).json({ message: 'Invalid credentials' });
+            response.status(401).json({ message: 'Invalid passcode' });
         }
     } catch (error) {
         // If there's any other error, send a server error response
