@@ -409,7 +409,7 @@
         });
 
         // --- Logout Logic ---
-        async function logout() {
+        document.getElementById('logout-button').addEventListener('click', async () => {
             const passcode = sessionStorage.getItem('userPasscode');
             if (passcode) {
                 try {
@@ -424,7 +424,7 @@
             }
             sessionStorage.removeItem('userPasscode');
             location.reload(); // Reload the page to show the login screen
-        }
+        });
 
 
         // Main function to update the entire calculator UI and totals
@@ -807,41 +807,43 @@
             const byodLinesSelect = document.getElementById('byod-lines');
             const newDeviceLinesSelect = document.getElementById('new-device-lines');
             const maxLines = 5;
-            
+
             let byodCount = parseInt(byodLinesSelect.value) || 0;
             let newDeviceCount = parseInt(newDeviceLinesSelect.value) || 0;
 
             if (byodCount + newDeviceCount > maxLines) {
                 if (isNewDeviceChange) {
-                    newDeviceCount = maxLines - byodCount;
-                } else {
                     byodCount = maxLines - newDeviceCount;
+                } else {
+                    newDeviceCount = maxLines - byodCount;
                 }
             }
-            
-            const remainingForNew = maxLines - byodCount;
-            const remainingForByod = maxLines - newDeviceCount;
-            
-            // Update New Device Dropdown
-            newDeviceLinesSelect.innerHTML = '';
-            for(let i = 0; i <= remainingForByod; i++) {
-                const option = document.createElement('option');
-                option.value = i;
-                option.textContent = i;
-                newDeviceLinesSelect.appendChild(option);
-            }
-            newDeviceLinesSelect.value = newDeviceCount;
 
-            // Update BYOD Dropdown
+            // Store the potentially adjusted values
+            const finalByodCount = byodCount;
+            const finalNewDeviceCount = newDeviceCount;
+
+            // Repopulate BYOD dropdown
             byodLinesSelect.innerHTML = '';
-            for(let i = 0; i <= remainingForNew; i++) {
+            for (let i = 0; i <= (maxLines - finalNewDeviceCount); i++) {
                 const option = document.createElement('option');
                 option.value = i;
                 option.textContent = i;
                 byodLinesSelect.appendChild(option);
             }
-            byodLinesSelect.value = byodCount;
-            
+            byodLinesSelect.value = finalByodCount;
+
+            // Repopulate New Device dropdown
+            newDeviceLinesSelect.innerHTML = '';
+            for (let i = 0; i <= (maxLines - finalByodCount); i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                newDeviceLinesSelect.appendChild(option);
+            }
+            newDeviceLinesSelect.value = finalNewDeviceCount;
+
+            // Trigger the next updates
             if (isNewDeviceChange) {
                 generateDeviceSelectors();
             } else {
