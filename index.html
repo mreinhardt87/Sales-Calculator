@@ -129,13 +129,13 @@
                      <div class="grid grid-cols-2 gap-4 mb-4">
                         <div>
                             <label for="byod-lines" class="block text-sm font-medium text-gray-700">BYOD Lines:</label>
-                            <select id="byod-lines" class="mt-1 w-full p-2 border border-gray-300 rounded-md" onchange="updateLineDropdowns(false)">
+                            <select id="byod-lines" class="mt-1 w-full p-2 border border-gray-300 rounded-md" onchange="updateLineDropdowns('byod')">
                                 <!-- Options dynamically populated -->
                             </select>
                         </div>
                         <div>
                             <label for="new-device-lines" class="block text-sm font-medium text-gray-700">New Device Lines:</label>
-                            <select id="new-device-lines" class="mt-1 w-full p-2 border border-gray-300 rounded-md" onchange="updateLineDropdowns(true)">
+                            <select id="new-device-lines" class="mt-1 w-full p-2 border border-gray-300 rounded-md" onchange="updateLineDropdowns('new')">
                                 <!-- Options dynamically populated -->
                             </select>
                         </div>
@@ -812,7 +812,7 @@
             let newDeviceCount = parseInt(newDeviceSelect.value);
 
             if (changedInput === 'byod') {
-                if (byodCount + newDeviceCount > maxLines) {
+                 if (byodCount + newDeviceCount > maxLines) {
                     newDeviceCount = maxLines - byodCount;
                 }
             } else { // 'new' was changed
@@ -897,7 +897,7 @@
             document.getElementById('home-internet').checked = false;
             document.getElementById('tax-rate-input').value = '10.3';
             document.getElementById('accessory-bundles').value = '0';
-            updateLineDropdowns(true);
+            updateLineDropdowns('new');
         }
 
 
@@ -911,7 +911,10 @@
                 tabletSelect.appendChild(option);
             });
             
-            updateLineDropdowns(true);
+            // Set initial values before calling the update function
+            document.getElementById('byod-lines').value = 0;
+            document.getElementById('new-device-lines').value = 1;
+            updateLineDropdowns('new');
         }
 
         // We don't call initializeApp on page load anymore, 
