@@ -803,28 +803,39 @@
             });
         }
         
-        function populateDropdown(selectElement, max, selectedValue) {
+        // Helper function to populate a dropdown with a max value, preserving the current selection if possible
+        function populateDropdown(selectElement, max) {
             const currentValue = parseInt(selectElement.value) || 0;
-            selectElement.innerHTML = '';
+            selectElement.innerHTML = ''; // Clear existing options
             for (let i = 0; i <= max; i++) {
                 const option = document.createElement('option');
                 option.value = i;
                 option.textContent = i;
                 selectElement.appendChild(option);
             }
+            // Set the value to the old value if it's still valid, otherwise cap it at the new max
             selectElement.value = Math.min(currentValue, max);
         }
 
+        // [UPDATED] This function now enforces the 5-line limit
         function updateLineDropdowns(changedInput) {
             const byodSelect = document.getElementById('byod-lines');
             const newDeviceSelect = document.getElementById('new-device-lines');
-            const maxLines = 10; // No 5 line limit
+            const maxLines = 5; // Set the total line limit here
 
-            let byodCount = parseInt(byodSelect.value);
-            let newDeviceCount = parseInt(newDeviceSelect.value);
+            let byodCount = parseInt(byodSelect.value) || 0;
+            let newDeviceCount = parseInt(newDeviceSelect.value) || 0;
 
-            // No need to adjust the other dropdown as the limit is removed
-            
+            // When one dropdown changes, adjust the maximum for the other
+            if (changedInput === 'byod') {
+                const maxNew = maxLines - byodCount;
+                populateDropdown(newDeviceSelect, maxNew);
+            } else if (changedInput === 'new') {
+                const maxByod = maxLines - newDeviceCount;
+                populateDropdown(byodSelect, maxByod);
+            }
+
+            // After adjusting dropdowns, trigger the rest of the updates
             if (changedInput === 'new') {
                 generateDeviceSelectors();
             } else {
@@ -876,6 +887,9 @@
             document.getElementById('home-internet').checked = false;
             document.getElementById('tax-rate-input').value = '10.3';
             document.getElementById('accessory-bundles').value = '0';
+            // Re-populate dropdowns to their initial state with the 5 line limit
+            populateDropdown(document.getElementById('byod-lines'), 5);
+            populateDropdown(document.getElementById('new-device-lines'), 5);
             updateLineDropdowns('new');
         }
 
@@ -892,9 +906,10 @@
             
             const byodSelect = document.getElementById('byod-lines');
             const newDeviceSelect = document.getElementById('new-device-lines');
+            const maxLines = 5;
 
             // Populate both dropdowns fully on initial load
-            for (let i = 0; i <= 5; i++) { 
+            for (let i = 0; i <= maxLines; i++) { 
                 const byodOption = document.createElement('option');
                 byodOption.value = i;
                 byodOption.textContent = i;
@@ -909,8 +924,7 @@
             // Set initial values and then call updateCalculator
             byodSelect.value = 0;
             newDeviceSelect.value = 1;
-            updateCalculator();
-            generateDeviceSelectors();
+            updateLineDropdowns('new'); // Call this to enforce limit from the start
         }
 
         // We don't call initializeApp on page load anymore, 
