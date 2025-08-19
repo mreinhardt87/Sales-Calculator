@@ -1,4 +1,5 @@
 // This is your secure serverless function for logging out.
+// No changes were needed here, as it correctly deletes the session.
 
 import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
