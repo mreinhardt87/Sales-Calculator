@@ -312,7 +312,7 @@
                             <span>Total Due Today:</span>
                             <span id="total-due" class="text-blue-600">$113.84</span>
                         </div>
-                        <p class="text-xs text-gray-500 mt-2 text-center">This calculator is to estimate only. Today's cost may vary slightly.</p>
+                        <p class="text-xs text-gray-500 mt-2 text-center">This calculation is for estimation only. Today price may vary</p>
                     </div>
                 </div>
             </div>
@@ -803,49 +803,50 @@
             });
         }
         
-        function updateLineDropdowns(isNewDeviceChange = false) {
-            const byodLinesSelect = document.getElementById('byod-lines');
-            const newDeviceLinesSelect = document.getElementById('new-device-lines');
+        function updateLineDropdowns(changedInput) {
+            const byodSelect = document.getElementById('byod-lines');
+            const newDeviceSelect = document.getElementById('new-device-lines');
             const maxLines = 5;
 
-            let byodCount = parseInt(byodLinesSelect.value) || 0;
-            let newDeviceCount = parseInt(newDeviceLinesSelect.value) || 0;
+            let byodCount = parseInt(byodSelect.value);
+            let newDeviceCount = parseInt(newDeviceSelect.value);
 
-            // This block ensures the total never exceeds maxLines
-            if (byodCount + newDeviceCount > maxLines) {
-                if (isNewDeviceChange) {
-                    byodCount = maxLines - newDeviceCount;
-                } else {
+            if (changedInput === 'byod') {
+                if (byodCount + newDeviceCount > maxLines) {
                     newDeviceCount = maxLines - byodCount;
+                }
+            } else { // 'new' was changed
+                if (byodCount + newDeviceCount > maxLines) {
+                    byodCount = maxLines - newDeviceCount;
                 }
             }
 
-            // Save the final correct counts before repopulating
-            const finalByodCount = byodCount;
-            const finalNewDeviceCount = newDeviceCount;
-
-            // Repopulate BYOD dropdown with correct options
-            byodLinesSelect.innerHTML = '';
-            for (let i = 0; i <= (maxLines - finalNewDeviceCount); i++) {
+            // Store the final correct counts before repopulating
+            const finalByodValue = byodCount;
+            const finalNewDeviceValue = newDeviceCount;
+            
+            // Repopulate the BYOD dropdown
+            byodSelect.innerHTML = '';
+            for (let i = 0; i <= (maxLines - finalNewDeviceValue); i++) {
                 const option = document.createElement('option');
                 option.value = i;
                 option.textContent = i;
-                byodLinesSelect.appendChild(option);
+                byodSelect.appendChild(option);
             }
-            byodLinesSelect.value = finalByodCount;
+            byodSelect.value = finalByodValue;
 
-            // Repopulate New Device dropdown with correct options
-            newDeviceLinesSelect.innerHTML = '';
-            for (let i = 0; i <= (maxLines - finalByodCount); i++) {
+            // Repopulate the New Device dropdown
+            newDeviceSelect.innerHTML = '';
+            for (let i = 0; i <= (maxLines - finalByodValue); i++) {
                 const option = document.createElement('option');
                 option.value = i;
                 option.textContent = i;
-                newDeviceLinesSelect.appendChild(option);
+                newDeviceSelect.appendChild(option);
             }
-            newDeviceLinesSelect.value = finalNewDeviceCount;
-
+            newDeviceSelect.value = finalNewDeviceValue;
+            
             // Trigger the next updates
-            if (isNewDeviceChange) {
+            if (changedInput === 'new') {
                 generateDeviceSelectors();
             } else {
                 updateCalculator();
