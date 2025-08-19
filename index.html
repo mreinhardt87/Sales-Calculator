@@ -827,7 +827,7 @@
             
             // Repopulate the BYOD dropdown
             byodSelect.innerHTML = '';
-            for (let i = 5; i <= (maxLines - finalNewDeviceValue); i++) {
+            for (let i = 0; i <= (maxLines - finalNewDeviceValue); i++) {
                 const option = document.createElement('option');
                 option.value = i;
                 option.textContent = i;
@@ -837,7 +837,7 @@
 
             // Repopulate the New Device dropdown
             newDeviceSelect.innerHTML = '';
-            for (let i = 5; i <= (maxLines - finalByodValue); i++) {
+            for (let i = 0; i <= (maxLines - finalByodValue); i++) {
                 const option = document.createElement('option');
                 option.value = i;
                 option.textContent = i;
@@ -923,4 +923,3 @@
 
 </body>
 </html>
-
