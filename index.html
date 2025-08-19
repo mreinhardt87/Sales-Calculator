@@ -812,12 +812,14 @@
             let newDeviceCount = parseInt(newDeviceSelect.value);
 
             if (changedInput === 'byod') {
-                 if (byodCount + newDeviceCount > maxLines) {
-                    newDeviceCount = maxLines - byodCount;
+                const maxNew = maxLines - byodCount;
+                if (newDeviceCount > maxNew) {
+                    newDeviceCount = maxNew;
                 }
             } else { // 'new' was changed
-                if (byodCount + newDeviceCount > maxLines) {
-                    byodCount = maxLines - newDeviceCount;
+                const maxByod = maxLines - newDeviceCount;
+                if (byodCount > maxByod) {
+                    byodCount = maxByod;
                 }
             }
 
