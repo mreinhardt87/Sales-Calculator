@@ -504,28 +504,54 @@
             let hasMultiMonthDevice = false;
             let iphone13PromoCount = 0;
 
+            // --- [NEW LOGIC] Special handling for Moto G Stylus 2024 Promo ---
+            let motoGStylus2024Count = 0;
             if (newDeviceLines > 0) {
                 for (let i = 1; i <= newDeviceLines; i++) {
                     const selector = document.getElementById(`device-select-${i}`);
-                    const selectedKey = selector.value;
-                    const currentDeal = dealData[selectedKey];
-                    
+                    if (selector.value === 'moto-g-stylus-5g-2024') {
+                        motoGStylus2024Count++;
+                    }
+                }
+            }
+
+            const isMotoGStylusPromoActive =
+                motoGStylus2024Count > 0 &&
+                motoGStylus2024Count === newDeviceLines && // All selected devices must be this model
+                newDeviceLines <= 4 &&
+                idVerified && // Veriff is required for all devices
+                portedLines >= 1; // At least one port-in is required for the account
+
+            if (isMotoGStylusPromoActive) {
+                // All Moto G Stylus 2024 devices are free under this promo, so totalDeviceCost remains 0
+                for (let i = 0; i < newDeviceLines; i++) {
+                    const currentDeal = dealData['moto-g-stylus-5g-2024'];
                     totalRetailForTax += currentDeal.retailPrice;
-                    if (currentDeal.promoMonths > 1) hasMultiMonthDevice = true;
-                    
-                    if (idVerified && portIn) {
-                        if (selectedKey === 'iphone-13') iphone13PromoCount++;
-                        totalDeviceCost += currentDeal.promoPrice;
-                    } else if (portIn) {
-                        totalDeviceCost += currentDeal.portOnlyPrice;
-                    } else if (idVerified) {
-                        totalDeviceCost += currentDeal.veriffOnlyPrice;
-                    } else {
-                        // "No Hassle" rule for certain devices
-                        if (currentDeal.noHasslePrice !== undefined) {
-                            totalDeviceCost += currentDeal.noHasslePrice;
+                }
+            } else {
+                // --- [EXISTING LOGIC] Fallback to standard per-device pricing ---
+                if (newDeviceLines > 0) {
+                    for (let i = 1; i <= newDeviceLines; i++) {
+                        const selector = document.getElementById(`device-select-${i}`);
+                        const selectedKey = selector.value;
+                        const currentDeal = dealData[selectedKey];
+                        
+                        totalRetailForTax += currentDeal.retailPrice;
+                        if (currentDeal.promoMonths > 1) hasMultiMonthDevice = true;
+                        
+                        if (idVerified && portIn) {
+                            if (selectedKey === 'iphone-13') iphone13PromoCount++;
+                            totalDeviceCost += currentDeal.promoPrice;
+                        } else if (portIn) {
+                            totalDeviceCost += currentDeal.portOnlyPrice;
+                        } else if (idVerified) {
+                            totalDeviceCost += currentDeal.veriffOnlyPrice;
                         } else {
-                            totalDeviceCost += currentDeal.retailPrice;
+                            if (currentDeal.noHasslePrice !== undefined) {
+                                totalDeviceCost += currentDeal.noHasslePrice;
+                            } else {
+                                totalDeviceCost += currentDeal.retailPrice;
+                            }
                         }
                     }
                 }
@@ -578,13 +604,18 @@
             const autopayCharge = (basePlanPrice === 50 || basePlanPrice === 60) ? 5 : 0;
             const serviceCostWithAutopay = baseServiceCost + autopayCharge;
             
-            // --- Handle Red Hot Ticket ---
+            // --- Handle Red Hot Ticket & Promo Box ---
             let showPromoBox = false;
             let promoBoxMessage = '';
             
+            if (isMotoGStylusPromoActive) {
+                showPromoBox = true;
+                promoBoxMessage = `Moto G Stylus 2024 "Port 1, Get up to 3 Free" promo applied!`;
+            }
+
             const isIphone13PromoActive = iphone13PromoCount > 0 && idVerified && portIn;
 
-            if (portedLines >= 1 && !isIphone13PromoActive) {
+            if (portedLines >= 1 && !isIphone13PromoActive && !isMotoGStylusPromoActive) {
                 redHotTicketContainer.style.display = 'block';
                 redHotTicketCheckbox.disabled = false;
                 showPromoBox = true;
@@ -596,7 +627,7 @@
             }
 
             let serviceDiscount = 0;
-            if (redHotTicket && !isIphone13PromoActive) {
+            if (redHotTicket && !isIphone13PromoActive && !isMotoGStylusPromoActive) {
                 let portedServiceCost = 0;
                 const portedLineCosts = [];
                 for (let i = 1; i <= portedLines; i++) {
