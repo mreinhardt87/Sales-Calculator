@@ -811,6 +811,7 @@
             let byodCount = parseInt(byodSelect.value);
             let newDeviceCount = parseInt(newDeviceSelect.value);
 
+            // This block ensures the total never exceeds maxLines
             if (changedInput === 'byod') {
                 if (byodCount + newDeviceCount > maxLines) {
                     newDeviceCount = maxLines - byodCount;
