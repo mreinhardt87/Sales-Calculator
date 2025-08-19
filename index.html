@@ -803,49 +803,28 @@
             });
         }
         
+        function populateDropdown(selectElement, max, selectedValue) {
+            const currentValue = parseInt(selectElement.value) || 0;
+            selectElement.innerHTML = '';
+            for (let i = 0; i <= max; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                selectElement.appendChild(option);
+            }
+            selectElement.value = Math.min(currentValue, max);
+        }
+
         function updateLineDropdowns(changedInput) {
             const byodSelect = document.getElementById('byod-lines');
             const newDeviceSelect = document.getElementById('new-device-lines');
-            const maxLines = 5;
+            const maxLines = 10; // No 5 line limit
 
             let byodCount = parseInt(byodSelect.value);
             let newDeviceCount = parseInt(newDeviceSelect.value);
 
-            if (changedInput === 'byod') {
-                if (byodCount + newDeviceCount > maxLines) {
-                    newDeviceCount = maxLines - byodCount;
-                }
-            } else { // 'new' was changed
-                if (byodCount + newDeviceCount > maxLines) {
-                    byodCount = maxLines - newDeviceCount;
-                }
-            }
-
-            // Store the final correct counts before repopulating
-            const finalByodValue = byodCount;
-            const finalNewDeviceValue = newDeviceCount;
+            // No need to adjust the other dropdown as the limit is removed
             
-            // Repopulate the BYOD dropdown
-            byodSelect.innerHTML = '';
-            for (let i = 0; i <= (maxLines - finalNewDeviceValue); i++) {
-                const option = document.createElement('option');
-                option.value = i;
-                option.textContent = i;
-                byodSelect.appendChild(option);
-            }
-            byodSelect.value = finalByodValue;
-
-            // Repopulate the New Device dropdown
-            newDeviceSelect.innerHTML = '';
-            for (let i = 0; i <= (maxLines - finalByodValue); i++) {
-                const option = document.createElement('option');
-                option.value = i;
-                option.textContent = i;
-                newDeviceSelect.appendChild(option);
-            }
-            newDeviceSelect.value = finalNewDeviceValue;
-            
-            // Trigger the next updates
             if (changedInput === 'new') {
                 generateDeviceSelectors();
             } else {
@@ -911,10 +890,27 @@
                 tabletSelect.appendChild(option);
             });
             
-            // Set initial values before calling the update function
-            document.getElementById('byod-lines').value = 0;
-            document.getElementById('new-device-lines').value = 1;
-            updateLineDropdowns('new');
+            const byodSelect = document.getElementById('byod-lines');
+            const newDeviceSelect = document.getElementById('new-device-lines');
+
+            // Populate both dropdowns fully on initial load
+            for (let i = 0; i <= 5; i++) { // No 5 line limit
+                const byodOption = document.createElement('option');
+                byodOption.value = i;
+                byodOption.textContent = i;
+                byodSelect.appendChild(byodOption);
+
+                const newDeviceOption = document.createElement('option');
+                newDeviceOption.value = i;
+                newDeviceOption.textContent = i;
+                newDeviceSelect.appendChild(newDeviceOption);
+            }
+
+            // Set initial values and then call updateCalculator
+            byodSelect.value = 0;
+            newDeviceSelect.value = 1;
+            updateCalculator();
+            generateDeviceSelectors();
         }
 
         // We don't call initializeApp on page load anymore, 
