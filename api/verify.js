@@ -1,11 +1,10 @@
 // This is your secure serverless function.
-// It now connects to Google Firestore to manage sessions.
+// It now connects to Google Firestore to manage sessions with a 15-minute timeout.
 
 import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 
 // Initialize Firebase Admin SDK only if it hasn't been already.
-// This prevents errors in the serverless environment.
 if (!getApps().length) {
   try {
     initializeApp({
@@ -18,9 +17,9 @@ if (!getApps().length) {
 }
 
 const db = getFirestore();
+const SESSION_DURATION_MINUTES = 10; // The session will expire after 10 minutes
 
 export default async function handler(request, response) {
-    // Ensure this function only handles POST requests
     if (request.method !== 'POST') {
         return response.status(405).json({ message: 'Method Not Allowed' });
     }
@@ -33,7 +32,7 @@ export default async function handler(request, response) {
             return response.status(400).json({ message: 'Passcode is required.' });
         }
 
-        // 1. Check if the passcode exists in the 'passcodes' collection
+        // 1. Check if the passcode is valid
         const passcodeRef = db.collection('passcodes').doc(passcode);
         const passcodeDoc = await passcodeRef.get();
 
@@ -42,21 +41,36 @@ export default async function handler(request, response) {
             return response.status(401).json({ message: 'Invalid passcode' });
         }
 
-        // 2. Check if the passcode is already in use in the 'sessions' collection
+        // 2. Check for an existing session
         const sessionRef = db.collection('sessions').doc(passcode);
         const sessionDoc = await sessionRef.get();
+        const now = new Date();
 
         if (sessionDoc.exists) {
-            console.log(`Login failed: Passcode ${passcode} is already in use.`);
-            return response.status(409).json({ message: 'This passcode is already in use.' });
-        } else {
-            // Passcode is valid and not in use, create a new session
-            await sessionRef.set({
-                loggedInAt: new Date().toISOString(),
-            });
-            console.log(`Login successful for passcode: ${passcode}`);
-            return response.status(200).json({ message: 'Login successful' });
+            const sessionData = sessionDoc.data();
+            const expiresAt = new Date(sessionData.expiresAt);
+
+            // Check if the session has expired
+            if (now > expiresAt) {
+                console.log(`Passcode ${passcode} had an expired session. Creating a new one.`);
+                // The old session is expired, so we'll allow a new login by overwriting it.
+            } else {
+                // The session is still active
+                console.log(`Login failed: Passcode ${passcode} is already in use and session is active.`);
+                return response.status(409).json({ message: 'This passcode is already in use.' });
+            }
         }
+        
+        // 3. Create a new session or overwrite the expired one
+        const expirationDate = new Date(now.getTime() + SESSION_DURATION_MINUTES * 60 * 1000);
+        
+        await sessionRef.set({
+            loggedInAt: now.toISOString(),
+            expiresAt: expirationDate.toISOString(), // Set the expiration time
+        });
+
+        console.log(`Login successful for passcode: ${passcode}. Session expires at ${expirationDate.toISOString()}`);
+        return response.status(200).json({ message: 'Login successful' });
 
     } catch (error) {
         console.error('Critical error in verify function:', error);
