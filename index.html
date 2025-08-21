@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Sales Calculator</title>
-    <script src="https://cdn/tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -182,31 +182,6 @@
                                 <span>External Port-in</span>
                             </label>
                         </div>
-                        <!-- [NEW] Upgrade Checkbox -->
-                        <div>
-                            <input type="checkbox" id="upgrade" onchange="updateCalculator()">
-                            <label for="upgrade" class="checkbox-label text-sm py-2">
-                                <span class="checkmark"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></span>
-                                <span>Upgrade</span>
-                            </label>
-                        </div>
-                        <!-- [NEW] Hidden rewards credit sub-checkboxes -->
-                        <div id="rewards-credit-container" class="hidden ml-8 space-y-2">
-                            <div>
-                                <input type="checkbox" id="rewards-100" onchange="updateCalculator()">
-                                <label for="rewards-100" class="checkbox-label text-sm py-2">
-                                    <span class="checkmark"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></span>
-                                    <span>Rewards Credit $100</span>
-                                </label>
-                            </div>
-                            <div>
-                                <input type="checkbox" id="rewards-200" onchange="updateCalculator()">
-                                <label for="rewards-200" class="checkbox-label text-sm py-2">
-                                    <span class="checkmark"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></span>
-                                    <span>Rewards Credit $200</span>
-                                </label>
-                            </div>
-                        </div>
                     </div>
 
                     <!-- Promo Box -->
@@ -287,24 +262,6 @@
                             </label>
                         </div>
                         
-                        <!-- [NEW] Mobile Hotspot Section -->
-                        <div>
-                            <input type="checkbox" id="mobile-hotspot" data-amount="49.99" onchange="updateCalculator()">
-                            <label for="mobile-hotspot" class="checkbox-label">
-                                <span class="checkmark"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></span>
-                                <span class="flex-grow">Mobile Hotspot Device</span>
-                                <span class="font-bold text-gray-800">$49.99</span>
-                            </label>
-                        </div>
-                        <div id="hotspot-plan-container" class="hidden ml-8">
-                             <label for="hotspot-plan-select" class="block text-sm font-medium text-gray-700 mb-1">Select Hotspot Plan:</label>
-                             <select id="hotspot-plan-select" class="w-full p-2 border border-gray-300 rounded-md" onchange="updateCalculator()">
-                                <option value="30">15GB - $30</option>
-                                <option value="40">40GB - $40</option>
-                                <option value="50">100GB - $50</option>
-                            </select>
-                        </div>
-
                         <!-- Tablet Service Cost -->
                         <div id="tablet-service-container" class="hidden">
                             <input type="checkbox" id="tablet-service" data-amount="0" disabled>
@@ -325,13 +282,13 @@
                             </label>
                         </div>
 
-                        <!-- Sim Card Fee Checkbox (hidden by default) -->
-                        <div id="sim-card-container" class="hidden">
-                            <input type="checkbox" id="sim-card-fee" data-amount="0" disabled>
-                            <label for="sim-card-fee" class="checkbox-label">
+                        <!-- BYOD Fee Checkbox (hidden by default) -->
+                        <div id="byod-fee-container" class="hidden">
+                            <input type="checkbox" id="byod-fee" data-amount="0" disabled>
+                            <label for="byod-fee" class="checkbox-label">
                                  <span class="checkmark"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></span>
-                                <span id="sim-card-label" class="flex-grow">Sim Card</span>
-                                <span id="sim-card-amount" class="font-bold text-gray-800">$0.00</span>
+                                <span id="byod-fee-label" class="flex-grow">BYOD Fee</span>
+                                <span id="byod-fee-amount" class="font-bold text-gray-800">$0.00</span>
                             </label>
                         </div>
 
@@ -397,7 +354,7 @@
         const dealData = {
             'iphone-13': { name: 'Apple iPhone 13 128GB', retailPrice: 529.00, promoPrice: 0.00, portOnlyPrice: 299.99, veriffOnlyPrice: 99.99, promoMonths: 3 },
             'iphone-14': { name: 'Apple iPhone 14 128GB', retailPrice: 629.00, promoPrice: 99.99, portOnlyPrice: 529.99, veriffOnlyPrice: 199.99, promoMonths: 3 },
-            'iphone-14-plus': { name: 'Apple iPhone 14 Plus 128GB', retailPrice: 729.00, promoPrice: 199.99, portOnlyPrice: 499.99, veriffOnlyPrice: 299.99, promoMonths: 3 },
+            'iphone-14-plus': { name: 'Apple iPhone 14 Plus 128GB', retailPrice: 729.00, promoPrice: 199.99, portOnlyPrice: 499.99, veriffOnlyPrice: 299.99, promoMonths: 1 },
             'iphone-15': { name: 'Apple iPhone 15 128GB', retailPrice: 729.00, promoPrice: 479.99, portOnlyPrice: 679.99, veriffOnlyPrice: 479.99, promoMonths: 1 },
             'iphone-16e': { name: 'Apple iPhone 16e 128GB', retailPrice: 599.99, promoPrice: 299.99, portOnlyPrice: 599.99, veriffOnlyPrice: 399.99, noHasslePrice: 599.99, promoMonths: 2 },
             'samsung-a15': { name: 'Samsung Galaxy A15 5G', retailPrice: 79.99, promoPrice: 0.00, portOnlyPrice: 59.99, veriffOnlyPrice: 0.00, promoMonths: 1 },
@@ -499,77 +456,134 @@
             const portedLines = parseInt(document.getElementById('ported-lines').value) || 0;
             const redHotTicket = document.getElementById('red-hot-ticket').checked;
             const accessoryBundles = parseInt(document.getElementById('accessory-bundles').value) || 0;
-            const upgradeChecked = document.getElementById('upgrade').checked;
-            const rewards100Checked = document.getElementById('rewards-100').checked;
-            const rewards200Checked = document.getElementById('rewards-200').checked;
-            const mobileHotspotChecked = document.getElementById('mobile-hotspot').checked;
-            const hotspotPlanCost = parseInt(document.getElementById('hotspot-plan-select').value);
-
 
             // --- Get all DOM elements ---
-            const rewardsCreditContainer = document.getElementById('rewards-credit-container');
-            const hotspotPlanContainer = document.getElementById('hotspot-plan-container');
-            const simCardContainer = document.getElementById('sim-card-container');
-            const simCardCheckbox = document.getElementById('sim-card-fee');
-            const simCardLabel = document.getElementById('sim-card-label');
-            const simCardAmountSpan = document.getElementById('sim-card-amount');
+            const headerTitle = document.getElementById('header-title');
+            const headerSubtitle = document.getElementById('header-subtitle');
+            
+            const deviceCostContainer = document.getElementById('device-cost-container');
+            const deviceCostCheckbox = document.getElementById('device-cost');
+            const deviceCostLabel = document.getElementById('device-cost-label');
+            const deviceCostAmount = document.getElementById('device-cost-amount');
+
+            const routerCostContainer = document.getElementById('router-cost-container');
+            const routerCostCheckbox = document.getElementById('router-cost');
+
+            const promoBox = document.getElementById('promo-box');
+            const promoBoxText = document.getElementById('promo-box-text');
+            const promoMonthsContainer = document.getElementById('promo-months-container');
+            const promoMonthsCheckbox = document.getElementById('promo-months');
+            const promoMonthsLabel = document.getElementById('promo-months-label');
+            const promoMonthsAmountSpan = document.getElementById('promo-months-amount');
+            
+            const serviceContainer = document.getElementById('service-container');
+            const serviceCheckbox = document.getElementById('service');
+            const serviceLabel = document.getElementById('service-label');
+            const serviceAmountSpan = document.getElementById('service-amount');
+
+            const protectLinesSelect = document.getElementById('protect-lines');
+            const protectContainer = document.getElementById('total-protect-container');
+            const protectCheckbox = document.getElementById('total-protect');
+            const protectLabel = document.getElementById('protect-label');
+            const protectAmountSpan = document.getElementById('protect-amount');
+            
+            const accessoryBundleContainer = document.getElementById('accessory-bundle-container');
+            const accessoryBundleCheckbox = document.getElementById('accessory-bundle-cost');
+            const accessoryBundleLabel = document.getElementById('accessory-bundle-label');
+            const accessoryBundleAmount = document.getElementById('accessory-bundle-amount');
+
+            const accessContainer = document.getElementById('access-fee-container');
+            const accessCheckbox = document.getElementById('access');
+            const accessLabel = document.getElementById('access-label');
+            const accessAmountSpan = document.getElementById('access-amount');
+
+            const byodFeeContainer = document.getElementById('byod-fee-container');
+            const byodFeeCheckbox = document.getElementById('byod-fee');
+            const byodFeeLabel = document.getElementById('byod-fee-label');
+            const byodFeeAmountSpan = document.getElementById('byod-fee-amount');
+
+            const taxCheckbox = document.getElementById('sales-tax');
+            const taxAmountSpan = document.getElementById('tax-amount');
+            
+            const tabletServiceContainer = document.getElementById('tablet-service-container');
+            const tabletServiceCheckbox = document.getElementById('tablet-service');
+            const tabletServiceLabel = document.getElementById('tablet-service-label');
+            const tabletServiceAmount = document.getElementById('tablet-service-amount');
+            
+            const redHotTicketContainer = document.getElementById('red-hot-ticket-container');
+            const redHotTicketCheckbox = document.getElementById('red-hot-ticket');
 
             // --- Determine Device Costs & Promotions ---
             let totalDeviceCost = 0;
             let totalRetailForTax = 0;
             let hasMultiMonthDevice = false;
-            let selectedDeviceKeys = [];
+            let iphone13PromoCount = 0;
 
+            // --- [NEW LOGIC] Special handling for Moto G Stylus 2024 Promo ---
+            let motoGStylus2024Count = 0;
             if (newDeviceLines > 0) {
                 for (let i = 1; i <= newDeviceLines; i++) {
                     const selector = document.getElementById(`device-select-${i}`);
-                    selectedDeviceKeys.push(selector.value);
+                    if (selector.value === 'moto-g-stylus-5g-2024') {
+                        motoGStylus2024Count++;
+                    }
                 }
             }
 
-            const hasIphone14 = selectedDeviceKeys.includes('iphone-14');
-            const hasIphone14Plus = selectedDeviceKeys.includes('iphone-14-plus');
-
-            // --- [NEW LOGIC] Special handling for Moto G Stylus 2024 Promo ---
-            const motoGStylus2024Count = selectedDeviceKeys.filter(k => k === 'moto-g-stylus-5g-2024').length;
-
             const isMotoGStylusPromoActive =
                 motoGStylus2024Count > 0 &&
-                motoGStylus2024Count === newDeviceLines &&
+                motoGStylus2024Count === newDeviceLines && // All selected devices must be this model
                 newDeviceLines <= 4 &&
-                idVerified &&
-                portedLines >= 1;
+                idVerified && // Veriff is required for all devices
+                portedLines >= 1; // At least one port-in is required for the account
 
             if (isMotoGStylusPromoActive) {
+                // All Moto G Stylus 2024 devices are free under this promo, so totalDeviceCost remains 0
                 for (let i = 0; i < newDeviceLines; i++) {
                     const currentDeal = dealData['moto-g-stylus-5g-2024'];
                     totalRetailForTax += currentDeal.retailPrice;
                 }
             } else {
                 // --- [EXISTING LOGIC] Fallback to standard per-device pricing ---
-                selectedDeviceKeys.forEach(selectedKey => {
-                    const currentDeal = dealData[selectedKey];
-                    totalRetailForTax += currentDeal.retailPrice;
-                    if (currentDeal.promoMonths > 1) hasMultiMonthDevice = true;
-                    
-                    if (idVerified && portIn) {
-                        totalDeviceCost += currentDeal.promoPrice;
-                    } else if (portIn) {
-                        totalDeviceCost += currentDeal.portOnlyPrice;
-                    } else if (idVerified) {
-                        totalDeviceCost += currentDeal.veriffOnlyPrice;
-                    } else {
-                        totalDeviceCost += currentDeal.noHasslePrice !== undefined ? currentDeal.noHasslePrice : currentDeal.retailPrice;
+                if (newDeviceLines > 0) {
+                    for (let i = 1; i <= newDeviceLines; i++) {
+                        const selector = document.getElementById(`device-select-${i}`);
+                        const selectedKey = selector.value;
+                        const currentDeal = dealData[selectedKey];
+                        
+                        totalRetailForTax += currentDeal.retailPrice;
+                        if (currentDeal.promoMonths > 1) hasMultiMonthDevice = true;
+                        
+                        if (idVerified && portIn) {
+                            if (selectedKey === 'iphone-13') iphone13PromoCount++;
+                            totalDeviceCost += currentDeal.promoPrice;
+                        } else if (portIn) {
+                            totalDeviceCost += currentDeal.portOnlyPrice;
+                        } else if (idVerified) {
+                            totalDeviceCost += currentDeal.veriffOnlyPrice;
+                        } else {
+                            if (currentDeal.noHasslePrice !== undefined) {
+                                totalDeviceCost += currentDeal.noHasslePrice;
+                            } else {
+                                totalDeviceCost += currentDeal.retailPrice;
+                            }
+                        }
                     }
-                });
+                }
             }
             
-            document.getElementById('device-cost-container').style.display = totalDeviceCost > 0 ? 'block' : 'none';
-            document.getElementById('device-cost').checked = totalDeviceCost > 0;
-            document.getElementById('device-cost').dataset.amount = totalDeviceCost.toFixed(2);
-            document.getElementById('device-cost-label').textContent = `Mobile Device Cost (${newDeviceLines} dev)`;
-            document.getElementById('device-cost-amount').textContent = `$${totalDeviceCost.toFixed(2)}`;
+            // --- Update Header ---
+            headerTitle.textContent = newDeviceLines > 0 ? 'New Device Promotion' : 'BYOD Only';
+            headerSubtitle.textContent = newDeviceLines > 0 ? `${newDeviceLines} Device${newDeviceLines > 1 ? 's' : ''} Selected` : 'Customer Device';
+
+
+            deviceCostContainer.style.display = totalDeviceCost > 0 ? 'block' : 'none';
+            deviceCostCheckbox.checked = totalDeviceCost > 0;
+            deviceCostCheckbox.dataset.amount = totalDeviceCost.toFixed(2);
+            deviceCostLabel.textContent = `Mobile Device Cost (${newDeviceLines} dev)`;
+            deviceCostAmount.textContent = `$${totalDeviceCost.toFixed(2)}`;
             
+
             // --- Calculate Service Cost ---
             let baseServiceCost = 0;
             const getLineCost = (lineNumber, planPrice) => {
@@ -590,37 +604,37 @@
                 for (let i = 1; i <= totalLines; i++) {
                     lineCosts.push(getLineCost(i, basePlanPrice));
                 }
+
+                // Apply 50% discount to the first BYOD line's cost
                 if (portIn && byodLines > 0) {
                     lineCosts[0] *= 0.5;
                 }
                 baseServiceCost = lineCosts.reduce((a, b) => a + b, 0);
             }
             
-            document.getElementById('service-container').style.display = totalLines > 0 ? 'block' : 'none';
-            document.getElementById('service').checked = totalLines > 0;
+            serviceContainer.style.display = totalLines > 0 ? 'block' : 'none';
+            serviceCheckbox.checked = totalLines > 0;
+            
+            // Add autopay charge
             const autopayCharge = (basePlanPrice === 50 || basePlanPrice === 60) ? 5 : 0;
             const serviceCostWithAutopay = baseServiceCost + autopayCharge;
             
             // --- Handle Red Hot Ticket & Promo Box ---
             let showPromoBox = false;
             let promoBoxMessage = '';
-            const redHotTicketContainer = document.getElementById('red-hot-ticket-container');
-            const redHotTicketCheckbox = document.getElementById('red-hot-ticket');
-
+            
             if (isMotoGStylusPromoActive) {
                 showPromoBox = true;
                 promoBoxMessage = `Moto G Stylus 2024 "Port 1, Get up to 3 Free" promo applied!`;
             }
 
-            const canUseRedHotTicket = portedLines >= 1 && !isMotoGStylusPromoActive && !hasIphone14 && !hasIphone14Plus;
+            const isIphone13PromoActive = iphone13PromoCount > 0 && idVerified && portIn;
 
-            if (canUseRedHotTicket) {
+            if (portedLines >= 1 && !isIphone13PromoActive && !isMotoGStylusPromoActive) {
                 redHotTicketContainer.style.display = 'block';
                 redHotTicketCheckbox.disabled = false;
-                if (!showPromoBox) {
-                    showPromoBox = true;
-                    promoBoxMessage = "Congratulations! You qualify for the Red Hot Ticket!";
-                }
+                showPromoBox = true;
+                promoBoxMessage = "Congratulations! You qualify for the Red Hot Ticket!";
             } else {
                 redHotTicketContainer.style.display = 'none';
                 redHotTicketCheckbox.checked = false;
@@ -628,166 +642,198 @@
             }
 
             let serviceDiscount = 0;
-            if (redHotTicket && canUseRedHotTicket) {
+            if (redHotTicket && !isIphone13PromoActive && !isMotoGStylusPromoActive) {
                 let portedServiceCost = 0;
                 const portedLineCosts = [];
                 for (let i = 1; i <= portedLines; i++) {
                     portedLineCosts.push(getLineCost(i, basePlanPrice));
                 }
-                if (portIn && byodLines > 0 && portedLines > 0) portedLineCosts[0] *= 0.5;
+                if (portIn && byodLines > 0 && portedLines > 0) {
+                    portedLineCosts[0] *= 0.5;
+                }
                 portedServiceCost = portedLineCosts.reduce((a, b) => a + b, 0);
                 serviceDiscount = Math.min(portedServiceCost, 120);
             }
             
             const finalServiceCost = serviceCostWithAutopay - serviceDiscount;
-            document.getElementById('service').dataset.amount = finalServiceCost.toFixed(2);
-            document.getElementById('service-label').textContent = `First Month Mobile Service (${totalLines} line${totalLines !== 1 ? 's' : ''})`;
-            document.getElementById('service-amount').textContent = `$${finalServiceCost.toFixed(2)}`;
+
+            serviceCheckbox.dataset.amount = finalServiceCost.toFixed(2);
+            serviceLabel.textContent = `First Month Mobile Service (${totalLines} line${totalLines !== 1 ? 's' : ''})`;
+            serviceAmountSpan.textContent = `$${finalServiceCost.toFixed(2)}`;
 
             // --- Handle Multi-Month Service Promo ---
-            const promoMonthsContainer = document.getElementById('promo-months-container');
-            const promoMonthsCheckbox = document.getElementById('promo-months');
-            let promoMonthsCost = 0;
-            let promoMonthsRequired = false;
-            let promoMonthsCount = 0;
+            if (hasMultiMonthDevice) {
+                promoMonthsContainer.classList.remove('hidden');
+                const ruleApplies = (iphone13PromoCount > 0 && totalLines === 1);
 
-            const isStandaloneIphone13 = totalLines === 1 && selectedDeviceKeys.includes('iphone-13');
-            const isStandaloneIphone14 = totalLines === 1 && (hasIphone14 || hasIphone14Plus);
+                if (ruleApplies) {
+                    showPromoBox = true;
+                    promoBoxMessage = `This promo requires paying for ${dealData['iphone-13'].promoMonths} months of service upfront for a single line.`;
+                    promoMonthsCheckbox.checked = true;
+                    promoMonthsCheckbox.disabled = true;
+                } else {
+                    promoMonthsCheckbox.disabled = true;
+                    promoMonthsCheckbox.checked = false;
+                     if(totalLines > 1 && iphone13PromoCount > 0) {
+                        showPromoBox = true;
+                        promoBoxMessage = `The 3-month upfront payment is waived for 2 or more lines.`;
+                    }
+                }
 
-            if (isStandaloneIphone13 || isStandaloneIphone14) {
-                promoMonthsRequired = true;
-                promoMonthsCount = 2; // 2nd and 3rd month
-                promoMonthsCost = basePlanPrice * promoMonthsCount;
-                if (!showPromoBox) {
-                    showPromoBox = true;
-                    promoBoxMessage = `This promo requires paying for ${promoMonthsCount + 1} months of service upfront for a single line.`;
-                }
-            } else if (totalLines > 1 && (selectedDeviceKeys.includes('iphone-13') || hasIphone14 || hasIphone14Plus)) {
-                 if (!showPromoBox) {
-                    showPromoBox = true;
-                    promoBoxMessage = `The upfront promotional month payment is waived for 2 or more lines.`;
-                }
+                const promoMonthsCost = basePlanPrice * (dealData['iphone-13'].promoMonths - 1);
+                promoMonthsCheckbox.dataset.amount = promoMonthsCost.toFixed(2);
+                promoMonthsLabel.textContent = `Promotional Months (2-3)`;
+                promoMonthsAmountSpan.textContent = `$${promoMonthsCost.toFixed(2)}`;
+            } else {
+                promoMonthsContainer.classList.add('hidden');
+                promoMonthsCheckbox.checked = false;
             }
-
-            promoMonthsContainer.style.display = promoMonthsRequired ? 'block' : 'none';
-            promoMonthsCheckbox.checked = promoMonthsRequired;
-            promoMonthsCheckbox.disabled = promoMonthsRequired;
-            promoMonthsCheckbox.dataset.amount = promoMonthsCost.toFixed(2);
-            document.getElementById('promo-months-label').textContent = `Promotional Months (2 & 3)`;
-            document.getElementById('promo-months-amount').textContent = `$${promoMonthsCost.toFixed(2)}`;
 
             if(portIn && byodLines > 0) {
                 showPromoBox = true;
                 promoBoxMessage = promoBoxMessage ? promoBoxMessage + " Also, 50% off first BYOD line." : "50% off first BYOD line for Port-in.";
             }
 
-            document.getElementById('promo-box').style.display = showPromoBox ? 'block' : 'none';
-            document.getElementById('promo-box-text').textContent = promoBoxMessage;
+            promoBox.style.display = showPromoBox ? 'block' : 'none';
+            promoBoxText.textContent = promoBoxMessage;
 
-            // --- Handle Home Internet, Tablets, Hotspot ---
-            document.getElementById('internet-amount').textContent = `$${(totalLines === 0 ? 60 : 45).toFixed(2)}`;
-            homeInternetCheckbox.dataset.amount = (totalLines === 0 ? 60 : 45).toFixed(2);
-            document.getElementById('router-cost-container').style.display = homeInternet ? 'block' : 'none';
-            document.getElementById('router-cost').checked = homeInternet;
-
-            hotspotPlanContainer.style.display = mobileHotspotChecked ? 'block' : 'none';
-            const finalHotspotPlanCost = mobileHotspotChecked ? hotspotPlanCost : 0;
+            // --- Handle Home Internet & Tablets ---
+            const internetServiceCost = totalLines === 0 ? 60 : 45;
+            homeInternetCheckbox.dataset.amount = internetServiceCost.toFixed(2);
+            document.getElementById('internet-amount').textContent = `$${internetServiceCost.toFixed(2)}`;
+            
+            routerCostContainer.style.display = homeInternet ? 'block' : 'none';
+            routerCostCheckbox.checked = homeInternet;
             
             if (selectedTabletKey !== 'none') {
-                document.getElementById('tablet-service-container').style.display = 'block';
-                document.getElementById('tablet-service').checked = true;
+                tabletServiceContainer.style.display = 'block';
+                tabletServiceCheckbox.checked = true;
                 const upfrontCost = currentTablet.serviceCost * currentTablet.upfrontMonths;
-                document.getElementById('tablet-service').dataset.amount = upfrontCost.toFixed(2);
-                document.getElementById('tablet-service-label').textContent = `${currentTablet.name} Service (${currentTablet.upfrontMonths} months)`;
-                document.getElementById('tablet-service-amount').textContent = `$${upfrontCost.toFixed(2)}`;
+                tabletServiceCheckbox.dataset.amount = upfrontCost.toFixed(2);
+                tabletServiceLabel.textContent = `${currentTablet.name} Service (${currentTablet.upfrontMonths} months)`;
+                tabletServiceAmount.textContent = `$${upfrontCost.toFixed(2)}`;
             } else {
-                document.getElementById('tablet-service-container').style.display = 'none';
-                document.getElementById('tablet-service').checked = false;
+                tabletServiceContainer.style.display = 'none';
+                tabletServiceCheckbox.checked = false;
+                tabletServiceCheckbox.dataset.amount = '0';
             }
 
-            // --- Update Dropdowns ---
-            ['protect-lines', 'ported-lines', 'accessory-bundles'].forEach(id => {
-                const select = document.getElementById(id);
-                const currentVal = parseInt(select.value) || 0;
-                select.innerHTML = '';
-                for (let i = 0; i <= totalLines; i++) {
-                    const option = document.createElement('option');
-                    option.value = i;
-                    option.textContent = i;
-                    select.appendChild(option);
-                }
-                select.value = Math.min(currentVal, totalLines);
-            });
 
-            // --- Update Fees & Protect ---
-            const protectLinesCount = parseInt(document.getElementById('protect-lines').value) || 0;
+            // --- Update Total Protect & Ported Lines Dropdowns ---
+            const currentProtectCount = parseInt(protectLinesSelect.value) || 0;
+            protectLinesSelect.innerHTML = '';
+            for (let i = 0; i <= totalLines; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                protectLinesSelect.appendChild(option);
+            }
+            if (currentProtectCount <= totalLines) {
+                protectLinesSelect.value = currentProtectCount;
+            } else {
+                protectLinesSelect.value = totalLines;
+            }
+            
+            const portedLinesSelect = document.getElementById('ported-lines');
+            const currentPortedCount = parseInt(portedLinesSelect.value) || 0;
+            portedLinesSelect.innerHTML = '';
+             for (let i = 0; i <= totalLines; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                portedLinesSelect.appendChild(option);
+            }
+             if (currentPortedCount <= totalLines) {
+                portedLinesSelect.value = currentPortedCount;
+            } else {
+                portedLinesSelect.value = totalLines;
+            }
+
+
+            protectContainer.style.display = totalLines > 0 ? 'block' : 'none';
+            const protectLinesCount = parseInt(protectLinesSelect.value) || 0;
             const protectCost = 5 * protectLinesCount;
-            document.getElementById('total-protect-container').style.display = totalLines > 0 ? 'block' : 'none';
-            document.getElementById('total-protect').checked = protectCost > 0;
-            document.getElementById('total-protect').dataset.amount = protectCost.toFixed(2);
-            document.getElementById('protect-label').textContent = `Total Protect (${protectLinesCount} line${protectLinesCount !== 1 ? 's' : ''})`;
-            document.getElementById('protect-amount').textContent = `$${protectCost.toFixed(2)}`;
+            protectCheckbox.checked = protectCost > 0;
+            protectCheckbox.dataset.amount = protectCost.toFixed(2);
+            protectLabel.textContent = `Total Protect (${protectLinesCount} line${protectLinesCount !== 1 ? 's' : ''})`;
+            protectAmountSpan.textContent = `$${protectCost.toFixed(2)}`;
             
-            const accessoryCost = 75 * (parseInt(document.getElementById('accessory-bundles').value) || 0);
-            document.getElementById('accessory-bundle-container').style.display = accessoryCost > 0 ? 'block' : 'none';
-            document.getElementById('accessory-bundle-cost').checked = accessoryCost > 0;
-            document.getElementById('accessory-bundle-cost').dataset.amount = accessoryCost.toFixed(2);
-            document.getElementById('accessory-bundle-label').textContent = `Accessory Bundle (${document.getElementById('accessory-bundles').value} bundle${(parseInt(document.getElementById('accessory-bundles').value) || 0) !== 1 ? 's' : ''})`;
-            document.getElementById('accessory-bundle-amount').textContent = `$${accessoryCost.toFixed(2)}`;
+            // --- Accessory Bundles ---
+            const accessoryBundlesSelect = document.getElementById('accessory-bundles');
+            const currentAccessoryCount = parseInt(accessoryBundlesSelect.value) || 0;
+            accessoryBundlesSelect.innerHTML = '';
+            for (let i = 0; i <= totalLines; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                accessoryBundlesSelect.appendChild(option);
+            }
+            if (currentAccessoryCount <= totalLines) {
+                accessoryBundlesSelect.value = currentAccessoryCount;
+            } else {
+                accessoryBundlesSelect.value = totalLines;
+            }
+            
+            const accessoryCost = 75 * accessoryBundles;
+            accessoryBundleContainer.style.display = accessoryCost > 0 ? 'block' : 'none';
+            accessoryBundleCheckbox.checked = accessoryCost > 0;
+            accessoryBundleCheckbox.dataset.amount = accessoryCost.toFixed(2);
+            accessoryBundleLabel.textContent = `Accessory Bundle (${accessoryBundles} bundle${accessoryBundles !== 1 ? 's' : ''})`;
+            accessoryBundleAmount.textContent = `$${accessoryCost.toFixed(2)}`;
 
+
+            // --- Access Fee ---
+            accessContainer.style.display = totalLines > 0 ? 'block' : 'none';
+            accessCheckbox.checked = totalLines > 0;
             const accessFee = Math.min(totalLines, 2) * 25;
-            document.getElementById('access-fee-container').style.display = totalLines > 0 ? 'block' : 'none';
-            document.getElementById('access').checked = totalLines > 0;
-            document.getElementById('access').dataset.amount = accessFee.toFixed(2);
-            document.getElementById('access-label').textContent = `Access Fee (Mobile) (${totalLines} line${totalLines !== 1 ? 's' : ''})`;
-            document.getElementById('access-amount').textContent = `$${accessFee.toFixed(2)}`;
+            accessCheckbox.dataset.amount = accessFee.toFixed(2);
+            accessLabel.textContent = `Access Fee (Mobile) (${totalLines} line${totalLines !== 1 ? 's' : ''})`;
+            accessAmountSpan.textContent = `$${accessFee.toFixed(2)}`;
             
-            const simCardFee = byodLines * 3;
-            simCardContainer.style.display = byodLines > 0 ? 'block' : 'none';
-            simCardCheckbox.checked = byodLines > 0;
-            simCardCheckbox.dataset.amount = simCardFee.toFixed(2);
-            simCardLabel.textContent = `Sim Card (${byodLines} line${byodLines !== 1 ? 's' : ''})`;
-            simCardAmountSpan.textContent = `$${simCardFee.toFixed(2)}`;
-
-            // --- Handle Upgrades & Rewards ---
-            rewardsCreditContainer.style.display = upgradeChecked ? 'block' : 'none';
-            let rewardsDeduction = 0;
-            if (upgradeChecked) {
-                if (rewards100Checked) rewardsDeduction += 100;
-                if (rewards200Checked) rewardsDeduction += 200;
+            // --- [NEW] Calculate and display BYOD Fee ---
+            const byodFee = byodLines * 3;
+            if (byodLines > 0) {
+                byodFeeContainer.style.display = 'block';
+                byodFeeCheckbox.checked = true;
+                byodFeeCheckbox.dataset.amount = byodFee.toFixed(2);
+                byodFeeLabel.textContent = `BYOD Fee (${byodLines} line${byodLines !== 1 ? 's' : ''})`;
+                byodFeeAmountSpan.textContent = `$${byodFee.toFixed(2)}`;
+            } else {
+                byodFeeContainer.style.display = 'none';
+                byodFeeCheckbox.checked = false;
+                byodFeeCheckbox.dataset.amount = '0';
             }
 
             // --- Sales Tax Calculation ---
-            const taxableHomeRouterAmount = homeInternet ? 99.00 : 0;
-            const taxableHotspotAmount = mobileHotspotChecked ? 49.99 : 0;
+            const homeRouterMsrp = 99.00;
+            const taxableHomeRouterAmount = homeInternet ? homeRouterMsrp : 0;
             const taxableTabletAmount = currentTablet.msrp;
             const taxableAccessoryAmount = accessoryCost;
-            const taxableAccessFee = (totalLines > 0 && document.getElementById('access').checked) ? accessFee : 0;
+            const taxableAccessFee = (totalLines > 0 && accessCheckbox.checked) ? accessFee : 0;
 
-            const totalTaxableAmount = totalRetailForTax + taxableHomeRouterAmount + taxableTabletAmount + taxableAccessoryAmount + taxableHotspotAmount;
-            const totalTax = (totalTaxableAmount * taxRate) + (taxableAccessFee * taxRate);
+            const totalTaxableDeviceAmount = totalRetailForTax + taxableHomeRouterAmount + taxableTabletAmount + taxableAccessoryAmount;
+            const totalTax = (totalTaxableDeviceAmount * taxRate) + (taxableAccessFee * taxRate);
             
-            document.getElementById('sales-tax').dataset.amount = totalTax.toFixed(2);
-            document.getElementById('tax-amount').textContent = `$${totalTax.toFixed(2)}`;
-            const isTaxable = totalTaxableAmount > 0 || taxableAccessFee > 0;
-            document.getElementById('sales-tax').disabled = !isTaxable;
+            taxCheckbox.dataset.amount = totalTax.toFixed(2);
+            taxAmountSpan.textContent = `$${totalTax.toFixed(2)}`;
+
+            const isTaxable = totalTaxableDeviceAmount > 0 || taxableAccessFee > 0;
+            taxCheckbox.disabled = !isTaxable;
             taxRateInput.disabled = !isTaxable;
-            document.getElementById('sales-tax').checked = isTaxable;
+            taxCheckbox.checked = isTaxable;
+
 
             // --- Calculate Final Total ---
             let total = 0;
-            document.querySelectorAll('input[type="checkbox"]:not(#upgrade, #rewards-100, #rewards-200)').forEach(checkbox => {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
                 if (checkbox.checked) {
-                    total += parseFloat(checkbox.dataset.amount) || 0;
+                    const amount = checkbox.dataset.amount ? parseFloat(checkbox.dataset.amount) : 0;
+                    total += amount;
                 }
             });
-            // Add hotspot plan cost (non-taxable)
-            total += finalHotspotPlanCost;
-
-            // Subtract rewards
-            total -= rewardsDeduction;
             
-            document.getElementById('total-due').textContent = `$${Math.max(0, total).toFixed(2)}`; // Ensure total isn't negative
+            document.getElementById('total-due').textContent = `$${total.toFixed(2)}`;
             
             updatePriceBreakdown();
         }
@@ -817,32 +863,39 @@
             });
         }
         
+        // Helper function to populate a dropdown with a max value, preserving the current selection if possible
         function populateDropdown(selectElement, max) {
             const currentValue = parseInt(selectElement.value) || 0;
-            selectElement.innerHTML = '';
+            selectElement.innerHTML = ''; // Clear existing options
             for (let i = 0; i <= max; i++) {
                 const option = document.createElement('option');
                 option.value = i;
                 option.textContent = i;
                 selectElement.appendChild(option);
             }
+            // Set the value to the old value if it's still valid, otherwise cap it at the new max
             selectElement.value = Math.min(currentValue, max);
         }
 
+        // [UPDATED] This function now enforces the 5-line limit
         function updateLineDropdowns(changedInput) {
             const byodSelect = document.getElementById('byod-lines');
             const newDeviceSelect = document.getElementById('new-device-lines');
-            const maxLines = 5;
+            const maxLines = 5; // Set the total line limit here
 
             let byodCount = parseInt(byodSelect.value) || 0;
             let newDeviceCount = parseInt(newDeviceSelect.value) || 0;
 
+            // When one dropdown changes, adjust the maximum for the other
             if (changedInput === 'byod') {
-                populateDropdown(newDeviceSelect, maxLines - byodCount);
+                const maxNew = maxLines - byodCount;
+                populateDropdown(newDeviceSelect, maxNew);
             } else if (changedInput === 'new') {
-                populateDropdown(byodSelect, maxLines - newDeviceCount);
+                const maxByod = maxLines - newDeviceCount;
+                populateDropdown(byodSelect, maxByod);
             }
 
+            // After adjusting dropdowns, trigger the rest of the updates
             if (changedInput === 'new') {
                 generateDeviceSelectors();
             } else {
@@ -854,7 +907,7 @@
         function generateDeviceSelectors() {
             const container = document.getElementById('new-device-selectors');
             const newDeviceLines = parseInt(document.getElementById('new-device-lines').value) || 0;
-            container.innerHTML = '';
+            container.innerHTML = ''; // Clear existing selectors
 
             for (let i = 1; i <= newDeviceLines; i++) {
                 const selectWrapper = document.createElement('div');
@@ -894,11 +947,7 @@
             document.getElementById('home-internet').checked = false;
             document.getElementById('tax-rate-input').value = '10.3';
             document.getElementById('accessory-bundles').value = '0';
-            document.getElementById('upgrade').checked = false;
-            document.getElementById('rewards-100').checked = false;
-            document.getElementById('rewards-200').checked = false;
-            document.getElementById('mobile-hotspot').checked = false;
-
+            // Re-populate dropdowns to their initial state with the 5 line limit
             populateDropdown(document.getElementById('byod-lines'), 5);
             populateDropdown(document.getElementById('new-device-lines'), 5);
             updateLineDropdowns('new');
@@ -919,6 +968,7 @@
             const newDeviceSelect = document.getElementById('new-device-lines');
             const maxLines = 5;
 
+            // Populate both dropdowns fully on initial load
             for (let i = 0; i <= maxLines; i++) { 
                 const byodOption = document.createElement('option');
                 byodOption.value = i;
@@ -931,11 +981,14 @@
                 newDeviceSelect.appendChild(newDeviceOption);
             }
 
+            // Set initial values and then call updateCalculator
             byodSelect.value = 0;
             newDeviceSelect.value = 1;
-            updateLineDropdowns('new');
+            updateLineDropdowns('new'); // Call this to enforce limit from the start
         }
 
+        // We don't call initializeApp on page load anymore, 
+        // it's called after a successful login.
     </script>
 
 </body>
