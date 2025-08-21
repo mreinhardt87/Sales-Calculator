@@ -497,7 +497,8 @@
                     selectedDeviceKeys.push(selector.value);
                 }
             }
-
+            
+            const hasIphone13 = selectedDeviceKeys.includes('iphone-13');
             const hasIphone14 = selectedDeviceKeys.includes('iphone-14');
             const hasIphone14Plus = selectedDeviceKeys.includes('iphone-14-plus');
 
@@ -582,7 +583,7 @@
                 promoBoxMessage = `Moto G Stylus 2024 "Port 1, Get up to 3 Free" promo applied!`;
             }
 
-            const canUseRedHotTicket = portedLines >= 1 && !isMotoGStylusPromoActive && !hasIphone14 && !hasIphone14Plus;
+            const canUseRedHotTicket = portedLines >= 1 && !isMotoGStylusPromoActive && !hasIphone13 && !hasIphone14 && !hasIphone14Plus;
 
             if (canUseRedHotTicket) {
                 redHotTicketContainer.style.display = 'block';
