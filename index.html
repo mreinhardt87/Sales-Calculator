@@ -262,6 +262,24 @@
                             </label>
                         </div>
                         
+                        <!-- [NEW] Dedicated Hotspot Section -->
+                        <div>
+                            <input type="checkbox" id="dedicated-hotspot" data-amount="49.99" onchange="updateCalculator()">
+                            <label for="dedicated-hotspot" class="checkbox-label">
+                                <span class="checkmark"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></span>
+                                <span class="flex-grow">Dedicated Hotspot Device</span>
+                                <span class="font-bold text-gray-800">$49.99</span>
+                            </label>
+                        </div>
+                        <div id="hotspot-plan-container" class="hidden ml-8">
+                             <label for="hotspot-plan-select" class="block text-sm font-medium text-gray-700 mb-1">Select Hotspot Plan:</label>
+                             <select id="hotspot-plan-select" class="w-full p-2 border border-gray-300 rounded-md" onchange="updateCalculator()">
+                                <option value="30">15GB - $30</option>
+                                <option value="40">40GB - $40</option>
+                                <option value="50">100GB - $50</option>
+                            </select>
+                        </div>
+
                         <!-- Tablet Service Cost -->
                         <div id="tablet-service-container" class="hidden">
                             <input type="checkbox" id="tablet-service" data-amount="0" disabled>
@@ -449,6 +467,9 @@
             const portIn = document.getElementById('port-in').checked;
             const homeInternetCheckbox = document.getElementById('home-internet');
             const homeInternet = homeInternetCheckbox.checked;
+            const dedicatedHotspotCheckbox = document.getElementById('dedicated-hotspot');
+            const dedicatedHotspot = dedicatedHotspotCheckbox.checked;
+            const hotspotPlanCost = parseInt(document.getElementById('hotspot-plan-select').value);
             const selectedTabletKey = document.getElementById('tablet-select').value;
             const currentTablet = tabletData[selectedTabletKey];
             const taxRateInput = document.getElementById('tax-rate-input');
@@ -462,6 +483,8 @@
             const simCardCheckbox = document.getElementById('sim-card-fee');
             const simCardLabel = document.getElementById('sim-card-label');
             const simCardAmountSpan = document.getElementById('sim-card-amount');
+            const hotspotPlanContainer = document.getElementById('hotspot-plan-container');
+
 
             // --- Determine Device Costs & Promotions ---
             let totalDeviceCost = 0;
@@ -631,13 +654,16 @@
             document.getElementById('promo-box').style.display = showPromoBox ? 'block' : 'none';
             document.getElementById('promo-box-text').textContent = promoBoxMessage;
 
-            // --- Handle Home Internet & Tablets ---
+            // --- Handle Home Internet, Hotspot & Tablets ---
             const internetServiceCost = totalLines === 0 ? 60 : 45;
             homeInternetCheckbox.dataset.amount = internetServiceCost.toFixed(2);
             document.getElementById('internet-amount').textContent = `$${internetServiceCost.toFixed(2)}`;
             
             document.getElementById('router-cost-container').style.display = homeInternet ? 'block' : 'none';
             document.getElementById('router-cost').checked = homeInternet;
+
+            hotspotPlanContainer.style.display = dedicatedHotspot ? 'block' : 'none';
+            const finalHotspotPlanCost = dedicatedHotspot ? hotspotPlanCost : 0;
             
             if (selectedTabletKey !== 'none') {
                 document.getElementById('tablet-service-container').style.display = 'block';
@@ -698,11 +724,12 @@
             // --- Sales Tax Calculation ---
             const homeRouterMsrp = 99.00;
             const taxableHomeRouterAmount = homeInternet ? homeRouterMsrp : 0;
+            const taxableHotspotAmount = dedicatedHotspot ? 49.99 : 0;
             const taxableTabletAmount = currentTablet.msrp;
             const taxableAccessoryAmount = accessoryCost;
             const taxableAccessFee = (totalLines > 0 && document.getElementById('access').checked) ? accessFee : 0;
 
-            const totalTaxableDeviceAmount = totalRetailForTax + taxableHomeRouterAmount + taxableTabletAmount + taxableAccessoryAmount;
+            const totalTaxableDeviceAmount = totalRetailForTax + taxableHomeRouterAmount + taxableTabletAmount + taxableAccessoryAmount + taxableHotspotAmount;
             const totalTax = (totalTaxableDeviceAmount * taxRate) + (taxableAccessFee * taxRate);
             
             document.getElementById('sales-tax').dataset.amount = totalTax.toFixed(2);
@@ -720,6 +747,8 @@
                 }
             });
             
+            total += finalHotspotPlanCost;
+
             document.getElementById('total-due').textContent = `$${total.toFixed(2)}`;
             
             updatePriceBreakdown();
@@ -825,6 +854,7 @@
             document.getElementById('id-verified').checked = true;
             document.getElementById('port-in').checked = true;
             document.getElementById('home-internet').checked = false;
+            document.getElementById('dedicated-hotspot').checked = false;
             document.getElementById('tax-rate-input').value = '10.3';
             document.getElementById('accessory-bundles').value = '0';
             populateDropdown(document.getElementById('byod-lines'), 5);
