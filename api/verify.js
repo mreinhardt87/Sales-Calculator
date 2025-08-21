@@ -17,7 +17,7 @@ if (!getApps().length) {
 }
 
 const db = getFirestore();
-const SESSION_DURATION_MINUTES = 10; // The session will expire after 10 minutes
+const SESSION_DURATION_MINUTES = 1; // The session will expire after 10 minutes
 
 export default async function handler(request, response) {
     if (request.method !== 'POST') {
@@ -77,3 +77,4 @@ export default async function handler(request, response) {
         return response.status(500).json({ message: 'An internal server error occurred.' });
     }
 }
+
