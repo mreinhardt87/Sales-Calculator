@@ -117,17 +117,6 @@
                     <!-- Controls Section -->
                     <div class="mb-4">
                          <div>
-                            <label for="plan-select" class="block text-sm font-medium text-gray-700 mb-1">Select Plan:</label>
-                            <select id="plan-select" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" onchange="updateCalculator()">
-                                <option value="40">Base 5G - $40 Plan</option>
-                                <option value="50" selected>Total 5G - $50 Plan</option>
-                                <option value="60">Total 5G+ - $60 Plan</option>
-                            </select>
-                        </div>
-                    </div>
-                    <!-- [NEW] Upgrade Type Dropdown -->
-                    <div class="mb-4">
-                         <div>
                             <label for="upgrade-type-select" class="block text-sm font-medium text-gray-700 mb-1">Select Transaction Type:</label>
                             <select id="upgrade-type-select" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" onchange="updateCalculator()">
                                 <option value="" selected>-- Select an Option --</option>
@@ -136,6 +125,16 @@
                                 <option value="upgrade-only">Upgrade Only</option>
                                 <option value="upgrade-with-rewards">Upgrade with Rewards</option>
                                 <option value="upgrade-add-line">Upgrade & add a line</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                         <div>
+                            <label for="plan-select" class="block text-sm font-medium text-gray-700 mb-1">Select Plan:</label>
+                            <select id="plan-select" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" onchange="updateCalculator()">
+                                <option value="40">Base 5G - $40 Plan</option>
+                                <option value="50" selected>Total 5G - $50 Plan</option>
+                                <option value="60">Total 5G+ - $60 Plan</option>
                             </select>
                         </div>
                     </div>
