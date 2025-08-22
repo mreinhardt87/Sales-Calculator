@@ -131,6 +131,7 @@
                             <label for="upgrade-type-select" class="block text-sm font-medium text-gray-700 mb-1">Select Transaction Type:</label>
                             <select id="upgrade-type-select" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" onchange="updateCalculator()">
                                 <option value="" selected>-- Select an Option --</option>
+                                <option value="new-account">New account</option>
                                 <option value="add-a-line">Add a line</option>
                                 <option value="upgrade-only">Upgrade Only</option>
                                 <option value="upgrade-with-rewards">Upgrade with Rewards</option>
@@ -154,12 +155,22 @@
                         </div>
                     </div>
                     <div id="new-device-selectors" class="space-y-2 mb-4"></div>
-                     <div class="mb-4">
-                        <label for="protect-lines" class="block text-sm font-medium text-gray-700">Total Protect Lines:</label>
-                        <select id="protect-lines" class="mt-1 w-full p-2 border border-gray-300 rounded-md" onchange="updateCalculator()">
-                            <!-- Options dynamically populated -->
-                        </select>
+                    <!-- [NEW] Upgrade Device Lines Dropdown -->
+                     <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="upgrade-device-lines" class="block text-sm font-medium text-gray-700">Upgrade Device Lines:</label>
+                            <select id="upgrade-device-lines" class="mt-1 w-full p-2 border border-gray-300 rounded-md" onchange="generateUpgradeDeviceSelectors()">
+                                <!-- Options dynamically populated -->
+                            </select>
+                        </div>
+                        <div>
+                            <label for="protect-lines" class="block text-sm font-medium text-gray-700">Total Protect Lines:</label>
+                            <select id="protect-lines" class="mt-1 w-full p-2 border border-gray-300 rounded-md" onchange="updateCalculator()">
+                                <!-- Options dynamically populated -->
+                            </select>
+                        </div>
                     </div>
+                    <div id="upgrade-device-selectors" class="space-y-2 mb-4"></div>
                      <div class="mb-4">
                         <label for="ported-lines" class="block text-sm font-medium text-gray-700">Number of Ported Lines:</label>
                         <select id="ported-lines" class="mt-1 w-full p-2 border border-gray-300 rounded-md" onchange="updateCalculator()">
@@ -475,6 +486,7 @@
             const basePlanPrice = parseInt(document.getElementById('plan-select').value);
             const byodLines = parseInt(document.getElementById('byod-lines').value) || 0;
             const newDeviceLines = parseInt(document.getElementById('new-device-lines').value) || 0;
+            const upgradeLines = parseInt(document.getElementById('upgrade-device-lines').value) || 0;
             const totalLines = byodLines + newDeviceLines;
             
             const idVerified = document.getElementById('id-verified').checked;
@@ -503,59 +515,66 @@
             // --- Determine Device Costs & Promotions ---
             let totalDeviceCost = 0;
             let totalRetailForTax = 0;
-            let selectedDeviceKeys = [];
+            let newDeviceKeys = [];
+            let upgradeDeviceKeys = [];
 
             if (newDeviceLines > 0) {
                 for (let i = 1; i <= newDeviceLines; i++) {
                     const selector = document.getElementById(`device-select-${i}`);
-                    selectedDeviceKeys.push(selector.value);
+                    newDeviceKeys.push(selector.value);
+                }
+            }
+            if (upgradeLines > 0) {
+                for (let i = 1; i <= upgradeLines; i++) {
+                    const selector = document.getElementById(`upgrade-device-select-${i}`);
+                    upgradeDeviceKeys.push(selector.value);
                 }
             }
             
+            const selectedDeviceKeys = [...newDeviceKeys, ...upgradeDeviceKeys];
             const hasIphone13 = selectedDeviceKeys.includes('iphone-13');
             const hasIphone14 = selectedDeviceKeys.includes('iphone-14');
             const hasIphone14Plus = selectedDeviceKeys.includes('iphone-14-plus');
 
-            const isUpgrade = upgradeType === 'upgrade-only' || upgradeType === 'upgrade-with-rewards';
+            const isUpgradeOnly = upgradeType === 'upgrade-only' || upgradeType === 'upgrade-with-rewards';
 
-            if (isUpgrade) {
-                // [NEW LOGIC] For upgrades, always use retail price
-                selectedDeviceKeys.forEach(selectedKey => {
+            // Calculate cost for new devices (promotional)
+            const motoGStylus2024Count = newDeviceKeys.filter(k => k === 'moto-g-stylus-5g-2024').length;
+            const isMotoGStylusPromoActive = motoGStylus2024Count > 0 && motoGStylus2024Count === newDeviceLines && newDeviceLines <= 4 && idVerified && portedLines >= 1;
+
+            if (isMotoGStylusPromoActive) {
+                for (let i = 0; i < newDeviceLines; i++) {
+                    const currentDeal = dealData['moto-g-stylus-5g-2024'];
+                    totalRetailForTax += currentDeal.retailPrice;
+                }
+            } else {
+                newDeviceKeys.forEach(selectedKey => {
                     const currentDeal = dealData[selectedKey];
                     totalRetailForTax += currentDeal.retailPrice;
-                    totalDeviceCost += currentDeal.retailPrice;
-                });
-            } else {
-                // --- Existing Promotional Logic ---
-                const motoGStylus2024Count = selectedDeviceKeys.filter(k => k === 'moto-g-stylus-5g-2024').length;
-                const isMotoGStylusPromoActive = motoGStylus2024Count > 0 && motoGStylus2024Count === newDeviceLines && newDeviceLines <= 4 && idVerified && portedLines >= 1;
-
-                if (isMotoGStylusPromoActive) {
-                    for (let i = 0; i < newDeviceLines; i++) {
-                        const currentDeal = dealData['moto-g-stylus-5g-2024'];
-                        totalRetailForTax += currentDeal.retailPrice;
+                    if (idVerified && portIn) {
+                        totalDeviceCost += currentDeal.promoPrice;
+                    } else if (portIn) {
+                        totalDeviceCost += currentDeal.portOnlyPrice;
+                    } else if (idVerified) {
+                        totalDeviceCost += currentDeal.veriffOnlyPrice;
+                    } else {
+                        totalDeviceCost += currentDeal.noHasslePrice !== undefined ? currentDeal.noHasslePrice : currentDeal.retailPrice;
                     }
-                } else {
-                    selectedDeviceKeys.forEach(selectedKey => {
-                        const currentDeal = dealData[selectedKey];
-                        totalRetailForTax += currentDeal.retailPrice;
-                        if (idVerified && portIn) {
-                            totalDeviceCost += currentDeal.promoPrice;
-                        } else if (portIn) {
-                            totalDeviceCost += currentDeal.portOnlyPrice;
-                        } else if (idVerified) {
-                            totalDeviceCost += currentDeal.veriffOnlyPrice;
-                        } else {
-                            totalDeviceCost += currentDeal.noHasslePrice !== undefined ? currentDeal.noHasslePrice : currentDeal.retailPrice;
-                        }
-                    });
-                }
+                });
             }
+
+            // Calculate cost for upgrade devices (SRP)
+            upgradeDeviceKeys.forEach(selectedKey => {
+                const currentDeal = dealData[selectedKey];
+                totalRetailForTax += currentDeal.retailPrice;
+                totalDeviceCost += currentDeal.retailPrice;
+            });
+            
             
             document.getElementById('device-cost-container').style.display = totalDeviceCost > 0 ? 'block' : 'none';
             document.getElementById('device-cost').checked = totalDeviceCost > 0;
             document.getElementById('device-cost').dataset.amount = totalDeviceCost.toFixed(2);
-            document.getElementById('device-cost-label').textContent = `Mobile Device Cost (${newDeviceLines} dev)`;
+            document.getElementById('device-cost-label').textContent = `Mobile Device Cost (${newDeviceLines + upgradeLines} dev)`;
             document.getElementById('device-cost-amount').textContent = `$${totalDeviceCost.toFixed(2)}`;
             
             // --- Calculate Service Cost ---
@@ -595,7 +614,7 @@
             const redHotTicketContainer = document.getElementById('red-hot-ticket-container');
             const redHotTicketCheckbox = document.getElementById('red-hot-ticket');
 
-            const canUseRedHotTicket = portedLines >= 1 && !isUpgrade && !hasIphone13 && !hasIphone14 && !hasIphone14Plus;
+            const canUseRedHotTicket = portedLines >= 1 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus;
 
             if (canUseRedHotTicket) {
                 redHotTicketContainer.style.display = 'block';
@@ -691,23 +710,24 @@
             }
 
             // --- Update Dropdowns ---
+            const totalDevicesInTransaction = byodLines + newDeviceLines + upgradeLines;
             ['protect-lines', 'ported-lines', 'accessory-bundles'].forEach(id => {
                 const select = document.getElementById(id);
                 const currentVal = parseInt(select.value) || 0;
                 select.innerHTML = '';
-                for (let i = 0; i <= totalLines; i++) {
+                for (let i = 0; i <= totalDevicesInTransaction; i++) {
                     const option = document.createElement('option');
                     option.value = i;
                     option.textContent = i;
                     select.appendChild(option);
                 }
-                select.value = Math.min(currentVal, totalLines);
+                select.value = Math.min(currentVal, totalDevicesInTransaction);
             });
 
             // --- Update Fees & Protect ---
             const protectLinesCount = parseInt(document.getElementById('protect-lines').value) || 0;
             const protectCost = 5 * protectLinesCount;
-            document.getElementById('total-protect-container').style.display = totalLines > 0 ? 'block' : 'none';
+            document.getElementById('total-protect-container').style.display = totalDevicesInTransaction > 0 ? 'block' : 'none';
             document.getElementById('total-protect').checked = protectCost > 0;
             document.getElementById('total-protect').dataset.amount = protectCost.toFixed(2);
             document.getElementById('protect-label').textContent = `Total Protect (${protectLinesCount} line${protectLinesCount !== 1 ? 's' : ''})`;
@@ -721,7 +741,7 @@
             document.getElementById('accessory-bundle-amount').textContent = `$${accessoryCost.toFixed(2)}`;
 
             let accessFee = 0;
-            if (!isUpgrade) {
+            if (!isUpgradeOnly) {
                 accessFee = Math.min(totalLines, 2) * 25;
             }
             document.getElementById('access-fee-container').style.display = totalLines > 0 ? 'block' : 'none';
@@ -839,10 +859,41 @@
                 const label = document.createElement('label');
                 label.htmlFor = `device-select-${i}`;
                 label.className = 'block text-sm font-medium text-gray-700 mb-1';
-                label.textContent = `Device for Line ${i}:`;
+                label.textContent = `New Device for Line ${i}:`;
                 
                 const select = document.createElement('select');
                 select.id = `device-select-${i}`;
+                select.className = 'w-full p-2 border border-gray-300 rounded-md';
+                select.onchange = updateCalculator;
+
+                Object.keys(dealData).forEach(key => {
+                    const option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = dealData[key].name;
+                    select.appendChild(option);
+                });
+                
+                selectWrapper.appendChild(label);
+                selectWrapper.appendChild(select);
+                container.appendChild(selectWrapper);
+            }
+            updateCalculator();
+        }
+
+        function generateUpgradeDeviceSelectors() {
+            const container = document.getElementById('upgrade-device-selectors');
+            const upgradeLines = parseInt(document.getElementById('upgrade-device-lines').value) || 0;
+            container.innerHTML = '';
+
+            for (let i = 1; i <= upgradeLines; i++) {
+                const selectWrapper = document.createElement('div');
+                const label = document.createElement('label');
+                label.htmlFor = `upgrade-device-select-${i}`;
+                label.className = 'block text-sm font-medium text-gray-700 mb-1';
+                label.textContent = `Upgrade Device ${i}:`;
+                
+                const select = document.createElement('select');
+                select.id = `upgrade-device-select-${i}`;
                 select.className = 'w-full p-2 border border-gray-300 rounded-md';
                 select.onchange = updateCalculator;
 
@@ -865,6 +916,7 @@
             document.getElementById('upgrade-type-select').value = '';
             document.getElementById('byod-lines').value = '0';
             document.getElementById('new-device-lines').value = '0';
+            document.getElementById('upgrade-device-lines').value = '0';
             document.getElementById('protect-lines').value = '0';
             document.getElementById('ported-lines').value = '0';
             document.getElementById('tablet-select').value = 'none';
@@ -876,6 +928,7 @@
             document.getElementById('accessory-bundles').value = '0';
             populateDropdown(document.getElementById('byod-lines'), 5);
             populateDropdown(document.getElementById('new-device-lines'), 5);
+            generateUpgradeDeviceSelectors();
             updateLineDropdowns('new');
         }
 
@@ -892,6 +945,7 @@
             
             const byodSelect = document.getElementById('byod-lines');
             const newDeviceSelect = document.getElementById('new-device-lines');
+            const upgradeDeviceSelect = document.getElementById('upgrade-device-lines');
             const maxLines = 5;
 
             for (let i = 0; i <= maxLines; i++) { 
@@ -904,10 +958,16 @@
                 newDeviceOption.value = i;
                 newDeviceOption.textContent = i;
                 newDeviceSelect.appendChild(newDeviceOption);
+                
+                const upgradeDeviceOption = document.createElement('option');
+                upgradeDeviceOption.value = i;
+                upgradeDeviceOption.textContent = i;
+                upgradeDeviceSelect.appendChild(upgradeDeviceOption);
             }
 
             byodSelect.value = 0;
             newDeviceSelect.value = 1;
+            upgradeDeviceSelect.value = 0;
             updateLineDropdowns('new');
         }
 
