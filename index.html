@@ -685,13 +685,35 @@
             document.getElementById('promo-box').style.display = showPromoBox ? 'block' : 'none';
             document.getElementById('promo-box-text').textContent = promoBoxMessage;
 
-            // --- Handle Home Internet, Hotspot & Tablets ---
-            const internetServiceCost = totalLines === 0 ? 60 : 45;
-            homeInternetCheckbox.dataset.amount = internetServiceCost.toFixed(2);
-            document.getElementById('internet-amount').textContent = `$${internetServiceCost.toFixed(2)}`;
+            // --- [UPDATED] Handle Home Internet, Hotspot & Tablets ---
+            const routerCostContainer = document.getElementById('router-cost-container');
+            const routerCostCheckbox = document.getElementById('router-cost');
+            const internetLabel = document.getElementById('internet-label');
+            const internetAmount = document.getElementById('internet-amount');
             
-            document.getElementById('router-cost-container').style.display = homeInternet ? 'block' : 'none';
-            document.getElementById('router-cost').checked = homeInternet;
+            let internetServiceCost = 49.99;
+            let routerDeviceCost = 0;
+
+            if (homeInternet) {
+                if (totalLines > 0) {
+                    // With voice line promo
+                    internetLabel.textContent = 'Home Internet Promo (Router + 3mo Service)';
+                    internetAmount.textContent = '$49.99';
+                    homeInternetCheckbox.dataset.amount = '49.99';
+                    routerCostContainer.style.display = 'none';
+                    routerCostCheckbox.checked = false;
+                } else {
+                    // Standalone internet
+                    internetLabel.textContent = 'Home Internet Service (1st Month)';
+                    internetAmount.textContent = '$49.99';
+                    homeInternetCheckbox.dataset.amount = '49.99';
+                    routerDeviceCost = 49.99;
+                    routerCostContainer.style.display = 'block';
+                    routerCostCheckbox.checked = true;
+                    routerCostCheckbox.dataset.amount = routerDeviceCost.toFixed(2);
+                    document.getElementById('router-cost-amount').textContent = `$${routerDeviceCost.toFixed(2)}`;
+                }
+            }
 
             hotspotPlanContainer.style.display = dedicatedHotspot ? 'block' : 'none';
             const finalHotspotPlanCost = dedicatedHotspot ? hotspotPlanCost : 0;
