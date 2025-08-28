@@ -270,8 +270,8 @@
                             <input type="checkbox" id="home-internet" data-amount="45" onchange="updateCalculator()">
                             <label for="home-internet" class="checkbox-label">
                                 <span class="checkmark"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></span>
-                                <span id="internet-label" class="flex-grow">Home Internet Service (1st Month)</span>
-                                <span id="internet-amount" class="font-bold text-gray-800">$45.00</span>
+                                <span id="internet-label" class="flex-grow">Home Internet Service</span>
+                                <span id="internet-amount" class="font-bold text-gray-800">$49.99</span>
                             </label>
                         </div>
 
@@ -691,7 +691,6 @@
             const internetLabel = document.getElementById('internet-label');
             const internetAmount = document.getElementById('internet-amount');
             
-            let internetServiceCost = 49.99;
             let routerDeviceCost = 0;
 
             if (homeInternet) {
@@ -704,7 +703,7 @@
                     routerCostCheckbox.checked = false;
                 } else {
                     // Standalone internet
-                    internetLabel.textContent = 'Home Internet Service (1st Month)';
+                    internetLabel.textContent = 'Home Internet Service (3 Months)';
                     internetAmount.textContent = '$49.99';
                     homeInternetCheckbox.dataset.amount = '49.99';
                     routerDeviceCost = 49.99;
