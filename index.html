@@ -395,7 +395,7 @@
         const dealData = {
             'iphone-13': { name: 'Apple iPhone 13 128GB', retailPrice: 529.00, promoPrice: 0.00, portOnlyPrice: 0.00, veriffOnlyPrice: 99.99, promoMonths: 3 },
             'iphone-14': { name: 'Apple iPhone 14 128GB', retailPrice: 629.00, promoPrice: 99.99, portOnlyPrice: 529.99, veriffOnlyPrice: 199.99, promoMonths: 3 },
-            'iphone-14-plus': { name: 'Apple iPhone 14 Plus 128GB', retailPrice: 729.00, promoPrice: 199.99, portOnlyPrice: 499.99, veriffOnlyPrice: 299.99, promoMonths: 3 },
+            'iphone-14-plus': { name: 'Apple iPhone 14 Plus 128GB', retailPrice: 729.00, promoPrice: 199.99, portOnlyPrice: 499.99, veriffOnlyPrice: 199.99, noHasslePrice: 499.99, promoMonths: 1, requiredPlan: 60 },
             'iphone-15': { name: 'Apple iPhone 15 128GB', retailPrice: 729.00, promoPrice: 479.99, portOnlyPrice: 679.99, veriffOnlyPrice: 479.99, promoMonths: 1 },
             'iphone-16e': { name: 'Apple iPhone 16e 128GB', retailPrice: 599.99, promoPrice: 299.99, portOnlyPrice: 599.99, veriffOnlyPrice: 399.99, noHasslePrice: 599.99, promoMonths: 2 },
             'samsung-a15': { name: 'Samsung Galaxy A15 5G', retailPrice: 79.99, promoPrice: 0.00, portOnlyPrice: 59.99, veriffOnlyPrice: 0.00, promoMonths: 1 },
@@ -509,6 +509,8 @@
             const simCardLabel = document.getElementById('sim-card-label');
             const simCardAmountSpan = document.getElementById('sim-card-amount');
             const hotspotPlanContainer = document.getElementById('hotspot-plan-container');
+            const promoBox = document.getElementById('promo-box');
+            const promoBoxText = document.getElementById('promo-box-text');
 
 
             // --- Determine Device Costs & Promotions ---
@@ -516,6 +518,8 @@
             let totalRetailForTax = 0;
             let newDeviceKeys = [];
             let upgradeDeviceKeys = [];
+            let showPromoBox = false;
+            let promoBoxMessage = '';
 
             if (newDeviceLines > 0) {
                 for (let i = 1; i <= newDeviceLines; i++) {
@@ -550,13 +554,29 @@
                 newDeviceKeys.forEach(selectedKey => {
                     const currentDeal = dealData[selectedKey];
                     totalRetailForTax += currentDeal.retailPrice;
-                    if (idVerified && portIn) {
-                        totalDeviceCost += currentDeal.promoPrice;
-                    } else if (portIn) {
-                        totalDeviceCost += currentDeal.portOnlyPrice;
-                    } else if (idVerified) {
-                        totalDeviceCost += currentDeal.veriffOnlyPrice;
+
+                    // [NEW] Check for plan requirement before applying promo price
+                    let meetsPlanRequirement = true;
+                    if (currentDeal.requiredPlan && basePlanPrice !== currentDeal.requiredPlan) {
+                        meetsPlanRequirement = false;
+                        if (!showPromoBox) {
+                            showPromoBox = true;
+                            promoBoxMessage = `${currentDeal.name} promo requires the $${currentDeal.requiredPlan} plan. Reverting to No Hassle Price.`;
+                        }
+                    }
+
+                    if (meetsPlanRequirement) {
+                        if (idVerified && portIn) {
+                            totalDeviceCost += currentDeal.promoPrice;
+                        } else if (portIn) {
+                            totalDeviceCost += currentDeal.portOnlyPrice;
+                        } else if (idVerified) {
+                            totalDeviceCost += currentDeal.veriffOnlyPrice;
+                        } else {
+                            totalDeviceCost += currentDeal.noHasslePrice !== undefined ? currentDeal.noHasslePrice : currentDeal.retailPrice;
+                        }
                     } else {
+                        // If plan requirement is not met, charge the noHasslePrice or retail
                         totalDeviceCost += currentDeal.noHasslePrice !== undefined ? currentDeal.noHasslePrice : currentDeal.retailPrice;
                     }
                 });
@@ -608,8 +628,6 @@
             const serviceCostWithAutopay = baseServiceCost + autopayCharge;
             
             // --- Handle Red Hot Ticket & Promo Box ---
-            let showPromoBox = false;
-            let promoBoxMessage = '';
             const redHotTicketContainer = document.getElementById('red-hot-ticket-container');
             const redHotTicketCheckbox = document.getElementById('red-hot-ticket');
 
@@ -655,7 +673,7 @@
             const isStandaloneIphone13 = totalLines === 1 && selectedDeviceKeys.includes('iphone-13');
             const isStandaloneIphone14 = totalLines === 1 && (hasIphone14 || hasIphone14Plus);
 
-            if (isStandaloneIphone13 || isStandaloneIphone14) {
+            if (isStandaloneIphone13 || (isStandaloneIphone14 && basePlanPrice === 60)) {
                 promoMonthsRequired = true;
                 promoMonthsCount = 2; // 2nd and 3rd month
                 promoMonthsCost = basePlanPrice * promoMonthsCount;
@@ -663,7 +681,7 @@
                     showPromoBox = true;
                     promoBoxMessage = `This promo requires paying for ${promoMonthsCount + 1} months of service upfront for a single line.`;
                 }
-            } else if (totalLines > 1 && (selectedDeviceKeys.includes('iphone-13') || hasIphone14 || hasIphone14Plus)) {
+            } else if (totalLines > 1 && (selectedDeviceKeys.includes('iphone-13') || (hasIphone14 || hasIphone14Plus))) {
                  if (!showPromoBox) {
                     showPromoBox = true;
                     promoBoxMessage = `The upfront promotional month payment is waived for 2 or more lines.`;
@@ -678,12 +696,14 @@
             document.getElementById('promo-months-amount').textContent = `$${promoMonthsCost.toFixed(2)}`;
 
             if(portIn && byodLines > 0) {
-                showPromoBox = true;
-                promoBoxMessage = promoBoxMessage ? promoBoxMessage + " Also, 50% off first BYOD line." : "50% off first BYOD line for Port-in.";
+                 if (!showPromoBox) {
+                    showPromoBox = true;
+                    promoBoxMessage = "50% off first BYOD line for Port-in.";
+                }
             }
-
-            document.getElementById('promo-box').style.display = showPromoBox ? 'block' : 'none';
-            document.getElementById('promo-box-text').textContent = promoBoxMessage;
+            
+            promoBox.style.display = showPromoBox ? 'block' : 'none';
+            promoBoxText.textContent = promoBoxMessage;
 
             // --- [UPDATED] Handle Home Internet, Hotspot & Tablets ---
             const routerCostContainer = document.getElementById('router-cost-container');
