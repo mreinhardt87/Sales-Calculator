@@ -267,7 +267,7 @@
                         
                         <!-- Home Internet Section -->
                         <div>
-                            <input type="checkbox" id="home-internet" data-amount="45" onchange="updateCalculator()">
+                            <input type="checkbox" id="home-internet" data-amount="49.99" onchange="updateCalculator()">
                             <label for="home-internet" class="checkbox-label">
                                 <span class="checkmark"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></span>
                                 <span id="internet-label" class="flex-grow">Home Internet Service</span>
@@ -277,11 +277,11 @@
 
                          <!-- Home Router Device Cost (hidden by default) -->
                         <div id="router-cost-container" class="hidden">
-                            <input type="checkbox" id="router-cost" data-amount="24.99" disabled>
+                            <input type="checkbox" id="router-cost" data-amount="49.99" disabled>
                             <label for="router-cost" class="checkbox-label">
                                 <span class="checkmark"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></span>
                                 <span id="router-cost-label" class="flex-grow">Home Router Device</span>
-                                <span id="router-cost-amount" class="font-bold text-gray-800">$24.99</span>
+                                <span id="router-cost-amount" class="font-bold text-gray-800">$49.99</span>
                             </label>
                         </div>
                         
@@ -393,7 +393,7 @@
     <script>
         // Data for different phone promotions based on the provided PDF
         const dealData = {
-            'iphone-13': { name: 'Apple iPhone 13 128GB', retailPrice: 529.00, promoPrice: 0.00, portOnlyPrice: 299.99, veriffOnlyPrice: 99.99, promoMonths: 3 },
+            'iphone-13': { name: 'Apple iPhone 13 128GB', retailPrice: 529.00, promoPrice: 0.00, portOnlyPrice: 0.00, veriffOnlyPrice: 99.99, promoMonths: 3 },
             'iphone-14': { name: 'Apple iPhone 14 128GB', retailPrice: 629.00, promoPrice: 99.99, portOnlyPrice: 529.99, veriffOnlyPrice: 199.99, promoMonths: 3 },
             'iphone-14-plus': { name: 'Apple iPhone 14 Plus 128GB', retailPrice: 729.00, promoPrice: 199.99, portOnlyPrice: 499.99, veriffOnlyPrice: 299.99, promoMonths: 3 },
             'iphone-15': { name: 'Apple iPhone 15 128GB', retailPrice: 729.00, promoPrice: 479.99, portOnlyPrice: 679.99, veriffOnlyPrice: 479.99, promoMonths: 1 },
@@ -694,18 +694,17 @@
             let routerDeviceCost = 0;
 
             if (homeInternet) {
+                homeInternetCheckbox.dataset.amount = '49.99';
+                internetAmount.textContent = '$49.99';
+
                 if (totalLines > 0) {
                     // With voice line promo
                     internetLabel.textContent = 'Home Internet Promo (Router + 3mo Service)';
-                    internetAmount.textContent = '$49.99';
-                    homeInternetCheckbox.dataset.amount = '49.99';
                     routerCostContainer.style.display = 'none';
                     routerCostCheckbox.checked = false;
                 } else {
                     // Standalone internet
                     internetLabel.textContent = 'Home Internet Service (3 Months)';
-                    internetAmount.textContent = '$49.99';
-                    homeInternetCheckbox.dataset.amount = '49.99';
                     routerDeviceCost = 49.99;
                     routerCostContainer.style.display = 'block';
                     routerCostCheckbox.checked = true;
@@ -713,6 +712,7 @@
                     document.getElementById('router-cost-amount').textContent = `$${routerDeviceCost.toFixed(2)}`;
                 }
             }
+
 
             hotspotPlanContainer.style.display = dedicatedHotspot ? 'block' : 'none';
             const finalHotspotPlanCost = dedicatedHotspot ? hotspotPlanCost : 0;
@@ -995,3 +995,4 @@
 
 </body>
 </html>
+
