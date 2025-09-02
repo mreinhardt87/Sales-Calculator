@@ -671,9 +671,9 @@
             let promoMonthsCount = 0;
 
             const isStandaloneIphone13 = totalLines === 1 && selectedDeviceKeys.includes('iphone-13');
-            const isStandaloneIphone14 = totalLines === 1 && (hasIphone14 || hasIphone14Plus);
+            const isStandaloneIphone14 = totalLines === 1 && hasIphone14;
 
-            if (isStandaloneIphone13 || (isStandaloneIphone14 && basePlanPrice === 60)) {
+            if (isStandaloneIphone13 || isStandaloneIphone14) {
                 promoMonthsRequired = true;
                 promoMonthsCount = 2; // 2nd and 3rd month
                 promoMonthsCost = basePlanPrice * promoMonthsCount;
@@ -681,7 +681,7 @@
                     showPromoBox = true;
                     promoBoxMessage = `This promo requires paying for ${promoMonthsCount + 1} months of service upfront for a single line.`;
                 }
-            } else if (totalLines > 1 && (selectedDeviceKeys.includes('iphone-13') || (hasIphone14 || hasIphone14Plus))) {
+            } else if (totalLines > 1 && (selectedDeviceKeys.includes('iphone-13') || hasIphone14)) {
                  if (!showPromoBox) {
                     showPromoBox = true;
                     promoBoxMessage = `The upfront promotional month payment is waived for 2 or more lines.`;
