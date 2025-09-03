@@ -903,6 +903,12 @@
             const portIn = document.getElementById('port-in').checked;
             const breakdownTitle = document.getElementById('breakdown-title');
             
+            // Get addon values
+            const protectLinesCount = parseInt(document.getElementById('protect-lines').value) || 0;
+            const dedicatedHotspot = document.getElementById('dedicated-hotspot').checked;
+            const hotspotPlanCost = dedicatedHotspot ? parseInt(document.getElementById('hotspot-plan-select').value) : 0;
+            const totalProtectCost = protectLinesCount * 5;
+
             const prices = planBreakdownData[selectedPlan];
             
             breakdownContainer.innerHTML = '';
@@ -930,7 +936,8 @@
 
             prices.forEach((price, index) => {
                 const lineCount = index + 1;
-                const finalPrice = price - discount;
+                // Add addons to the final price for each line count scenario
+                const finalPrice = price - discount + totalProtectCost + hotspotPlanCost;
 
                 const div = document.createElement('div');
                 div.className = 'flex justify-between items-center text-gray-600';
@@ -947,9 +954,10 @@
                 priceContainer.appendChild(spanPrice);
                 
                 if (qualifiesForByodDiscount) {
+                    const originalPriceWithAddons = price + totalProtectCost + hotspotPlanCost;
                     const originalPriceSpan = document.createElement('span');
                     originalPriceSpan.className = 'text-xs text-gray-400 line-through ml-2';
-                    originalPriceSpan.textContent = `$${price.toFixed(2)}`;
+                    originalPriceSpan.textContent = `$${originalPriceWithAddons.toFixed(2)}`;
                     priceContainer.appendChild(originalPriceSpan);
                 }
 
@@ -957,6 +965,28 @@
                 div.appendChild(priceContainer);
                 breakdownContainer.appendChild(div);
             });
+
+            // Add a sub-breakdown for the addons
+            if (totalProtectCost > 0 || hotspotPlanCost > 0) {
+                const addonsContainer = document.createElement('div');
+                addonsContainer.className = 'mt-4 pt-4 border-t border-dashed space-y-2';
+
+                if (totalProtectCost > 0) {
+                    const protectDiv = document.createElement('div');
+                    protectDiv.className = 'flex justify-between items-center text-sm text-gray-500';
+                    protectDiv.innerHTML = `<span>Total Protect (${protectLinesCount} lines)</span><span class="font-medium">+$${totalProtectCost.toFixed(2)}</span>`;
+                    addonsContainer.appendChild(protectDiv);
+                }
+
+                if (hotspotPlanCost > 0) {
+                    const hotspotDiv = document.createElement('div');
+                    hotspotDiv.className = 'flex justify-between items-center text-sm text-gray-500';
+                    hotspotDiv.innerHTML = `<span>Dedicated Hotspot Plan</span><span class="font-medium">+$${hotspotPlanCost.toFixed(2)}</span>`;
+                    addonsContainer.appendChild(hotspotDiv);
+                }
+                
+                breakdownContainer.appendChild(addonsContainer);
+            }
         }
         
         function populateDropdown(selectElement, max) {
@@ -1120,5 +1150,4 @@
 
 </body>
 </html>
-"
 
