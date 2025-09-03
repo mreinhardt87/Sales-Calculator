@@ -759,8 +759,8 @@
                 homeInternetCheckbox.dataset.amount = '49.99';
                 internetAmount.textContent = '$49.99';
 
-                if (totalLines > 0) {
-                    // With voice line promo
+                if (totalLines > 0 || upgradeLines > 0) {
+                    // With voice line promo (new, add-a-line, or upgrade)
                     internetLabel.textContent = 'Home Internet Promo (Router + 3mo Service)';
                     routerCostContainer.style.display = 'none';
                     routerCostCheckbox.checked = false;
