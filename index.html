@@ -674,6 +674,14 @@
             const redHotTicketCheckbox = document.getElementById('red-hot-ticket');
 
             const canUseRedHotTicket = portedLines >= 1 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus;
+            const qualifiesForByodDiscount = portIn && byodLines > 0;
+
+            if (canUseRedHotTicket && qualifiesForByodDiscount) {
+                if (!showPromoBox) {
+                    showPromoBox = true;
+                    promoBoxMessage = "Congratulations! You qualify for 50% off the first BYOD line and the Red Hot Ticket.";
+                }
+            }
 
             if (canUseRedHotTicket) {
                 redHotTicketContainer.style.display = 'block';
@@ -737,7 +745,7 @@
             document.getElementById('promo-months-label').textContent = `Promotional Months (2 & 3)`;
             document.getElementById('promo-months-amount').textContent = `$${promoMonthsCost.toFixed(2)}`;
 
-            if(portIn && byodLines > 0) {
+            if (qualifiesForByodDiscount) {
                  if (!showPromoBox) {
                     showPromoBox = true;
                     promoBoxMessage = "50% off first BYOD line for Port-in.";
@@ -1083,6 +1091,4 @@
 
 </body>
 </html>
-
-"
 
