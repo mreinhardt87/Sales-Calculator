@@ -132,8 +132,9 @@
                          <div>
                             <label for="plan-select" class="block text-sm font-medium text-gray-700 mb-1">Select Plan:</label>
                             <select id="plan-select" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" onchange="updateCalculator()">
+                                <option value="" selected>-- Select a Plan --</option>
                                 <option value="40">Base 5G - $40 Plan</option>
-                                <option value="50" selected>Total 5G - $50 Plan</option>
+                                <option value="50">Total 5G - $50 Plan</option>
                                 <option value="60">Total 5G+ - $60 Plan</option>
                             </select>
                         </div>
@@ -171,12 +172,6 @@
                     </div>
                     <div id="upgrade-device-selectors" class="space-y-2 mb-4"></div>
                      <div class="mb-4">
-                        <label for="ported-lines" class="block text-sm font-medium text-gray-700">Number of Ported Lines:</label>
-                        <select id="ported-lines" class="mt-1 w-full p-2 border border-gray-300 rounded-md" onchange="updateCalculator()">
-                            <!-- Options dynamically populated -->
-                        </select>
-                    </div>
-                     <div class="mb-4">
                         <label for="accessory-bundles" class="block text-sm font-medium text-gray-700">Accessory Bundles: (Case, Glass Protector & Wall Charger)</label>
                         <select id="accessory-bundles" class="mt-1 w-full p-2 border border-gray-300 rounded-md" onchange="updateCalculator()">
                             <!-- Options dynamically populated -->
@@ -204,6 +199,12 @@
                                 <span class="checkmark"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></span>
                                 <span>External Port-in</span>
                             </label>
+                        </div>
+                        <div id="ported-lines-container" class="hidden ml-8">
+                            <label for="ported-lines" class="block text-sm font-medium text-gray-700">Number of Ported Lines:</label>
+                            <select id="ported-lines" class="mt-1 w-full p-2 border border-gray-300 rounded-md" onchange="updateCalculator()">
+                                <!-- Options dynamically populated -->
+                            </select>
                         </div>
                     </div>
 
@@ -482,7 +483,7 @@
         function updateCalculator() {
             // --- Read all user inputs ---
             const upgradeType = document.getElementById('upgrade-type-select').value;
-            const basePlanPrice = parseInt(document.getElementById('plan-select').value);
+            const basePlanPrice = parseInt(document.getElementById('plan-select').value) || 0;
             const byodLines = parseInt(document.getElementById('byod-lines').value) || 0;
             const newDeviceLines = parseInt(document.getElementById('new-device-lines').value) || 0;
             const upgradeLines = parseInt(document.getElementById('upgrade-device-lines').value) || 0;
@@ -511,6 +512,15 @@
             const hotspotPlanContainer = document.getElementById('hotspot-plan-container');
             const promoBox = document.getElementById('promo-box');
             const promoBoxText = document.getElementById('promo-box-text');
+            const portedLinesContainer = document.getElementById('ported-lines-container');
+
+            // --- UI Visibility Logic ---
+            if (portIn) {
+                portedLinesContainer.classList.remove('hidden');
+            } else {
+                portedLinesContainer.classList.add('hidden');
+                document.getElementById('ported-lines').value = '0';
+            }
 
 
             // --- Determine Device Costs & Promotions ---
@@ -611,7 +621,7 @@
                 return 0;
             };
 
-            if (totalLines > 0) {
+            if (totalLines > 0 && basePlanPrice > 0) {
                 const lineCosts = [];
                 for (let i = 1; i <= totalLines; i++) {
                     lineCosts.push(getLineCost(i, basePlanPrice));
@@ -673,7 +683,7 @@
             const isStandaloneIphone13 = totalLines === 1 && selectedDeviceKeys.includes('iphone-13');
             const isStandaloneIphone14 = totalLines === 1 && hasIphone14;
 
-            if (isStandaloneIphone13 || isStandaloneIphone14) {
+            if (basePlanPrice > 0 && (isStandaloneIphone13 || isStandaloneIphone14)) {
                 promoMonthsRequired = true;
                 promoMonthsCount = 2; // 2nd and 3rd month
                 promoMonthsCost = basePlanPrice * promoMonthsCount;
@@ -837,6 +847,15 @@
             
             breakdownContainer.innerHTML = '';
             
+            // Handle case where no plan is selected
+            if (!prices) {
+                const div = document.createElement('div');
+                div.className = 'text-center text-gray-500';
+                div.textContent = 'Select a plan to see monthly costs.';
+                breakdownContainer.appendChild(div);
+                return;
+            }
+
             prices.forEach((price, index) => {
                 const lineCount = index + 1;
                 const div = document.createElement('div');
@@ -952,7 +971,7 @@
         }
 
         function resetCalculator() {
-            document.getElementById('plan-select').value = '50';
+            document.getElementById('plan-select').value = '';
             document.getElementById('upgrade-type-select').value = '';
             document.getElementById('byod-lines').value = '0';
             document.getElementById('new-device-lines').value = '0';
