@@ -753,8 +753,6 @@
             const internetLabel = document.getElementById('internet-label');
             const internetAmount = document.getElementById('internet-amount');
             
-            let routerDeviceCost = 0;
-
             if (homeInternet) {
                 homeInternetCheckbox.dataset.amount = '49.99';
                 internetAmount.textContent = '$49.99';
@@ -764,15 +762,22 @@
                     internetLabel.textContent = 'Home Internet Promo (Router + 3mo Service)';
                     routerCostContainer.style.display = 'none';
                     routerCostCheckbox.checked = false;
+                    routerCostCheckbox.dataset.amount = '0';
                 } else {
                     // Standalone internet
                     internetLabel.textContent = 'Home Internet Service (3 Months)';
-                    routerDeviceCost = 49.99;
                     routerCostContainer.style.display = 'block';
                     routerCostCheckbox.checked = true;
-                    routerCostCheckbox.dataset.amount = routerDeviceCost.toFixed(2);
-                    document.getElementById('router-cost-amount').textContent = `$${routerDeviceCost.toFixed(2)}`;
+                    routerCostCheckbox.dataset.amount = '49.99';
+                    document.getElementById('router-cost-amount').textContent = `$49.99`;
                 }
+            } else {
+                // Reset everything if home internet is not selected
+                internetLabel.textContent = 'Home Internet Service';
+                homeInternetCheckbox.dataset.amount = '49.99';
+                routerCostContainer.style.display = 'none';
+                routerCostCheckbox.checked = false;
+                routerCostCheckbox.dataset.amount = '0';
             }
 
 
@@ -1078,4 +1083,6 @@
 
 </body>
 </html>
+
+"
 
