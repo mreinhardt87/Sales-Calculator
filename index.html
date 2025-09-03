@@ -192,14 +192,14 @@
                     <!-- Port-in and ID Validation Checkboxes -->
                     <div class="mb-4 space-y-2">
                         <div>
-                            <input type="checkbox" id="id-verified" checked onchange="updateCalculator()">
+                            <input type="checkbox" id="id-verified" onchange="updateCalculator()">
                             <label for="id-verified" class="checkbox-label text-sm py-2">
                                 <span class="checkmark"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></span>
                                 <span>ID Verified (Veriff)</span>
                             </label>
                         </div>
                          <div>
-                            <input type="checkbox" id="port-in" checked onchange="updateCalculator()">
+                            <input type="checkbox" id="port-in" onchange="updateCalculator()">
                             <label for="port-in" class="checkbox-label text-sm py-2">
                                 <span class="checkmark"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></span>
                                 <span>External Port-in</span>
@@ -960,8 +960,8 @@
             document.getElementById('protect-lines').value = '0';
             document.getElementById('ported-lines').value = '0';
             document.getElementById('tablet-select').value = 'none';
-            document.getElementById('id-verified').checked = true;
-            document.getElementById('port-in').checked = true;
+            document.getElementById('id-verified').checked = false;
+            document.getElementById('port-in').checked = false;
             document.getElementById('home-internet').checked = false;
             document.getElementById('dedicated-hotspot').checked = false;
             document.getElementById('tax-rate-input').value = '10.3';
@@ -1006,7 +1006,7 @@
             }
 
             byodSelect.value = 0;
-            newDeviceSelect.value = 1;
+            newDeviceSelect.value = 0;
             upgradeDeviceSelect.value = 0;
             updateLineDropdowns('new');
         }
