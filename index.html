@@ -899,12 +899,17 @@
         function updatePriceBreakdown() {
             const breakdownContainer = document.getElementById('price-breakdown');
             const selectedPlan = document.getElementById('plan-select').value;
+            const byodLines = parseInt(document.getElementById('byod-lines').value) || 0;
+            const portIn = document.getElementById('port-in').checked;
+            const breakdownTitle = document.getElementById('breakdown-title');
+            
             const prices = planBreakdownData[selectedPlan];
             
             breakdownContainer.innerHTML = '';
             
             // Handle case where no plan is selected
             if (!prices) {
+                breakdownTitle.textContent = 'Monthly Plan Cost';
                 const div = document.createElement('div');
                 div.className = 'text-center text-gray-500';
                 div.textContent = 'Select a plan to see monthly costs.';
@@ -912,20 +917,44 @@
                 return;
             }
 
+            let discount = 0;
+            const singleLinePrice = prices[0];
+            const qualifiesForByodDiscount = portIn && byodLines > 0;
+
+            if (qualifiesForByodDiscount) {
+                discount = singleLinePrice * 0.5;
+                breakdownTitle.textContent = 'Monthly Cost (w/ BYOD Discount)';
+            } else {
+                breakdownTitle.textContent = 'Monthly Plan Cost';
+            }
+
             prices.forEach((price, index) => {
                 const lineCount = index + 1;
+                const finalPrice = price - discount;
+
                 const div = document.createElement('div');
                 div.className = 'flex justify-between items-center text-gray-600';
                 
                 const spanLabel = document.createElement('span');
                 spanLabel.textContent = `${lineCount} Line${lineCount > 1 ? 's' : ''}`;
                 
+                const priceContainer = document.createElement('div');
+                priceContainer.className = 'flex items-baseline';
+
                 const spanPrice = document.createElement('span');
                 spanPrice.className = 'font-medium text-gray-900';
-                spanPrice.textContent = `$${price.toFixed(2)}`;
+                spanPrice.textContent = `$${finalPrice.toFixed(2)}`;
+                priceContainer.appendChild(spanPrice);
                 
+                if (qualifiesForByodDiscount) {
+                    const originalPriceSpan = document.createElement('span');
+                    originalPriceSpan.className = 'text-xs text-gray-400 line-through ml-2';
+                    originalPriceSpan.textContent = `$${price.toFixed(2)}`;
+                    priceContainer.appendChild(originalPriceSpan);
+                }
+
                 div.appendChild(spanLabel);
-                div.appendChild(spanPrice);
+                div.appendChild(priceContainer);
                 breakdownContainer.appendChild(div);
             });
         }
@@ -1091,4 +1120,5 @@
 
 </body>
 </html>
+"
 
