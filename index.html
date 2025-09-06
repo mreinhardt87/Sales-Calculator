@@ -722,6 +722,8 @@
 
             const isStandaloneIphone13 = totalLines === 1 && selectedDeviceKeys.includes('iphone-13');
             const isStandaloneIphone14 = totalLines === 1 && hasIphone14;
+            const isStandaloneRazr = totalLines === 1 && selectedDeviceKeys.includes('moto-razr-2025');
+            const isRazrRequiredPlan = basePlanPrice === 50 || basePlanPrice === 60;
 
             if (basePlanPrice > 0 && (isStandaloneIphone13 || isStandaloneIphone14)) {
                 promoMonthsRequired = true;
@@ -731,7 +733,15 @@
                     showPromoBox = true;
                     promoBoxMessage = `This promo requires paying for ${promoMonthsCount + 1} months of service upfront for a single line.`;
                 }
-            } else if (totalLines > 1 && (selectedDeviceKeys.includes('iphone-13') || hasIphone14)) {
+            } else if (basePlanPrice > 0 && isStandaloneRazr && isRazrRequiredPlan) {
+                promoMonthsRequired = true;
+                promoMonthsCount = 1; // 2nd month
+                promoMonthsCost = basePlanPrice * promoMonthsCount;
+                if (!showPromoBox) {
+                    showPromoBox = true;
+                    promoBoxMessage = `The Motorola Razr requires paying for ${promoMonthsCount + 1} months of service upfront on this plan.`;
+                }
+            } else if (totalLines > 1 && (selectedDeviceKeys.includes('iphone-13') || hasIphone14 || selectedDeviceKeys.includes('moto-razr-2025'))) {
                  if (!showPromoBox) {
                     showPromoBox = true;
                     promoBoxMessage = `The upfront promotional month payment is waived for 2 or more lines.`;
@@ -742,7 +752,7 @@
             promoMonthsCheckbox.checked = promoMonthsRequired;
             promoMonthsCheckbox.disabled = promoMonthsRequired;
             promoMonthsCheckbox.dataset.amount = promoMonthsCost.toFixed(2);
-            document.getElementById('promo-months-label').textContent = `Promotional Months (2 & 3)`;
+            document.getElementById('promo-months-label').textContent = `Promotional Months (Month 2${promoMonthsCount > 1 ? ' & 3' : ''})`;
             document.getElementById('promo-months-amount').textContent = `$${promoMonthsCost.toFixed(2)}`;
 
             if (qualifiesForByodDiscount) {
