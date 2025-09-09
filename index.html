@@ -188,11 +188,19 @@
                             <!-- Options dynamically populated -->
                         </select>
                     </div>
-                     <div class="mb-4">
-                        <label for="tablet-select" class="block text-sm font-medium text-gray-700">Add Tablet:</label>
-                        <select id="tablet-select" class="mt-1 w-full p-2 border border-gray-300 rounded-md" onchange="updateCalculator()">
-                            <!-- Options dynamically populated -->
-                        </select>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="tablet-select" class="block text-sm font-medium text-gray-700">Add Tablet:</label>
+                            <select id="tablet-select" class="mt-1 w-full p-2 border border-gray-300 rounded-md" onchange="updateCalculator()">
+                                <!-- Options dynamically populated -->
+                            </select>
+                        </div>
+                        <div>
+                            <label for="byot-lines" class="block text-sm font-medium text-gray-700">Bring Your Own Tablet:</label>
+                            <select id="byot-tablet-lines" class="mt-1 w-full p-2 border border-gray-300 rounded-md" onchange="updateCalculator()">
+                                <!-- Options dynamically populated -->
+                            </select>
+                        </div>
                     </div>
                     
                     <!-- Port-in and ID Validation Checkboxes -->
@@ -325,6 +333,16 @@
                             </label>
                         </div>
 
+                        <!-- BYOT Service Cost -->
+                        <div id="byot-service-container" class="hidden">
+                            <input type="checkbox" id="byot-service" data-amount="0" disabled>
+                            <label for="byot-service" class="checkbox-label">
+                                <span class="checkmark"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></span>
+                                <span id="byot-service-label" class="flex-grow">BYOT Service (1st Month)</span>
+                                <span id="byot-service-amount" class="font-bold text-gray-800">$0.00</span>
+                            </label>
+                        </div>
+
                         <!-- Access Fee Checkbox -->
                         <div id="access-fee-container">
                             <input type="checkbox" id="access" data-amount="25" onchange="updateCalculator()">
@@ -416,8 +434,8 @@
         // Data for different phone promotions based on the provided PDF
         const dealData = {
             'iphone-13': { name: 'Apple iPhone 13 128GB', retailPrice: 529.00, promoPrice: 0.00, portOnlyPrice: 0.00, veriffOnlyPrice: 99.99, promoMonths: 3 },
-            'iphone-14': { name: 'Apple iPhone 14 128GB', retailPrice: 629.00, promoPrice: 99.99, portOnlyPrice: 529.99, veriffOnlyPrice: 199.99, promoMonths: 3 },
-            'iphone-14-plus': { name: 'Apple iPhone 14 Plus 128GB', retailPrice: 729.00, promoPrice: 199.99, portOnlyPrice: 499.99, veriffOnlyPrice: 199.99, noHasslePrice: 499.99, promoMonths: 1 },
+            'iphone-14': { name: 'Apple iPhone 14 128GB', retailPrice: 629.00, promoPrice: 99.99, portOnlyPrice: 529.99, veriffOnlyPrice: 199.99, promoMonths: 3, requiredPlan: 40 },
+            'iphone-14-plus': { name: 'Apple iPhone 14 Plus 128GB', retailPrice: 729.00, promoPrice: 199.99, portOnlyPrice: 499.99, veriffOnlyPrice: 199.99, noHasslePrice: 499.99, promoMonths: 1, requiredPlan: 40 },
             'iphone-15': { name: 'Apple iPhone 15 128GB', retailPrice: 729.00, promoPrice: 479.99, portOnlyPrice: 679.99, veriffOnlyPrice: 479.99, promoMonths: 1 },
             'iphone-16e': { name: 'Apple iPhone 16e 128GB', retailPrice: 599.99, promoPrice: 299.99, portOnlyPrice: 599.99, veriffOnlyPrice: 399.99, noHasslePrice: 599.99, promoMonths: 2 },
             'samsung-a15': { name: 'Samsung Galaxy A15 5G', retailPrice: 79.99, promoPrice: 0.00, portOnlyPrice: 59.99, veriffOnlyPrice: 0.00, promoMonths: 1 },
@@ -427,8 +445,8 @@
             'samsung-a36': { name: 'Samsung Galaxy A36 (5G)', retailPrice: 279.99, promoPrice: 0.00, portOnlyPrice: 199.99, veriffOnlyPrice: 99.99, promoMonths: 1 },
             'samsung-s24fe': { name: 'Samsung Galaxy S24FE (5G)', retailPrice: 699.99, promoPrice: 199.99, portOnlyPrice: 699.99, veriffOnlyPrice: 299.99, promoMonths: 2 },
             'moto-g-5g-2025': { name: 'Motorola Moto G 5G 2025', retailPrice: 79.99, promoPrice: 0.00, portOnlyPrice: 0.00, veriffOnlyPrice: 0.00, noHasslePrice: 0.00, promoMonths: 1 },
-            'moto-g-stylus-5g-2024': { name: 'Moto G Stylus 5G 2024', retailPrice: 249.99, promoPrice: 0.00, portOnlyPrice: 49.99, veriffOnlyPrice: 24.99, promoMonths: 1 },
-            'moto-g-stylus-5g-2025': { name: 'Moto G Stylus 5G 2025', retailPrice: 199.00, promoPrice: 0.00, portOnlyPrice: 149.99, veriffOnlyPrice: 49.99, promoMonths: 1 },
+            'moto-g-stylus-5g-2024': { name: 'Moto G Stylus 5G 2024', retailPrice: 249.99, promoPrice: 0.00, portOnlyPrice: 49.99, veriffOnlyPrice: 24.99, promoMonths: 1, requiredPlan: 40 },
+            'moto-g-stylus-5g-2025': { name: 'Moto G Stylus 5G 2025', retailPrice: 199.00, promoPrice: 0.00, portOnlyPrice: 149.99, veriffOnlyPrice: 49.99, promoMonths: 1, requiredPlan: 40 },
             'moto-edge-2024': { name: 'Motorola Edge 2024', retailPrice: 259.99, promoPrice: 0.00, portOnlyPrice: 149.99, veriffOnlyPrice: 49.99, promoMonths: 1 },
             'moto-edge-2025': { name: 'Motorola Edge 2025', retailPrice: 259.99, promoPrice: 0.00, portOnlyPrice: 149.99, veriffOnlyPrice: 49.99, promoMonths: 1 },
             'moto-razr-2025': { name: 'Motorola Razr 2025', retailPrice: 599.99, promoPrice: 199.99, portOnlyPrice: 599.99, veriffOnlyPrice: 299.99, promoMonths: 2 },
@@ -519,6 +537,7 @@
             const dedicatedHotspot = dedicatedHotspotCheckbox.checked;
             const hotspotPlanCost = parseInt(document.getElementById('hotspot-plan-select').value);
             const selectedTabletKey = document.getElementById('tablet-select').value;
+            const byotTabletLines = parseInt(document.getElementById('byot-tablet-lines').value) || 0;
             const currentTablet = tabletData[selectedTabletKey];
             const taxRateInput = document.getElementById('tax-rate-input');
             const taxRate = parseFloat(taxRateInput.value) / 100 || 0;
@@ -538,6 +557,8 @@
             const rewardsContainer = document.getElementById('rewards-container');
             const rewardsCreditContainer = document.getElementById('rewards-credit-container');
             const rewardsCreditCheckbox = document.getElementById('rewards-credit');
+            const byotServiceContainer = document.getElementById('byot-service-container');
+            const byotServiceCheckbox = document.getElementById('byot-service');
 
             // --- UI Visibility Logic ---
             if (portIn) {
@@ -605,9 +626,9 @@
 
                     // Check for plan requirement before applying promo price
                     let meetsPlanRequirement = true;
-                    if (currentDeal.requiredPlan && basePlanPrice !== currentDeal.requiredPlan) {
+                    if (currentDeal.requiredPlan && basePlanPrice < currentDeal.requiredPlan) {
                         meetsPlanRequirement = false;
-                        promoMessages.push(`<b>${currentDeal.name}</b> promo requires the $${currentDeal.requiredPlan} plan.`);
+                        promoMessages.push(`<b>${currentDeal.name}</b> promo requires the $${currentDeal.requiredPlan} plan or higher.`);
                     }
 
                     if (meetsPlanRequirement) {
@@ -755,7 +776,7 @@
             // [NEW] Display promo messages
             if (promoMessages.length > 0) {
                 promoBox.style.display = 'block';
-                promoBoxText.innerHTML = promoMessages.join('<br><br>');
+                promoBoxText.innerHTML = [...new Set(promoMessages)].join('<br><br>'); // Use Set to remove duplicates
             } else {
                 promoBox.style.display = 'none';
             }
@@ -808,9 +829,18 @@
                 document.getElementById('tablet-service-container').style.display = 'none';
                 document.getElementById('tablet-service').checked = false;
             }
+            
+            // [NEW] BYOT Service
+            const byotServiceCost = byotTabletLines * 20;
+            byotServiceContainer.style.display = byotServiceCost > 0 ? 'block' : 'none';
+            byotServiceCheckbox.checked = byotServiceCost > 0;
+            byotServiceCheckbox.dataset.amount = byotServiceCost.toFixed(2);
+            document.getElementById('byot-service-label').textContent = `BYOT Service (${byotTabletLines} line${byotTabletLines !== 1 ? 's' : ''})`;
+            document.getElementById('byot-service-amount').textContent = `$${byotServiceCost.toFixed(2)}`;
+
 
             // --- Update Dropdowns ---
-            const totalDevicesInTransaction = byodLines + newDeviceLines + upgradeLines;
+            const totalDevicesInTransaction = byodLines + newDeviceLines + upgradeLines + byotTabletLines;
             ['protect-lines', 'ported-lines', 'accessory-bundles'].forEach(id => {
                 const select = document.getElementById(id);
                 const currentVal = parseInt(select.value) || 0;
@@ -850,11 +880,13 @@
             document.getElementById('access-label').textContent = `Access Fee (Mobile) (${totalLines} line${totalLines !== 1 ? 's' : ''})`;
             document.getElementById('access-amount').textContent = `$${accessFee.toFixed(2)}`;
             
-            const simCardFee = byodLines * 3;
-            simCardContainer.style.display = byodLines > 0 ? 'block' : 'none';
-            simCardCheckbox.checked = byodLines > 0;
+            // [NEW] Updated SIM Card logic
+            const simCardFee = (byodLines + byotTabletLines) * 3;
+            const totalSims = byodLines + byotTabletLines;
+            simCardContainer.style.display = totalSims > 0 ? 'block' : 'none';
+            simCardCheckbox.checked = totalSims > 0;
             simCardCheckbox.dataset.amount = simCardFee.toFixed(2);
-            simCardLabel.textContent = `Sim Card (${byodLines} line${byodLines !== 1 ? 's' : ''})`;
+            simCardLabel.textContent = `Sim Card (${totalSims} sim${totalSims !== 1 ? 's' : ''})`;
             simCardAmountSpan.textContent = `$${simCardFee.toFixed(2)}`;
 
             // --- [NEW] Handle Rewards Credit ---
@@ -913,6 +945,8 @@
             const dedicatedHotspot = document.getElementById('dedicated-hotspot').checked;
             const hotspotPlanCost = dedicatedHotspot ? parseInt(document.getElementById('hotspot-plan-select').value) : 0;
             const totalProtectCost = protectLinesCount * 5;
+            const byotTabletLines = parseInt(document.getElementById('byot-tablet-lines').value) || 0;
+            const byotMonthlyCost = byotTabletLines * 20;
 
             const prices = planBreakdownData[selectedPlan];
             
@@ -942,7 +976,7 @@
             prices.forEach((price, index) => {
                 const lineCount = index + 1;
                 // Add addons to the final price for each line count scenario
-                const finalPrice = price - discount + totalProtectCost + hotspotPlanCost;
+                const finalPrice = price - discount + totalProtectCost + hotspotPlanCost + byotMonthlyCost;
 
                 const div = document.createElement('div');
                 div.className = 'flex justify-between items-center text-gray-600';
@@ -959,7 +993,7 @@
                 priceContainer.appendChild(spanPrice);
                 
                 if (qualifiesForByodDiscount) {
-                    const originalPriceWithAddons = price + totalProtectCost + hotspotPlanCost;
+                    const originalPriceWithAddons = price + totalProtectCost + hotspotPlanCost + byotMonthlyCost;
                     const originalPriceSpan = document.createElement('span');
                     originalPriceSpan.className = 'text-xs text-gray-400 line-through ml-2';
                     originalPriceSpan.textContent = `$${originalPriceWithAddons.toFixed(2)}`;
@@ -972,7 +1006,7 @@
             });
 
             // Add a sub-breakdown for the addons
-            if (totalProtectCost > 0 || hotspotPlanCost > 0) {
+            if (totalProtectCost > 0 || hotspotPlanCost > 0 || byotMonthlyCost > 0) {
                 const addonsContainer = document.createElement('div');
                 addonsContainer.className = 'mt-4 pt-4 border-t border-dashed space-y-2';
 
@@ -981,6 +1015,13 @@
                     protectDiv.className = 'flex justify-between items-center text-sm text-gray-500';
                     protectDiv.innerHTML = `<span>Total Protect (${protectLinesCount} lines)</span><span class="font-medium">+$${totalProtectCost.toFixed(2)}</span>`;
                     addonsContainer.appendChild(protectDiv);
+                }
+                
+                if (byotMonthlyCost > 0) {
+                    const byotDiv = document.createElement('div');
+                    byotDiv.className = 'flex justify-between items-center text-sm text-gray-500';
+                    byotDiv.innerHTML = `<span>BYOT Service (${byotTabletLines} lines)</span><span class="font-medium">+$${byotMonthlyCost.toFixed(2)}</span>`;
+                    addonsContainer.appendChild(byotDiv);
                 }
 
                 if (hotspotPlanCost > 0) {
@@ -1100,6 +1141,7 @@
             document.getElementById('protect-lines').value = '0';
             document.getElementById('ported-lines').value = '0';
             document.getElementById('tablet-select').value = 'none';
+            document.getElementById('byot-tablet-lines').value = '0';
             document.getElementById('id-verified').checked = false;
             document.getElementById('port-in').checked = false;
             document.getElementById('home-internet').checked = false;
@@ -1126,6 +1168,7 @@
             const byodSelect = document.getElementById('byod-lines');
             const newDeviceSelect = document.getElementById('new-device-lines');
             const upgradeDeviceSelect = document.getElementById('upgrade-device-lines');
+            const byotTabletSelect = document.getElementById('byot-tablet-lines');
             const maxLines = 5;
 
             for (let i = 0; i <= maxLines; i++) { 
@@ -1143,11 +1186,17 @@
                 upgradeDeviceOption.value = i;
                 upgradeDeviceOption.textContent = i;
                 upgradeDeviceSelect.appendChild(upgradeDeviceOption);
+
+                const byotTabletOption = document.createElement('option');
+                byotTabletOption.value = i;
+                byotTabletOption.textContent = i;
+                byotTabletSelect.appendChild(byotTabletOption);
             }
 
             byodSelect.value = 0;
             newDeviceSelect.value = 0;
             upgradeDeviceSelect.value = 0;
+            byotTabletSelect.value = 0;
             updateLineDropdowns('new');
         }
 
