@@ -332,6 +332,16 @@
                                 <span id="tablet-service-amount" class="font-bold text-gray-800">$0.00</span>
                             </label>
                         </div>
+                        
+                        <!-- [NEW] Tablet Device Cost -->
+                        <div id="tablet-device-cost-container" class="hidden">
+                            <input type="checkbox" id="tablet-device-cost" data-amount="0" disabled>
+                            <label for="tablet-device-cost" class="checkbox-label">
+                                <span class="checkmark"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></span>
+                                <span id="tablet-device-cost-label" class="flex-grow">Tablet Device</span>
+                                <span id="tablet-device-cost-amount" class="font-bold text-gray-800">$0.00</span>
+                            </label>
+                        </div>
 
                         <!-- BYOT Service Cost -->
                         <div id="byot-service-container" class="hidden">
@@ -559,6 +569,8 @@
             const rewardsCreditCheckbox = document.getElementById('rewards-credit');
             const byotServiceContainer = document.getElementById('byot-service-container');
             const byotServiceCheckbox = document.getElementById('byot-service');
+            const tabletDeviceCostContainer = document.getElementById('tablet-device-cost-container'); 
+            const tabletDeviceCostCheckbox = document.getElementById('tablet-device-cost'); 
 
             // --- UI Visibility Logic ---
             if (portIn) {
@@ -819,15 +831,49 @@
             const finalHotspotPlanCost = dedicatedHotspot ? hotspotPlanCost : 0;
             
             if (selectedTabletKey !== 'none') {
+                const isTabletOnly = upgradeType === 'new-account' && totalLines === 0 && byotTabletLines === 0 && newDeviceLines === 0 && upgradeLines === 0;
+
+                let tabletServiceCost;
+                let tabletUpfrontMonths;
+                let tabletDeviceCost = 0;
+
+                if (isTabletOnly) {
+                    tabletServiceCost = 60;
+                    tabletUpfrontMonths = 1;
+                    tabletDeviceCost = currentTablet.msrp;
+                    promoMessages.push("<b>Notice:</b> Tablet-only accounts have a $60/mo service cost and do not qualify for device promotions.");
+                } else {
+                    tabletServiceCost = currentTablet.serviceCost;
+                    tabletUpfrontMonths = currentTablet.upfrontMonths;
+                    tabletDeviceCost = 0; // Device is free (promo) with a voice line
+                }
+
+                const upfrontServiceCost = tabletServiceCost * tabletUpfrontMonths;
+
+                // Update Tablet Service container
                 document.getElementById('tablet-service-container').style.display = 'block';
                 document.getElementById('tablet-service').checked = true;
-                const upfrontCost = currentTablet.serviceCost * currentTablet.upfrontMonths;
-                document.getElementById('tablet-service').dataset.amount = upfrontCost.toFixed(2);
-                document.getElementById('tablet-service-label').textContent = `${currentTablet.name} Service (${currentTablet.upfrontMonths} months)`;
-                document.getElementById('tablet-service-amount').textContent = `$${upfrontCost.toFixed(2)}`;
+                document.getElementById('tablet-service').dataset.amount = upfrontServiceCost.toFixed(2);
+                document.getElementById('tablet-service-label').textContent = `${currentTablet.name} Service (${tabletUpfrontMonths} month${tabletUpfrontMonths !== 1 ? 's' : ''})`;
+                document.getElementById('tablet-service-amount').textContent = `$${upfrontServiceCost.toFixed(2)}`;
+                
+                // Update Tablet Device Cost container
+                if (tabletDeviceCost > 0) {
+                    tabletDeviceCostContainer.style.display = 'block';
+                    tabletDeviceCostCheckbox.checked = true;
+                    tabletDeviceCostCheckbox.dataset.amount = tabletDeviceCost.toFixed(2);
+                    document.getElementById('tablet-device-cost-label').textContent = `${currentTablet.name} Device`;
+                    document.getElementById('tablet-device-cost-amount').textContent = `$${tabletDeviceCost.toFixed(2)}`;
+                } else {
+                    tabletDeviceCostContainer.style.display = 'none';
+                    tabletDeviceCostCheckbox.checked = false;
+                }
+
             } else {
                 document.getElementById('tablet-service-container').style.display = 'none';
                 document.getElementById('tablet-service').checked = false;
+                tabletDeviceCostContainer.style.display = 'none'; // Hide if no tablet
+                tabletDeviceCostCheckbox.checked = false; // Uncheck if no tablet
             }
             
             // [NEW] BYOT Service
