@@ -891,7 +891,7 @@
             const finalHotspotPlanCost = dedicatedHotspot ? hotspotPlanCost : 0;
             
             if (selectedTabletKey !== 'none') {
-                 const isTabletOnlyNewAccount = (upgradeType === 'new-account' || upgradeType === '') && totalLines === 0 && byotTabletLines === 0 && newDeviceLines === 0 && upgradeLines === 0;
+                const isTabletOnlyNewAccount = (upgradeType === 'new-account' || upgradeType === '') && totalLines === 0 && byotTabletLines === 0 && newDeviceLines === 0 && upgradeLines === 0;
                 let tabletServiceCost;
                 let tabletUpfrontMonths;
                 let tabletDeviceCost = 0;
@@ -913,7 +913,7 @@
 
                     tabletServiceCost = proratedFirstMonthCost + remainingMonthsCost;
                     tabletUpfrontMonths = 0; // It's a custom calculation now
-                    tabletDeviceCost = currentTablet.msrp; // No promo on AAL tablet
+                    tabletDeviceCost = 0; 
                     tabletServiceLabel = `${currentTablet.name} (Prorated + ${remainingFullMonths} mo)`;
                 }
                 else {
@@ -936,9 +936,7 @@
                     tabletDeviceCostCheckbox.dataset.amount = tabletDeviceCost.toFixed(2);
                     document.getElementById('tablet-device-cost-label').textContent = `${currentTablet.name} Device`;
                     document.getElementById('tablet-device-cost-amount').textContent = `$${tabletDeviceCost.toFixed(2)}`;
-                    totalRetailForTax += tabletDeviceCost;
                 } else {
-                    totalRetailForTax += currentTablet.msrp;
                     tabletDeviceCostContainer.style.display = 'none';
                     tabletDeviceCostCheckbox.checked = false;
                 }
@@ -1024,7 +1022,7 @@
             const homeRouterMsrp = 99.00;
             const taxableHomeRouterAmount = homeInternet ? homeRouterMsrp : 0;
             const taxableHotspotAmount = dedicatedHotspot ? 49.99 : 0;
-            const taxableTabletDeviceAmount = tabletDeviceCostCheckbox.checked ? currentTablet.msrp : 0;
+            const taxableTabletDeviceAmount = selectedTabletKey !== 'none' ? currentTablet.msrp : 0;
             const taxableAccessoryAmount = accessoryCost;
             const taxableAccessFee = (totalLines > 0 && document.getElementById('access').checked) ? accessFee : 0;
 
