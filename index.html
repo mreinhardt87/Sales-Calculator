@@ -615,7 +615,7 @@
             if (upgradeType === 'add-a-line') {
                 planSelectLabel.textContent = 'Select Current Plan:';
                 addALineControls.classList.remove('hidden');
-                if (parseInt(currentLinesSelect.value) > 0) {
+                if (parseInt(currentLinesSelect.value) > 0 || byotTabletLines > 0 || selectedTabletKey !== 'none') {
                     billingCycleContainer.classList.remove('hidden');
                 } else {
                     billingCycleContainer.classList.add('hidden');
@@ -712,8 +712,9 @@
             // --- Calculate Service Cost ---
             let finalServiceCost = 0;
             let serviceLabelText = 'First Month Mobile Service';
+            const isAddingALine = upgradeType === 'add-a-line';
 
-            if (upgradeType === 'add-a-line') {
+            if (isAddingALine) {
                 const daysIntoCycle = parseInt(billingCycleDaysInput.value) || 0;
                 const newLines = totalLines;
 
@@ -757,7 +758,7 @@
                 const autopayCharge = (basePlanPrice === 50 || basePlanPrice === 60) ? 5 : 0;
                 const serviceCostWithAutopay = baseServiceCost + autopayCharge;
                 let serviceDiscount = 0;
-                const canUseRedHotTicket = upgradeType !== 'add-a-line' && portedLines >= 1 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus && !hasMotoStylus;
+                const canUseRedHotTicket = portedLines >= 1 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus && !hasMotoStylus;
 
                 if (redHotTicket && canUseRedHotTicket) {
                     let portedServiceCost = 0;
@@ -774,7 +775,7 @@
                 serviceLabelText = `First Month Mobile Service (${totalLines} line${totalLines !== 1 ? 's' : ''})`;
             }
             
-            document.getElementById('service-container').style.display = (totalLines > 0 || upgradeType === 'add-a-line') ? 'block' : 'none';
+            document.getElementById('service-container').style.display = (totalLines > 0 && !isAddingALine) || (isAddingALine && finalServiceCost > 0) ? 'block' : 'none';
             document.getElementById('service').checked = finalServiceCost > 0;
             document.getElementById('service').dataset.amount = finalServiceCost.toFixed(2);
             document.getElementById('service-label').textContent = serviceLabelText;
@@ -890,42 +891,54 @@
             const finalHotspotPlanCost = dedicatedHotspot ? hotspotPlanCost : 0;
             
             if (selectedTabletKey !== 'none') {
-                const isTabletOnly = (upgradeType === 'new-account' || upgradeType === '') && totalLines === 0 && byotTabletLines === 0 && newDeviceLines === 0 && upgradeLines === 0;
-
+                 const isTabletOnlyNewAccount = (upgradeType === 'new-account' || upgradeType === '') && totalLines === 0 && byotTabletLines === 0 && newDeviceLines === 0 && upgradeLines === 0;
                 let tabletServiceCost;
                 let tabletUpfrontMonths;
                 let tabletDeviceCost = 0;
+                let tabletServiceLabel = `${currentTablet.name} Service`;
 
-                if (isTabletOnly) {
+                if (isTabletOnlyNewAccount) {
                     tabletServiceCost = 60;
                     tabletUpfrontMonths = 1;
                     tabletDeviceCost = currentTablet.msrp;
                     if (!promoMessages.some(m => m.includes("Tablet-only"))) {
                         promoMessages.push("<b>Notice:</b> Tablet-only accounts have a $60/mo service cost and do not qualify for device promotions.");
                     }
-                } else {
+                } else if (isAddingALine) {
+                    const daysIntoCycle = parseInt(billingCycleDaysInput.value) || 0;
+                    const remainingDays = 30 - daysIntoCycle;
+                    const proratedFirstMonthCost = (currentTablet.serviceCost / 30) * remainingDays;
+                    const remainingFullMonths = currentTablet.upfrontMonths - 1;
+                    const remainingMonthsCost = remainingFullMonths > 0 ? currentTablet.serviceCost * remainingFullMonths : 0;
+
+                    tabletServiceCost = proratedFirstMonthCost + remainingMonthsCost;
+                    tabletUpfrontMonths = 0; // It's a custom calculation now
+                    tabletDeviceCost = currentTablet.msrp; // No promo on AAL tablet
+                    tabletServiceLabel = `${currentTablet.name} (Prorated + ${remainingFullMonths} mo)`;
+                }
+                else {
                     tabletServiceCost = currentTablet.serviceCost;
                     tabletUpfrontMonths = currentTablet.upfrontMonths;
                     tabletDeviceCost = 0; // Device is free (promo) with a voice line
                 }
 
-                const upfrontServiceCost = tabletServiceCost * tabletUpfrontMonths;
-
-                // Update Tablet Service container
+                const upfrontServiceCost = tabletUpfrontMonths > 0 ? tabletServiceCost * tabletUpfrontMonths : tabletServiceCost;
+                
                 document.getElementById('tablet-service-container').style.display = 'block';
                 document.getElementById('tablet-service').checked = true;
                 document.getElementById('tablet-service').dataset.amount = upfrontServiceCost.toFixed(2);
-                document.getElementById('tablet-service-label').textContent = `${currentTablet.name} Service (${tabletUpfrontMonths} month${tabletUpfrontMonths !== 1 ? 's' : ''})`;
+                document.getElementById('tablet-service-label').textContent = tabletUpfrontMonths > 0 ? `${currentTablet.name} Service (${tabletUpfrontMonths} month${tabletUpfrontMonths !== 1 ? 's' : ''})` : tabletServiceLabel;
                 document.getElementById('tablet-service-amount').textContent = `$${upfrontServiceCost.toFixed(2)}`;
                 
-                // Update Tablet Device Cost container
                 if (tabletDeviceCost > 0) {
                     tabletDeviceCostContainer.style.display = 'block';
                     tabletDeviceCostCheckbox.checked = true;
                     tabletDeviceCostCheckbox.dataset.amount = tabletDeviceCost.toFixed(2);
                     document.getElementById('tablet-device-cost-label').textContent = `${currentTablet.name} Device`;
                     document.getElementById('tablet-device-cost-amount').textContent = `$${tabletDeviceCost.toFixed(2)}`;
+                    totalRetailForTax += tabletDeviceCost;
                 } else {
+                    totalRetailForTax += currentTablet.msrp;
                     tabletDeviceCostContainer.style.display = 'none';
                     tabletDeviceCostCheckbox.checked = false;
                 }
@@ -1011,11 +1024,11 @@
             const homeRouterMsrp = 99.00;
             const taxableHomeRouterAmount = homeInternet ? homeRouterMsrp : 0;
             const taxableHotspotAmount = dedicatedHotspot ? 49.99 : 0;
-            const taxableTabletAmount = tabletDeviceCostCheckbox.checked ? currentTablet.msrp : 0;
+            const taxableTabletDeviceAmount = tabletDeviceCostCheckbox.checked ? currentTablet.msrp : 0;
             const taxableAccessoryAmount = accessoryCost;
             const taxableAccessFee = (totalLines > 0 && document.getElementById('access').checked) ? accessFee : 0;
 
-            const totalTaxableDeviceAmount = totalRetailForTax + taxableHomeRouterAmount + taxableTabletAmount + taxableAccessoryAmount + taxableHotspotAmount;
+            const totalTaxableDeviceAmount = totalRetailForTax + taxableHomeRouterAmount + taxableTabletDeviceAmount + taxableAccessoryAmount + taxableHotspotAmount;
             const totalTax = (totalTaxableDeviceAmount * taxRate) + (taxableAccessFee * taxRate);
             
             document.getElementById('sales-tax').dataset.amount = totalTax.toFixed(2);
