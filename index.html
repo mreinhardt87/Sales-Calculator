@@ -572,6 +572,7 @@
             const portedLines = parseInt(document.getElementById('ported-lines').value) || 0;
             const redHotTicket = document.getElementById('red-hot-ticket').checked;
             const accessoryBundles = parseInt(document.getElementById('accessory-bundles').value) || 0;
+            const currentLines = parseInt(document.getElementById('current-lines-select').value) || 0;
 
             // --- Get all DOM elements ---
             const simCardContainer = document.getElementById('sim-card-container');
@@ -655,7 +656,6 @@
             const hasIphone13 = selectedDeviceKeys.includes('iphone-13');
             const hasIphone14 = selectedDeviceKeys.includes('iphone-14');
             const hasIphone14Plus = selectedDeviceKeys.includes('iphone-14-plus');
-            // [NEW] Moto Stylus Check
             const hasMotoStylus = selectedDeviceKeys.some(key => key.includes('moto-g-stylus'));
 
             const isUpgradeOnly = upgradeType === 'upgrade-only' || upgradeType === 'upgrade-with-rewards';
@@ -674,7 +674,6 @@
                     const currentDeal = dealData[selectedKey];
                     totalRetailForTax += currentDeal.retailPrice;
 
-                    // Check for plan requirement before applying promo price
                     let meetsPlanRequirement = true;
                     if (currentDeal.requiredPlan && basePlanPrice < currentDeal.requiredPlan) {
                         meetsPlanRequirement = false;
@@ -692,13 +691,11 @@
                             totalDeviceCost += currentDeal.noHasslePrice !== undefined ? currentDeal.noHasslePrice : currentDeal.retailPrice;
                         }
                     } else {
-                        // If plan requirement is not met, charge the noHasslePrice or retail
                         totalDeviceCost += currentDeal.noHasslePrice !== undefined ? currentDeal.noHasslePrice : currentDeal.retailPrice;
                     }
                 });
             }
 
-            // Calculate cost for upgrade devices (SRP)
             upgradeDeviceKeys.forEach(selectedKey => {
                 const currentDeal = dealData[selectedKey];
                 totalRetailForTax += currentDeal.retailPrice;
@@ -717,7 +714,6 @@
             let serviceLabelText = 'First Month Mobile Service';
 
             if (upgradeType === 'add-a-line') {
-                const currentLines = parseInt(currentLinesSelect.value) || 0;
                 const daysIntoCycle = parseInt(billingCycleDaysInput.value) || 0;
                 const newLines = totalLines;
 
@@ -732,7 +728,6 @@
                         serviceLabelText = `Prorated Service Cost (${30 - daysIntoCycle} days)`;
                     }
                 }
-                 document.getElementById('red-hot-ticket-container').style.display = 'none'; // No RHT for AAL
             } else {
                 let baseServiceCost = 0;
                 const getLineCost = (lineNumber, planPrice) => {
@@ -761,28 +756,9 @@
                 
                 const autopayCharge = (basePlanPrice === 50 || basePlanPrice === 60) ? 5 : 0;
                 const serviceCostWithAutopay = baseServiceCost + autopayCharge;
-                
-                // Red Hot Ticket Logic
-                const canUseRedHotTicket = portedLines >= 1 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus && !hasMotoStylus;
-                const qualifiesForByodDiscount = portIn && byodLines > 0;
-
-                if (canUseRedHotTicket && qualifiesForByodDiscount) {
-                    promoMessages.push("Congratulations! You qualify for 50% off the first BYOD line and the Red Hot Ticket.");
-                }
-
-                if (canUseRedHotTicket) {
-                    redHotTicketContainer.style.display = 'block';
-                    redHotTicketCheckbox.disabled = false;
-                    if (!qualifiesForByodDiscount){ // Avoid duplicate message
-                        promoMessages.push("Congratulations! You qualify for the Red Hot Ticket!");
-                    }
-                } else {
-                    redHotTicketContainer.style.display = 'none';
-                    redHotTicketCheckbox.checked = false;
-                    redHotTicketCheckbox.disabled = true;
-                }
-
                 let serviceDiscount = 0;
+                const canUseRedHotTicket = upgradeType !== 'add-a-line' && portedLines >= 1 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus && !hasMotoStylus;
+
                 if (redHotTicket && canUseRedHotTicket) {
                     let portedServiceCost = 0;
                     const portedLineCosts = [];
@@ -811,23 +787,28 @@
             let promoMonthsRequired = false;
             let promoMonthsCount = 0;
 
-            const isStandaloneIphone13 = totalLines === 1 && selectedDeviceKeys.includes('iphone-13');
-            const isStandaloneIphone14 = totalLines === 1 && hasIphone14;
-            const isStandaloneRazr = totalLines === 1 && selectedDeviceKeys.includes('moto-razr-2025');
-            const isRazrRequiredPlan = basePlanPrice === 50 || basePlanPrice === 60;
-
-            if (basePlanPrice > 0 && (isStandaloneIphone13 || isStandaloneIphone14)) {
-                promoMonthsRequired = true;
-                promoMonthsCount = 2; // 2nd and 3rd month
-                promoMonthsCost = basePlanPrice * promoMonthsCount;
-                promoMessages.push(`This promo requires paying for ${promoMonthsCount + 1} months of service upfront for a single line.`);
-            } else if (basePlanPrice > 0 && isStandaloneRazr && isRazrRequiredPlan) {
-                promoMonthsRequired = true;
-                promoMonthsCount = 1; // 2nd month
-                promoMonthsCost = basePlanPrice * promoMonthsCount;
-                promoMessages.push(`The Motorola Razr requires paying for ${promoMonthsCount + 1} months of service upfront on this plan.`);
-            } else if (totalLines > 1 && (selectedDeviceKeys.includes('iphone-13') || hasIphone14 || selectedDeviceKeys.includes('moto-razr-2025'))) {
-                promoMessages.push(`The upfront promotional month payment is waived for 2 or more lines.`);
+            const hasPromoDevice = selectedDeviceKeys.includes('iphone-13') || hasIphone14 || hasIphone14Plus || selectedDeviceKeys.includes('moto-razr-2025');
+            const isRazr = selectedDeviceKeys.includes('moto-razr-2025');
+            const isIphone = selectedDeviceKeys.includes('iphone-13') || hasIphone14 || hasIphone14Plus;
+            const isNewSingleLineAccount = upgradeType === 'new-account' && totalLines === 1;
+            const hasExistingLines = (upgradeType === 'add-a-line' || upgradeType === 'upgrade-add-line') && currentLines >= 1;
+            
+            if (basePlanPrice > 0 && isNewSingleLineAccount && hasPromoDevice) {
+                if(isIphone){
+                    promoMonthsRequired = true;
+                    promoMonthsCount = 2; // 2nd and 3rd month
+                    promoMonthsCost = basePlanPrice * promoMonthsCount;
+                    promoMessages.push(`This promo requires paying for ${promoMonthsCount + 1} months of service upfront for a single line.`);
+                } else if (isRazr && (basePlanPrice === 50 || basePlanPrice === 60)) {
+                    promoMonthsRequired = true;
+                    promoMonthsCount = 1; // 2nd month
+                    promoMonthsCost = basePlanPrice * promoMonthsCount;
+                    promoMessages.push(`The Motorola Razr requires paying for ${promoMonthsCount + 1} months of service upfront on this plan.`);
+                }
+            } else if (hasPromoDevice && (totalLines > 1 || hasExistingLines)) {
+                 if (!promoMessages.some(m => m.includes("waived"))) {
+                    promoMessages.push(`The upfront promotional month payment is waived for multi-line or existing accounts.`);
+                 }
             }
 
             promoMonthsContainer.style.display = promoMonthsRequired ? 'block' : 'none';
@@ -836,8 +817,31 @@
             promoMonthsCheckbox.dataset.amount = promoMonthsCost.toFixed(2);
             document.getElementById('promo-months-label').textContent = `Promotional Months (Month 2${promoMonthsCount > 1 ? ' & 3' : ''})`;
             document.getElementById('promo-months-amount').textContent = `$${promoMonthsCost.toFixed(2)}`;
+            
+            // --- Handle Red Hot Ticket & Promo Box ---
+            const redHotTicketContainer = document.getElementById('red-hot-ticket-container');
+            const redHotTicketCheckbox = document.getElementById('red-hot-ticket');
+            
+            const canUseRedHotTicket = upgradeType !== 'add-a-line' && portedLines >= 1 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus && !hasMotoStylus;
+            const qualifiesForByodDiscount = portIn && byodLines > 0;
 
-            if (portIn && byodLines > 0 && upgradeType !== 'add-a-line') {
+            if (canUseRedHotTicket) {
+                redHotTicketContainer.style.display = 'block';
+                redHotTicketCheckbox.disabled = false;
+                let rhtMessage = "Congratulations! You qualify for the Red Hot Ticket!";
+                if (qualifiesForByodDiscount) {
+                    rhtMessage = "Congratulations! You qualify for 50% off the first BYOD line and the Red Hot Ticket.";
+                }
+                if (!promoMessages.some(m => m.includes("Red Hot Ticket"))) {
+                     promoMessages.push(rhtMessage);
+                }
+            } else {
+                redHotTicketContainer.style.display = 'none';
+                redHotTicketCheckbox.checked = false;
+                redHotTicketCheckbox.disabled = true;
+            }
+
+            if (qualifiesForByodDiscount && !canUseRedHotTicket) {
                 if (!promoMessages.some(m => m.includes("50% off"))) { // Avoid duplicate message
                     promoMessages.push("50% off first BYOD line for Port-in.");
                 }
@@ -861,7 +865,7 @@
                 homeInternetCheckbox.dataset.amount = '49.99';
                 internetAmount.textContent = '$49.99';
 
-                if (totalLines > 0 || upgradeLines > 0) {
+                if (totalLines > 0 || upgradeLines > 0 || currentLines > 0) {
                     internetLabel.textContent = 'Home Internet Promo (Router + 3mo Service)';
                     routerCostContainer.style.display = 'none';
                     routerCostCheckbox.checked = false;
@@ -886,7 +890,7 @@
             const finalHotspotPlanCost = dedicatedHotspot ? hotspotPlanCost : 0;
             
             if (selectedTabletKey !== 'none') {
-                const isTabletOnly = upgradeType === 'new-account' && totalLines === 0 && byotTabletLines === 0 && newDeviceLines === 0 && upgradeLines === 0;
+                const isTabletOnly = (upgradeType === 'new-account' || upgradeType === '') && totalLines === 0 && byotTabletLines === 0 && newDeviceLines === 0 && upgradeLines === 0;
 
                 let tabletServiceCost;
                 let tabletUpfrontMonths;
