@@ -237,11 +237,19 @@
                                 <span>External Port-in</span>
                             </label>
                         </div>
-                        <div id="ported-lines-container" class="hidden ml-8">
-                            <label for="ported-lines" class="block text-sm font-medium text-gray-700">Number of Ported Lines:</label>
-                            <select id="ported-lines" class="mt-1 w-full p-2 border border-gray-300 rounded-md" onchange="updateCalculator()">
-                                <!-- Options dynamically populated -->
-                            </select>
+                        <div id="ported-lines-container" class="hidden ml-8 space-y-2">
+                            <div>
+                                <label for="ported-lines" class="block text-sm font-medium text-gray-700">Total Ported Lines:</label>
+                                <select id="ported-lines" class="mt-1 w-full p-2 border border-gray-300 rounded-md" onchange="updateCalculator()">
+                                    <!-- Options dynamically populated -->
+                                </select>
+                            </div>
+                             <div id="byod-ports-container" class="hidden">
+                                <label for="byod-ports-select" class="block text-sm font-medium text-gray-700">Number of BYOD Ports:</label>
+                                <select id="byod-ports-select" class="mt-1 w-full p-2 border border-gray-300 rounded-md" onchange="updateCalculator()">
+                                    <!-- Options dynamically populated -->
+                                </select>
+                            </div>
                         </div>
                     </div>
 
@@ -570,6 +578,7 @@
             const taxRateInput = document.getElementById('tax-rate-input');
             const taxRate = parseFloat(taxRateInput.value) / 100 || 0;
             const portedLines = parseInt(document.getElementById('ported-lines').value) || 0;
+            const byodPorts = parseInt(document.getElementById('byod-ports-select').value) || 0;
             const redHotTicket = document.getElementById('red-hot-ticket').checked;
             const accessoryBundles = parseInt(document.getElementById('accessory-bundles').value) || 0;
             const currentLines = parseInt(document.getElementById('current-lines-select').value) || 0;
@@ -583,6 +592,7 @@
             const promoBox = document.getElementById('promo-box');
             const promoBoxText = document.getElementById('promo-box-text');
             const portedLinesContainer = document.getElementById('ported-lines-container');
+            const byodPortsContainer = document.getElementById('byod-ports-container');
             const rewardsContainer = document.getElementById('rewards-container');
             const rewardsCreditContainer = document.getElementById('rewards-credit-container');
             const rewardsCreditCheckbox = document.getElementById('rewards-credit');
@@ -600,9 +610,16 @@
             // --- UI Visibility Logic ---
             if (portIn) {
                 portedLinesContainer.classList.remove('hidden');
+                if(byodLines > 0 && newDeviceLines > 0) {
+                    byodPortsContainer.classList.remove('hidden');
+                } else {
+                    byodPortsContainer.classList.add('hidden');
+                }
             } else {
                 portedLinesContainer.classList.add('hidden');
+                byodPortsContainer.classList.add('hidden');
                 document.getElementById('ported-lines').value = '0';
+                document.getElementById('byod-ports-select').value = '0';
             }
 
             if (upgradeType === 'upgrade-with-rewards') {
@@ -661,6 +678,7 @@
             const isUpgradeOnly = upgradeType === 'upgrade-only' || upgradeType === 'upgrade-with-rewards';
 
             // Calculate cost for new devices (promotional)
+            let newDevicePortsAvailable = portedLines - byodPorts;
             const motoGStylus2024Count = newDeviceKeys.filter(k => k === 'moto-g-stylus-5g-2024').length;
             const isMotoGStylusPromoActive = motoGStylus2024Count > 0 && motoGStylus2024Count === newDeviceLines && newDeviceLines <= 4 && idVerified && portedLines >= 1;
 
@@ -681,10 +699,12 @@
                     }
 
                     if (meetsPlanRequirement) {
-                        if (idVerified && portIn) {
+                        if (idVerified && newDevicePortsAvailable > 0) {
                             totalDeviceCost += currentDeal.promoPrice;
-                        } else if (portIn) {
-                            totalDeviceCost += currentDeal.portOnlyPrice;
+                            newDevicePortsAvailable--;
+                        } else if (newDevicePortsAvailable > 0) {
+                             totalDeviceCost += currentDeal.portOnlyPrice;
+                            newDevicePortsAvailable--;
                         } else if (idVerified) {
                             totalDeviceCost += currentDeal.veriffOnlyPrice;
                         } else {
@@ -745,28 +765,57 @@
                 };
 
                 if (totalLines > 0 && basePlanPrice > 0) {
-                    const lineCosts = [];
+                    let lineCosts = [];
+                    let byodLineCounter = byodLines;
+                    
                     for (let i = 1; i <= totalLines; i++) {
-                        lineCosts.push(getLineCost(i, basePlanPrice));
+                        lineCosts.push({ cost: getLineCost(i, basePlanPrice), type: byodLineCounter-- > 0 ? 'byod' : 'new' });
                     }
-                    if (portIn && byodLines > 0) {
-                        lineCosts[0] *= 0.5;
+                    
+                    let byodPortsToApply = byodPorts;
+                    if (portIn && byodPortsToApply > 0) {
+                         for (let i = 0; i < lineCosts.length; i++) {
+                            if (lineCosts[i].type === 'byod' && byodPortsToApply > 0) {
+                                lineCosts[i].cost *= 0.5;
+                                byodPortsToApply--;
+                            }
+                        }
                     }
-                    baseServiceCost = lineCosts.reduce((a, b) => a + b, 0);
+
+                    baseServiceCost = lineCosts.reduce((acc, line) => acc + line.cost, 0);
                 }
                 
                 const autopayCharge = (basePlanPrice === 50 || basePlanPrice === 60) ? 5 : 0;
                 const serviceCostWithAutopay = baseServiceCost + autopayCharge;
                 let serviceDiscount = 0;
-                const canUseRedHotTicket = portedLines >= 1 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus && !hasMotoStylus;
+                const canUseRedHotTicket = portedLines > 0 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus && !hasMotoStylus;
 
                 if (redHotTicket && canUseRedHotTicket) {
                     let portedServiceCost = 0;
                     const portedLineCosts = [];
-                    for (let i = 1; i <= portedLines; i++) {
-                        portedLineCosts.push(getLineCost(i, basePlanPrice));
+                    let tempByodPorts = byodPorts;
+                    let tempNewDevicePorts = portedLines - byodPorts;
+                    
+                    let lineCounterForRHT = 1;
+                    if(byodLines > 0 && tempByodPorts > 0) {
+                        for(let i = 0; i<byodLines; i++) {
+                             if(tempByodPorts > 0) {
+                                portedLineCosts.push(getLineCost(lineCounterForRHT, basePlanPrice) * 0.5);
+                                tempByodPorts--;
+                                lineCounterForRHT++;
+                             }
+                        }
                     }
-                    if (portIn && byodLines > 0 && portedLines > 0) portedLineCosts[0] *= 0.5;
+                     if(newDeviceLines > 0 && tempNewDevicePorts > 0) {
+                        for(let i = 0; i<newDeviceLines; i++) {
+                             if(tempNewDevicePorts > 0) {
+                                portedLineCosts.push(getLineCost(lineCounterForRHT, basePlanPrice));
+                                tempNewDevicePorts--;
+                                lineCounterForRHT++;
+                             }
+                        }
+                    }
+
                     portedServiceCost = portedLineCosts.reduce((a, b) => a + b, 0);
                     serviceDiscount = Math.min(portedServiceCost, 120);
                 }
@@ -823,8 +872,8 @@
             const redHotTicketContainer = document.getElementById('red-hot-ticket-container');
             const redHotTicketCheckbox = document.getElementById('red-hot-ticket');
             
-            const canUseRedHotTicket = upgradeType !== 'add-a-line' && portedLines >= 1 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus && !hasMotoStylus;
-            const qualifiesForByodDiscount = portIn && byodLines > 0;
+            const canUseRedHotTicket = upgradeType !== 'add-a-line' && portedLines > 0 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus && !hasMotoStylus;
+            const qualifiesForByodDiscount = portIn && byodPorts > 0;
 
             if (canUseRedHotTicket) {
                 redHotTicketContainer.style.display = 'block';
@@ -970,6 +1019,18 @@
                 }
                 select.value = Math.min(currentVal, totalDevicesInTransaction);
             });
+             const byodPortsSelect = document.getElementById('byod-ports-select');
+             const maxByodPorts = Math.min(byodLines, portedLines);
+             const currentByodPortsVal = parseInt(byodPortsSelect.value) || 0;
+             byodPortsSelect.innerHTML = '';
+             for (let i = 0; i <= maxByodPorts; i++) {
+                 const option = document.createElement('option');
+                 option.value = i;
+                 option.textContent = i;
+                 byodPortsSelect.appendChild(option);
+             }
+             byodPortsSelect.value = Math.min(currentByodPortsVal, maxByodPorts);
+
 
             // --- Update Fees & Protect ---
             const protectLinesCount = parseInt(document.getElementById('protect-lines').value) || 0;
