@@ -676,6 +676,7 @@
             const hasMotoStylus = selectedDeviceKeys.some(key => key.includes('moto-g-stylus'));
 
             const isUpgradeOnly = upgradeType === 'upgrade-only' || upgradeType === 'upgrade-with-rewards';
+            const isAddingALine = upgradeType === 'add-a-line';
 
             // Calculate cost for new devices (promotional)
             let newDevicePortsAvailable = portedLines - byodPorts;
@@ -732,7 +733,6 @@
             // --- Calculate Service Cost ---
             let finalServiceCost = 0;
             let serviceLabelText = 'First Month Mobile Service';
-            const isAddingALine = upgradeType === 'add-a-line';
 
             if (isAddingALine) {
                 const daysIntoCycle = parseInt(billingCycleDaysInput.value) || 0;
@@ -765,24 +765,15 @@
                 };
 
                 if (totalLines > 0 && basePlanPrice > 0) {
-                    let lineCosts = [];
-                    let byodLineCounter = byodLines;
+                    const planPrices = planBreakdownData[basePlanPrice.toString()];
+                    baseServiceCost = planPrices[totalLines - 1] || 0;
                     
-                    for (let i = 1; i <= totalLines; i++) {
-                        lineCosts.push({ cost: getLineCost(i, basePlanPrice), type: byodLineCounter-- > 0 ? 'byod' : 'new' });
+                    if (portIn && byodPorts > 0) {
+                        const singleLineCost = planPrices[0];
+                        const discountPerByodPort = singleLineCost * 0.5;
+                        const totalDiscount = discountPerByodPort * byodPorts;
+                        baseServiceCost -= totalDiscount;
                     }
-                    
-                    let byodPortsToApply = byodPorts;
-                    if (portIn && byodPortsToApply > 0) {
-                         for (let i = 0; i < lineCosts.length; i++) {
-                            if (lineCosts[i].type === 'byod' && byodPortsToApply > 0) {
-                                lineCosts[i].cost *= 0.5;
-                                byodPortsToApply--;
-                            }
-                        }
-                    }
-
-                    baseServiceCost = lineCosts.reduce((acc, line) => acc + line.cost, 0);
                 }
                 
                 const autopayCharge = (basePlanPrice === 50 || basePlanPrice === 60) ? 5 : 0;
@@ -791,33 +782,15 @@
                 const canUseRedHotTicket = portedLines > 0 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus && !hasMotoStylus;
 
                 if (redHotTicket && canUseRedHotTicket) {
-                    let portedServiceCost = 0;
-                    const portedLineCosts = [];
-                    let tempByodPorts = byodPorts;
-                    let tempNewDevicePorts = portedLines - byodPorts;
-                    
-                    let lineCounterForRHT = 1;
-                    if(byodLines > 0 && tempByodPorts > 0) {
-                        for(let i = 0; i<byodLines; i++) {
-                             if(tempByodPorts > 0) {
-                                portedLineCosts.push(getLineCost(lineCounterForRHT, basePlanPrice) * 0.5);
-                                tempByodPorts--;
-                                lineCounterForRHT++;
-                             }
-                        }
-                    }
-                     if(newDeviceLines > 0 && tempNewDevicePorts > 0) {
-                        for(let i = 0; i<newDeviceLines; i++) {
-                             if(tempNewDevicePorts > 0) {
-                                portedLineCosts.push(getLineCost(lineCounterForRHT, basePlanPrice));
-                                tempNewDevicePorts--;
-                                lineCounterForRHT++;
-                             }
-                        }
-                    }
-
-                    portedServiceCost = portedLineCosts.reduce((a, b) => a + b, 0);
-                    serviceDiscount = Math.min(portedServiceCost, 120);
+                   const planPrices = planBreakdownData[basePlanPrice.toString()];
+                   if(planPrices && portedLines > 0) {
+                        let costOfPortedLines = planPrices[portedLines - 1];
+                        const singleLineCost = planPrices[0];
+                        const byodPortsAmongTotalPorts = Math.min(byodPorts, portedLines);
+                        const byodDiscountOnPortedLines = byodPortsAmongTotalPorts * (singleLineCost * 0.5);
+                        costOfPortedLines -= byodDiscountOnPortedLines;
+                        serviceDiscount = Math.min(costOfPortedLines, 120);
+                   }
                 }
                 
                 finalServiceCost = serviceCostWithAutopay - serviceDiscount;
