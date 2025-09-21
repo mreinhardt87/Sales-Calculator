@@ -405,7 +405,7 @@
                             <label for="rewards-credit" class="checkbox-label border-green-500 bg-green-50">
                                 <span class="checkmark"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></span>
                                 <span id="rewards-credit-label" class="flex-grow text-green-700 font-medium">Rewards Credit</span>
-                                <span id="rewards-credit-amount" class="font-bold text-gray-800">-$0.00</span>
+                                <span id="rewards-credit-amount" class="font-bold text-green-700">-$0.00</span>
                             </label>
                         </div>
 
@@ -847,7 +847,7 @@
             const redHotTicketContainer = document.getElementById('red-hot-ticket-container');
             const redHotTicketCheckbox = document.getElementById('red-hot-ticket');
             
-            const canUseRedHotTicket = !isAddingALine && portedLines > 0 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus && !hasMotoStylus;
+            const canUseRedHotTicket = upgradeType !== 'add-a-line' && portedLines > 0 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus && !hasMotoStylus;
             const qualifiesForByodDiscount = portIn && byodPorts > 0;
 
             if (canUseRedHotTicket) {
@@ -1063,7 +1063,7 @@
             const taxableAccessoryAmount = accessoryCost;
             const taxableAccessFee = (totalLines > 0 && document.getElementById('access').checked) ? accessFee : 0;
 
-            const totalTaxableDeviceAmount = totalRetailForTax + taxableHomeRouterAmount + taxableTabletDeviceAmount + taxableAccessoryAmount + taxableHotspotAmount;
+            const totalTaxableDeviceAmount = totalRetailForTax + taxableHomeRouterAmount + taxableAccessoryAmount + taxableHotspotAmount;
             const totalTax = (totalTaxableDeviceAmount * taxRate) + (taxableAccessFee * taxRate);
             
             document.getElementById('sales-tax').dataset.amount = totalTax.toFixed(2);
@@ -1361,5 +1361,4 @@
 
 </body>
 </html>
-
 
