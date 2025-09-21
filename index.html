@@ -405,7 +405,7 @@
                             <label for="rewards-credit" class="checkbox-label border-green-500 bg-green-50">
                                 <span class="checkmark"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></span>
                                 <span id="rewards-credit-label" class="flex-grow text-green-700 font-medium">Rewards Credit</span>
-                                <span id="rewards-credit-amount" class="font-bold text-green-700">-$0.00</span>
+                                <span id="rewards-credit-amount" class="font-bold text-gray-800">-$0.00</span>
                             </label>
                         </div>
 
@@ -470,6 +470,7 @@
         // Data for different phone promotions based on the provided PDF
         const dealData = {
             'iphone-13': { name: 'Apple iPhone 13 128GB', retailPrice: 529.00, promoPrice: 0.00, portOnlyPrice: 0.00, veriffOnlyPrice: 99.99, promoMonths: 3 },
+            'iphone-13-cpo': { name: 'Apple iPhone 13 CPO 128GB', retailPrice: 349.99, promoPrice: 0.00, portOnlyPrice: 0.00, veriffOnlyPrice: 99.99, promoMonths: 2 },
             'iphone-14': { name: 'Apple iPhone 14 128GB', retailPrice: 629.00, promoPrice: 99.99, portOnlyPrice: 529.99, veriffOnlyPrice: 199.99, promoMonths: 3, requiredPlan: 40 },
             'iphone-14-plus': { name: 'Apple iPhone 14 Plus 128GB', retailPrice: 729.00, promoPrice: 199.99, portOnlyPrice: 499.99, veriffOnlyPrice: 199.99, noHasslePrice: 499.99, promoMonths: 1, requiredPlan: 40 },
             'iphone-15': { name: 'Apple iPhone 15 128GB', retailPrice: 729.00, promoPrice: 479.99, portOnlyPrice: 679.99, veriffOnlyPrice: 479.99, promoMonths: 1 },
@@ -670,7 +671,7 @@
             }
             
             const selectedDeviceKeys = [...newDeviceKeys, ...upgradeDeviceKeys];
-            const hasIphone13 = selectedDeviceKeys.includes('iphone-13');
+            const hasIphone13 = selectedDeviceKeys.includes('iphone-13') || selectedDeviceKeys.includes('iphone-13-cpo');
             const hasIphone14 = selectedDeviceKeys.includes('iphone-14');
             const hasIphone14Plus = selectedDeviceKeys.includes('iphone-14-plus');
             const hasMotoStylus = selectedDeviceKeys.some(key => key.includes('moto-g-stylus'));
@@ -810,25 +811,26 @@
             let promoMonthsRequired = false;
             let promoMonthsCount = 0;
 
-            const hasPromoDevice = selectedDeviceKeys.includes('iphone-13') || hasIphone14 || hasIphone14Plus || selectedDeviceKeys.includes('moto-razr-2025');
-            const isRazr = selectedDeviceKeys.includes('moto-razr-2025');
-            const isIphone = selectedDeviceKeys.includes('iphone-13') || hasIphone14 || hasIphone14Plus;
+            const promoDeviceKey = selectedDeviceKeys.find(key => dealData[key] && dealData[key].promoMonths > 1);
             const isNewSingleLineAccount = upgradeType === 'new-account' && totalLines === 1;
-            const hasExistingLines = (upgradeType === 'add-a-line' || upgradeType === 'upgrade-add-line') && currentLines >= 1;
+            const hasExistingLines = (isAddingALine || upgradeType === 'upgrade-add-line') && currentLines >= 1;
             
-            if (basePlanPrice > 0 && isNewSingleLineAccount && hasPromoDevice) {
-                if(isIphone){
-                    promoMonthsRequired = true;
-                    promoMonthsCount = 2; // 2nd and 3rd month
-                    promoMonthsCost = basePlanPrice * promoMonthsCount;
-                    promoMessages.push(`This promo requires paying for ${promoMonthsCount + 1} months of service upfront for a single line.`);
-                } else if (isRazr && (basePlanPrice === 50 || basePlanPrice === 60)) {
-                    promoMonthsRequired = true;
-                    promoMonthsCount = 1; // 2nd month
-                    promoMonthsCost = basePlanPrice * promoMonthsCount;
-                    promoMessages.push(`The Motorola Razr requires paying for ${promoMonthsCount + 1} months of service upfront on this plan.`);
+            if (basePlanPrice > 0 && isNewSingleLineAccount && promoDeviceKey) {
+                const deal = dealData[promoDeviceKey];
+                let isPromoApplicable = true;
+
+                if (promoDeviceKey === 'moto-razr-2025' && !(basePlanPrice === 50 || basePlanPrice === 60)) {
+                    isPromoApplicable = false;
                 }
-            } else if (hasPromoDevice && (totalLines > 1 || hasExistingLines)) {
+                
+                if (isPromoApplicable) {
+                    promoMonthsRequired = true;
+                    promoMonthsCount = deal.promoMonths - 1;
+                    promoMonthsCost = basePlanPrice * promoMonthsCount;
+                    promoMessages.push(`<b>${deal.name}</b> requires paying for ${deal.promoMonths} months of service upfront for a single line.`);
+                }
+
+            } else if (promoDeviceKey && (totalLines > 1 || hasExistingLines)) {
                  if (!promoMessages.some(m => m.includes("waived"))) {
                     promoMessages.push(`The upfront promotional month payment is waived for multi-line or existing accounts.`);
                  }
@@ -838,14 +840,14 @@
             promoMonthsCheckbox.checked = promoMonthsRequired;
             promoMonthsCheckbox.disabled = promoMonthsRequired;
             promoMonthsCheckbox.dataset.amount = promoMonthsCost.toFixed(2);
-            document.getElementById('promo-months-label').textContent = `Promotional Months (Month 2${promoMonthsCount > 1 ? ' & 3' : ''})`;
+            document.getElementById('promo-months-label').textContent = `Promotional Months (Month 2${promoMonthsCount > 1 ? ` - ${promoMonthsCount + 1}` : ''})`;
             document.getElementById('promo-months-amount').textContent = `$${promoMonthsCost.toFixed(2)}`;
             
             // --- Handle Red Hot Ticket & Promo Box ---
             const redHotTicketContainer = document.getElementById('red-hot-ticket-container');
             const redHotTicketCheckbox = document.getElementById('red-hot-ticket');
             
-            const canUseRedHotTicket = upgradeType !== 'add-a-line' && portedLines > 0 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus && !hasMotoStylus;
+            const canUseRedHotTicket = !isAddingALine && portedLines > 0 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus && !hasMotoStylus;
             const qualifiesForByodDiscount = portIn && byodPorts > 0;
 
             if (canUseRedHotTicket) {
@@ -962,6 +964,7 @@
                     tabletDeviceCostContainer.style.display = 'none';
                     tabletDeviceCostCheckbox.checked = false;
                 }
+                totalRetailForTax += currentTablet.msrp;
 
             } else {
                 document.getElementById('tablet-service-container').style.display = 'none';
@@ -1358,4 +1361,5 @@
 
 </body>
 </html>
+
 
