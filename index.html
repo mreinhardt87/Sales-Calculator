@@ -501,8 +501,8 @@
         
         const planBreakdownData = {
             '40': [40, 80, 100, 100, 115],
-            '50': [50, 80, 110, 110, 115],
-            '60': [60, 90, 120, 120, 135]
+            '50': [50, 80, 105, 105, 120],
+            '60': [60, 90, 115, 115, 130]
         };
         
         // --- Login Logic ---
@@ -776,8 +776,6 @@
                     }
                 }
                 
-                const autopayCharge = (basePlanPrice === 50 || basePlanPrice === 60) ? 5 : 0;
-                const serviceCostWithAutopay = baseServiceCost + autopayCharge;
                 let serviceDiscount = 0;
                 const canUseRedHotTicket = portedLines > 0 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus && !hasMotoStylus;
 
@@ -793,7 +791,7 @@
                    }
                 }
                 
-                finalServiceCost = serviceCostWithAutopay - serviceDiscount;
+                finalServiceCost = baseServiceCost - serviceDiscount;
                 serviceLabelText = `First Month Mobile Service (${totalLines} line${totalLines !== 1 ? 's' : ''})`;
             }
             
@@ -1121,21 +1119,17 @@
             const qualifiesForByodDiscount = portIn && byodPorts > 0;
 
             if (qualifiesForByodDiscount) {
-                const singleLineBasePrice = parseInt(selectedPlan);
+                const singleLineBasePrice = planBreakdownData[selectedPlan][0];
                 discount = singleLineBasePrice * 0.5;
                 breakdownTitle.textContent = 'Monthly Cost (w/ BYOD Discount)';
             } else {
                 breakdownTitle.textContent = 'Monthly Plan Cost';
             }
 
-            const autopayCharge = (selectedPlan === '50' || selectedPlan === '60') ? 5 : 0;
-
             prices.forEach((price, index) => {
                 const lineCount = index + 1;
-                const priceWithAutopay = price - autopayCharge;
                 
-                // [FIX] Calculate final price based only on plan cost and discount
-                const finalPrice = priceWithAutopay - (lineCount >= 1 && qualifiesForByodDiscount ? discount : 0);
+                const finalPrice = price - (lineCount >= 1 && qualifiesForByodDiscount ? discount : 0);
 
                 const div = document.createElement('div');
                 div.className = 'flex justify-between items-center text-gray-600';
@@ -1152,10 +1146,9 @@
                 priceContainer.appendChild(spanPrice);
                 
                 if (qualifiesForByodDiscount && lineCount >= 1) {
-                    const originalPriceWithAddons = priceWithAutopay;
                     const originalPriceSpan = document.createElement('span');
                     originalPriceSpan.className = 'text-xs text-gray-400 line-through ml-2';
-                    originalPriceSpan.textContent = `$${originalPriceWithAddons.toFixed(2)}`;
+                    originalPriceSpan.textContent = `$${price.toFixed(2)}`;
                     priceContainer.appendChild(originalPriceSpan);
                 }
 
