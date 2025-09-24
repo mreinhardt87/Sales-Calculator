@@ -772,8 +772,7 @@
                     if (portIn && byodPorts > 0) {
                         const singleLineCost = planPrices[0];
                         const discountPerByodPort = singleLineCost * 0.5;
-                        const totalDiscount = discountPerByodPort * byodPorts;
-                        baseServiceCost -= totalDiscount;
+                        baseServiceCost -= discountPerByodPort;
                     }
                 }
                 
@@ -1063,7 +1062,7 @@
             const taxableAccessoryAmount = accessoryCost;
             const taxableAccessFee = (totalLines > 0 && document.getElementById('access').checked) ? accessFee : 0;
 
-            const totalTaxableDeviceAmount = totalRetailForTax + taxableHomeRouterAmount + taxableAccessoryAmount + taxableHotspotAmount;
+            const totalTaxableDeviceAmount = totalRetailForTax + taxableHomeRouterAmount + taxableTabletDeviceAmount + taxableAccessoryAmount + taxableHotspotAmount;
             const totalTax = (totalTaxableDeviceAmount * taxRate) + (taxableAccessFee * taxRate);
             
             document.getElementById('sales-tax').dataset.amount = totalTax.toFixed(2);
@@ -1092,6 +1091,7 @@
             const breakdownContainer = document.getElementById('price-breakdown');
             const selectedPlan = document.getElementById('plan-select').value;
             const byodLines = parseInt(document.getElementById('byod-lines').value) || 0;
+            const byodPorts = parseInt(document.getElementById('byod-ports-select').value) || 0;
             const portIn = document.getElementById('port-in').checked;
             const breakdownTitle = document.getElementById('breakdown-title');
             
@@ -1118,11 +1118,11 @@
             }
 
             let discount = 0;
-            const singleLinePrice = prices[0];
-            const qualifiesForByodDiscount = portIn && byodLines > 0;
+            const qualifiesForByodDiscount = portIn && byodPorts > 0;
 
             if (qualifiesForByodDiscount) {
-                discount = singleLinePrice * 0.5;
+                const singleLineBasePrice = parseInt(selectedPlan);
+                discount = singleLineBasePrice * 0.5;
                 breakdownTitle.textContent = 'Monthly Cost (w/ BYOD Discount)';
             } else {
                 breakdownTitle.textContent = 'Monthly Plan Cost';
@@ -1130,8 +1130,9 @@
 
             prices.forEach((price, index) => {
                 const lineCount = index + 1;
-                // Add addons to the final price for each line count scenario
-                const finalPrice = price - discount + totalProtectCost + hotspotPlanCost + byotMonthlyCost;
+                const autopayCharge = (selectedPlan === '50' || selectedPlan === '60') ? 5 : 0;
+                const priceWithAutopay = price + autopayCharge;
+                const finalPrice = priceWithAutopay - discount + totalProtectCost + hotspotPlanCost + byotMonthlyCost;
 
                 const div = document.createElement('div');
                 div.className = 'flex justify-between items-center text-gray-600';
@@ -1148,7 +1149,7 @@
                 priceContainer.appendChild(spanPrice);
                 
                 if (qualifiesForByodDiscount) {
-                    const originalPriceWithAddons = price + totalProtectCost + hotspotPlanCost + byotMonthlyCost;
+                    const originalPriceWithAddons = priceWithAutopay + totalProtectCost + hotspotPlanCost + byotMonthlyCost;
                     const originalPriceSpan = document.createElement('span');
                     originalPriceSpan.className = 'text-xs text-gray-400 line-through ml-2';
                     originalPriceSpan.textContent = `$${originalPriceWithAddons.toFixed(2)}`;
