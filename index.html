@@ -1128,11 +1128,14 @@
                 breakdownTitle.textContent = 'Monthly Plan Cost';
             }
 
+            const autopayCharge = (selectedPlan === '50' || selectedPlan === '60') ? 5 : 0;
+
             prices.forEach((price, index) => {
                 const lineCount = index + 1;
-                const autopayCharge = (selectedPlan === '50' || selectedPlan === '60') ? 5 : 0;
-                const priceWithAutopay = price + autopayCharge;
-                const finalPrice = priceWithAutopay - discount + totalProtectCost + hotspotPlanCost + byotMonthlyCost;
+                const priceWithAutopay = price - autopayCharge;
+                
+                // [FIX] Calculate final price based only on plan cost and discount
+                const finalPrice = priceWithAutopay - (lineCount >= 1 && qualifiesForByodDiscount ? discount : 0);
 
                 const div = document.createElement('div');
                 div.className = 'flex justify-between items-center text-gray-600';
@@ -1148,8 +1151,8 @@
                 spanPrice.textContent = `$${finalPrice.toFixed(2)}`;
                 priceContainer.appendChild(spanPrice);
                 
-                if (qualifiesForByodDiscount) {
-                    const originalPriceWithAddons = priceWithAutopay + totalProtectCost + hotspotPlanCost + byotMonthlyCost;
+                if (qualifiesForByodDiscount && lineCount >= 1) {
+                    const originalPriceWithAddons = priceWithAutopay;
                     const originalPriceSpan = document.createElement('span');
                     originalPriceSpan.className = 'text-xs text-gray-400 line-through ml-2';
                     originalPriceSpan.textContent = `$${originalPriceWithAddons.toFixed(2)}`;
@@ -1362,4 +1365,5 @@
 
 </body>
 </html>
+
 
