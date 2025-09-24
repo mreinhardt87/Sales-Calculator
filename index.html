@@ -501,8 +501,8 @@
         
         const planBreakdownData = {
             '40': [40, 80, 100, 100, 115],
-            '50': [50, 80, 105, 105, 120],
-            '60': [60, 90, 115, 115, 130]
+            '50': [55, 85, 110, 110, 125],
+            '60': [65, 95, 120, 120, 135]
         };
         
         // --- Login Logic ---
@@ -679,62 +679,6 @@
             const isUpgradeOnly = upgradeType === 'upgrade-only' || upgradeType === 'upgrade-with-rewards';
             const isAddingALine = upgradeType === 'add-a-line';
 
-            // Calculate cost for new devices (promotional)
-            let newDevicePortsAvailable = portedLines - byodPorts;
-            const motoGStylus2024Count = newDeviceKeys.filter(k => k === 'moto-g-stylus-5g-2024').length;
-            const isMotoGStylusPromoActive = motoGStylus2024Count > 0 && motoGStylus2024Count === newDeviceLines && newDeviceLines <= 4 && idVerified && portedLines >= 1;
-
-            if (isMotoGStylusPromoActive) {
-                for (let i = 0; i < newDeviceLines; i++) {
-                    const currentDeal = dealData['moto-g-stylus-5g-2024'];
-                    totalRetailForTax += currentDeal.retailPrice;
-                }
-            } else {
-                newDeviceKeys.forEach(selectedKey => {
-                    const currentDeal = dealData[selectedKey];
-                    totalRetailForTax += currentDeal.retailPrice;
-
-                    let meetsPlanRequirement = true;
-                    if (currentDeal.requiredPlan && basePlanPrice < currentDeal.requiredPlan) {
-                        meetsPlanRequirement = false;
-                        promoMessages.push(`<b>${currentDeal.name}</b> promo requires the $${currentDeal.requiredPlan} plan or higher.`);
-                    }
-
-                    if (meetsPlanRequirement) {
-                        if (idVerified && newDevicePortsAvailable > 0) {
-                            totalDeviceCost += currentDeal.promoPrice;
-                            newDevicePortsAvailable--;
-                        } else if (newDevicePortsAvailable > 0) {
-                             totalDeviceCost += currentDeal.portOnlyPrice;
-                            newDevicePortsAvailable--;
-                        } else if (idVerified) {
-                            totalDeviceCost += currentDeal.veriffOnlyPrice;
-                        } else {
-                            totalDeviceCost += currentDeal.noHasslePrice !== undefined ? currentDeal.noHasslePrice : currentDeal.retailPrice;
-                        }
-                    } else {
-                        totalDeviceCost += currentDeal.noHasslePrice !== undefined ? currentDeal.noHasslePrice : currentDeal.retailPrice;
-                    }
-                });
-            }
-
-            upgradeDeviceKeys.forEach(selectedKey => {
-                const currentDeal = dealData[selectedKey];
-                totalRetailForTax += currentDeal.retailPrice;
-                totalDeviceCost += currentDeal.retailPrice;
-            });
-            
-            
-            document.getElementById('device-cost-container').style.display = totalDeviceCost > 0 ? 'block' : 'none';
-            document.getElementById('device-cost').checked = totalDeviceCost > 0;
-            document.getElementById('device-cost').dataset.amount = totalDeviceCost.toFixed(2);
-            document.getElementById('device-cost-label').textContent = `Mobile Device Cost (${newDeviceLines + upgradeLines} dev)`;
-            document.getElementById('device-cost-amount').textContent = `$${totalDeviceCost.toFixed(2)}`;
-            
-            // --- Calculate Service Cost ---
-            let finalServiceCost = 0;
-            let serviceLabelText = 'First Month Mobile Service';
-
             if (isAddingALine) {
                 const daysIntoCycle = parseInt(billingCycleDaysInput.value) || 0;
                 const newLines = totalLines;
@@ -769,9 +713,15 @@
                     const planPrices = planBreakdownData[basePlanPrice.toString()];
                     baseServiceCost = planPrices[totalLines - 1] || 0;
                     
+                    // [FIX] Apply autopay discount for single lines on eligible plans for the first month
+                    if (totalLines === 1 && (basePlanPrice === 50 || basePlanPrice === 60)) {
+                        baseServiceCost -= 5;
+                    }
+
                     if (portIn && byodPorts > 0) {
-                        const singleLineCost = planPrices[0];
-                        const discountPerByodPort = singleLineCost * 0.5;
+                        // BYOD discount is 50% of the single line price BEFORE autopay
+                        const singleLineBasePrice = planPrices[0];
+                        const discountPerByodPort = singleLineBasePrice * 0.5;
                         baseServiceCost -= discountPerByodPort;
                     }
                 }
@@ -785,8 +735,11 @@
                         let costOfPortedLines = planPrices[portedLines - 1];
                         const singleLineCost = planPrices[0];
                         const byodPortsAmongTotalPorts = Math.min(byodPorts, portedLines);
-                        const byodDiscountOnPortedLines = byodPortsAmongTotalPorts * (singleLineCost * 0.5);
-                        costOfPortedLines -= byodDiscountOnPortedLines;
+                        
+                        if (byodPortsAmongTotalPorts > 0) {
+                           costOfPortedLines -= (singleLineCost * 0.5);
+                        }
+                       
                         serviceDiscount = Math.min(costOfPortedLines, 120);
                    }
                 }
@@ -1128,8 +1081,17 @@
 
             prices.forEach((price, index) => {
                 const lineCount = index + 1;
+                let finalPrice = price; // Base price from new data object
+
+                // [FIX] Apply autopay discount ONLY for single line on eligible plans
+                if (lineCount === 1 && (selectedPlan === '50' || selectedPlan === '60')) {
+                    finalPrice -= 5;
+                }
                 
-                const finalPrice = price - (lineCount >= 1 && qualifiesForByodDiscount ? discount : 0);
+                // [FIX] Apply BYOD discount if applicable
+                if (qualifiesForByodDiscount && lineCount >= byodPorts) {
+                     finalPrice -= discount;
+                }
 
                 const div = document.createElement('div');
                 div.className = 'flex justify-between items-center text-gray-600';
@@ -1146,9 +1108,13 @@
                 priceContainer.appendChild(spanPrice);
                 
                 if (qualifiesForByodDiscount && lineCount >= 1) {
+                    let originalPrice = price;
+                     if (lineCount === 1 && (selectedPlan === '50' || selectedPlan === '60')) {
+                        originalPrice -= 5;
+                    }
                     const originalPriceSpan = document.createElement('span');
                     originalPriceSpan.className = 'text-xs text-gray-400 line-through ml-2';
-                    originalPriceSpan.textContent = `$${price.toFixed(2)}`;
+                    originalPriceSpan.textContent = `$${originalPrice.toFixed(2)}`;
                     priceContainer.appendChild(originalPriceSpan);
                 }
 
@@ -1358,4 +1324,5 @@
 
 </body>
 </html>
+
 
