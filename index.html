@@ -679,6 +679,62 @@
             const isUpgradeOnly = upgradeType === 'upgrade-only' || upgradeType === 'upgrade-with-rewards';
             const isAddingALine = upgradeType === 'add-a-line';
 
+            // Calculate cost for new devices (promotional)
+            let newDevicePortsAvailable = portedLines - byodPorts;
+            const motoGStylus2024Count = newDeviceKeys.filter(k => k === 'moto-g-stylus-5g-2024').length;
+            const isMotoGStylusPromoActive = motoGStylus2024Count > 0 && motoGStylus2024Count === newDeviceLines && newDeviceLines <= 4 && idVerified && portedLines >= 1;
+
+            if (isMotoGStylusPromoActive) {
+                for (let i = 0; i < newDeviceLines; i++) {
+                    const currentDeal = dealData['moto-g-stylus-5g-2024'];
+                    totalRetailForTax += currentDeal.retailPrice;
+                }
+            } else {
+                newDeviceKeys.forEach(selectedKey => {
+                    const currentDeal = dealData[selectedKey];
+                    totalRetailForTax += currentDeal.retailPrice;
+
+                    let meetsPlanRequirement = true;
+                    if (currentDeal.requiredPlan && basePlanPrice < currentDeal.requiredPlan) {
+                        meetsPlanRequirement = false;
+                        promoMessages.push(`<b>${currentDeal.name}</b> promo requires the $${currentDeal.requiredPlan} plan or higher.`);
+                    }
+
+                    if (meetsPlanRequirement) {
+                        if (idVerified && newDevicePortsAvailable > 0) {
+                            totalDeviceCost += currentDeal.promoPrice;
+                            newDevicePortsAvailable--;
+                        } else if (newDevicePortsAvailable > 0) {
+                             totalDeviceCost += currentDeal.portOnlyPrice;
+                            newDevicePortsAvailable--;
+                        } else if (idVerified) {
+                            totalDeviceCost += currentDeal.veriffOnlyPrice;
+                        } else {
+                            totalDeviceCost += currentDeal.noHasslePrice !== undefined ? currentDeal.noHasslePrice : currentDeal.retailPrice;
+                        }
+                    } else {
+                        totalDeviceCost += currentDeal.noHasslePrice !== undefined ? currentDeal.noHasslePrice : currentDeal.retailPrice;
+                    }
+                });
+            }
+
+            upgradeDeviceKeys.forEach(selectedKey => {
+                const currentDeal = dealData[selectedKey];
+                totalRetailForTax += currentDeal.retailPrice;
+                totalDeviceCost += currentDeal.retailPrice;
+            });
+            
+            
+            document.getElementById('device-cost-container').style.display = totalDeviceCost > 0 ? 'block' : 'none';
+            document.getElementById('device-cost').checked = totalDeviceCost > 0;
+            document.getElementById('device-cost').dataset.amount = totalDeviceCost.toFixed(2);
+            document.getElementById('device-cost-label').textContent = `Mobile Device Cost (${newDeviceLines + upgradeLines} dev)`;
+            document.getElementById('device-cost-amount').textContent = `$${totalDeviceCost.toFixed(2)}`;
+            
+            // --- Calculate Service Cost ---
+            let finalServiceCost = 0;
+            let serviceLabelText = 'First Month Mobile Service';
+
             if (isAddingALine) {
                 const daysIntoCycle = parseInt(billingCycleDaysInput.value) || 0;
                 const newLines = totalLines;
@@ -696,31 +752,18 @@
                 }
             } else {
                 let baseServiceCost = 0;
-                const getLineCost = (lineNumber, planPrice) => {
-                    if (lineNumber === 1) return planPrice;
-                    if (planPrice === 40) { // Base 5G
-                        if (lineNumber === 2) return 40;
-                        if (lineNumber === 3) return 20;
-                    } else { // Total 5G & 5G+
-                        if (lineNumber === 2 || lineNumber === 3) return 30;
-                    }
-                    if (lineNumber === 4) return 0;
-                    if (lineNumber >= 5) return 15;
-                    return 0;
-                };
-
+               
                 if (totalLines > 0 && basePlanPrice > 0) {
                     const planPrices = planBreakdownData[basePlanPrice.toString()];
                     baseServiceCost = planPrices[totalLines - 1] || 0;
                     
-                    // [FIX] Apply autopay discount for single lines on eligible plans for the first month
+                    // Apply autopay discount for single lines on eligible plans for the first month
                     if (totalLines === 1 && (basePlanPrice === 50 || basePlanPrice === 60)) {
                         baseServiceCost -= 5;
                     }
 
                     if (portIn && byodPorts > 0) {
-                        // BYOD discount is 50% of the single line price BEFORE autopay
-                        const singleLineBasePrice = planPrices[0];
+                        const singleLineBasePrice = planBreakdownData[basePlanPrice.toString()][0];
                         const discountPerByodPort = singleLineBasePrice * 0.5;
                         baseServiceCost -= discountPerByodPort;
                     }
@@ -1009,11 +1052,10 @@
             const homeRouterMsrp = 99.00;
             const taxableHomeRouterAmount = homeInternet ? homeRouterMsrp : 0;
             const taxableHotspotAmount = dedicatedHotspot ? 49.99 : 0;
-            const taxableTabletDeviceAmount = selectedTabletKey !== 'none' ? currentTablet.msrp : 0;
             const taxableAccessoryAmount = accessoryCost;
             const taxableAccessFee = (totalLines > 0 && document.getElementById('access').checked) ? accessFee : 0;
 
-            const totalTaxableDeviceAmount = totalRetailForTax + taxableHomeRouterAmount + taxableTabletDeviceAmount + taxableAccessoryAmount + taxableHotspotAmount;
+            const totalTaxableDeviceAmount = totalRetailForTax + taxableHomeRouterAmount + taxableAccessoryAmount + taxableHotspotAmount;
             const totalTax = (totalTaxableDeviceAmount * taxRate) + (taxableAccessFee * taxRate);
             
             document.getElementById('sales-tax').dataset.amount = totalTax.toFixed(2);
@@ -1083,12 +1125,12 @@
                 const lineCount = index + 1;
                 let finalPrice = price; // Base price from new data object
 
-                // [FIX] Apply autopay discount ONLY for single line on eligible plans
+                // Apply autopay discount ONLY for single line on eligible plans
                 if (lineCount === 1 && (selectedPlan === '50' || selectedPlan === '60')) {
                     finalPrice -= 5;
                 }
                 
-                // [FIX] Apply BYOD discount if applicable
+                // Apply BYOD discount if applicable
                 if (qualifiesForByodDiscount && lineCount >= byodPorts) {
                      finalPrice -= discount;
                 }
@@ -1324,5 +1366,4 @@
 
 </body>
 </html>
-
 
