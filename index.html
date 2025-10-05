@@ -860,15 +860,13 @@
 
             // --- Handle Home Internet, Hotspot & Tablets ---
             const internetLabel = document.getElementById('internet-label');
-            
+            const isMultiLine = totalLines > 0 || upgradeLines > 0 || currentLines > 0;
+
             if (homeInternet) {
-                const isMultiLine = totalLines > 0 || upgradeLines > 0 || currentLines > 0;
+                internetLabel.textContent = isMultiLine ? 'Home Internet Promo (Router + 3mo Service)' : 'Home Internet Service (3 Months)';
                 const hiCost = isMultiLine ? 49.99 : (99.99 + 49.99);
-                
-                internetLabel.textContent = 'Home Internet (3 Months + Router)';
                 homeInternetCheckbox.dataset.amount = hiCost.toFixed(2);
                 document.getElementById('internet-amount').textContent = `$${hiCost.toFixed(2)}`;
-                
             } else {
                 internetLabel.textContent = 'Home Internet Service';
                 homeInternetCheckbox.dataset.amount = '49.99';
