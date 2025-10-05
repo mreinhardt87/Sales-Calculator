@@ -880,22 +880,21 @@
             const internetAmount = document.getElementById('internet-amount');
             
             if (homeInternet) {
+                internetLabel.textContent = 'Home Internet Service (3 Months)';
                 homeInternetCheckbox.dataset.amount = '49.99';
                 internetAmount.textContent = '$49.99';
 
-                if (totalLines > 0 || upgradeLines > 0 || currentLines > 0) {
-                    internetLabel.textContent = 'Home Internet Promo (Router + 3mo Service)';
-                    routerCostContainer.style.display = 'none';
-                    routerCostCheckbox.checked = false;
-                    routerCostCheckbox.dataset.amount = '0';
-                } else {
-                    internetLabel.textContent = 'Home Internet Service (3 Months)';
-                    routerCostContainer.style.display = 'block';
-                    routerCostCheckbox.checked = true;
-                    routerCostCheckbox.dataset.amount = '49.99';
-                    document.getElementById('router-cost-amount').textContent = `$49.99`;
-                }
+                const isMultiLine = totalLines > 0 || upgradeLines > 0 || currentLines > 0;
+                const routerDeviceCost = isMultiLine ? 4.99 : 99.99;
+
+                routerCostContainer.style.display = 'block';
+                routerCostCheckbox.checked = true;
+                routerCostCheckbox.dataset.amount = routerDeviceCost.toFixed(2);
+                document.getElementById('router-cost-amount').textContent = `$${routerDeviceCost.toFixed(2)}`;
+                document.getElementById('router-cost-label').textContent = 'FWA 5G Router';
+                
             } else {
+                // Reset everything if home internet is not selected
                 internetLabel.textContent = 'Home Internet Service';
                 homeInternetCheckbox.dataset.amount = '49.99';
                 routerCostContainer.style.display = 'none';
@@ -1054,8 +1053,9 @@
             const taxableHotspotAmount = dedicatedHotspot ? 49.99 : 0;
             const taxableAccessoryAmount = accessoryCost;
             const taxableAccessFee = (totalLines > 0 && document.getElementById('access').checked) ? accessFee : 0;
+            const taxableTabletDeviceAmount = tabletDeviceCostCheckbox.checked ? parseFloat(tabletDeviceCostCheckbox.dataset.amount) : (selectedTabletKey !== 'none' ? currentTablet.msrp : 0);
 
-            const totalTaxableDeviceAmount = totalRetailForTax + taxableHomeRouterAmount + taxableAccessoryAmount + taxableHotspotAmount;
+            const totalTaxableDeviceAmount = totalRetailForTax + taxableHomeRouterAmount + (selectedTabletKey !== 'none' ? currentTablet.msrp : 0) + taxableAccessoryAmount + taxableHotspotAmount;
             const totalTax = (totalTaxableDeviceAmount * taxRate) + (taxableAccessFee * taxRate);
             
             document.getElementById('sales-tax').dataset.amount = totalTax.toFixed(2);
