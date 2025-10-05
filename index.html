@@ -473,7 +473,7 @@
             'iphone-13-cpo': { name: 'Apple iPhone 13 CPO 128GB', retailPrice: 349.99, promoPrice: 0.00, portOnlyPrice: 0.00, veriffOnlyPrice: 99.99, promoMonths: 2 },
             'iphone-14': { name: 'Apple iPhone 14 128GB', retailPrice: 629.00, promoPrice: 99.99, portOnlyPrice: 529.99, veriffOnlyPrice: 199.99, promoMonths: 3, requiredPlan: 40 },
             'iphone-14-plus': { name: 'Apple iPhone 14 Plus 128GB', retailPrice: 729.00, promoPrice: 199.99, portOnlyPrice: 499.99, veriffOnlyPrice: 199.99, noHasslePrice: 499.99, promoMonths: 1, requiredPlan: 40 },
-            'iphone-15': { name: 'Apple iPhone 15 128GB', retailPrice: 729.00, promoPrice: 479.99, portOnlyPrice: 679.99, veriffOnlyPrice: 479.99, promoMonths: 1 },
+            'iphone-15': { name: 'Apple iPhone 15 128GB', retailPrice: 729.00, promoPrice: 379.99, veriffOnlyPrice: 479.99, noHasslePrice: 629.99, promoMonths: 2, requiredPlan: 50 },
             'iphone-16e': { name: 'Apple iPhone 16e 128GB', retailPrice: 599.99, promoPrice: 299.99, portOnlyPrice: 599.99, veriffOnlyPrice: 399.99, noHasslePrice: 599.99, promoMonths: 2 },
             'samsung-a15': { name: 'Samsung Galaxy A15 5G', retailPrice: 79.99, promoPrice: 0.00, portOnlyPrice: 59.99, veriffOnlyPrice: 0.00, promoMonths: 1 },
             'samsung-a16': { name: 'Samsung Galaxy A16 (5G)', retailPrice: 129.00, promoPrice: 0.00, portOnlyPrice: 0.00, veriffOnlyPrice: 0.00, noHasslePrice: 0.00, promoMonths: 1 },
@@ -812,7 +812,7 @@
                 const deal = dealData[promoDeviceKey];
                 let isPromoApplicable = true;
 
-                if (promoDeviceKey === 'moto-razr-2025' && !(basePlanPrice === 50 || basePlanPrice === 60)) {
+                if (deal.requiredPlan && basePlanPrice < deal.requiredPlan) {
                     isPromoApplicable = false;
                 }
                 
@@ -1053,9 +1053,8 @@
             const taxableHotspotAmount = dedicatedHotspot ? 49.99 : 0;
             const taxableAccessoryAmount = accessoryCost;
             const taxableAccessFee = (totalLines > 0 && document.getElementById('access').checked) ? accessFee : 0;
-            const taxableTabletDeviceAmount = tabletDeviceCostCheckbox.checked ? parseFloat(tabletDeviceCostCheckbox.dataset.amount) : (selectedTabletKey !== 'none' ? currentTablet.msrp : 0);
-
-            const totalTaxableDeviceAmount = totalRetailForTax + taxableHomeRouterAmount + (selectedTabletKey !== 'none' ? currentTablet.msrp : 0) + taxableAccessoryAmount + taxableHotspotAmount;
+            
+            const totalTaxableDeviceAmount = totalRetailForTax + taxableHomeRouterAmount + taxableAccessoryAmount + taxableHotspotAmount;
             const totalTax = (totalTaxableDeviceAmount * taxRate) + (taxableAccessFee * taxRate);
             
             document.getElementById('sales-tax').dataset.amount = totalTax.toFixed(2);
