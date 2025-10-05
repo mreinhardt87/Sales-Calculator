@@ -1044,7 +1044,7 @@
 
             // --- Sales Tax Calculation ---
             const homeRouterMsrp = 99.00;
-            const taxableHomeRouterAmount = homeInternet ? homeRouterMsrp : 0;
+            const taxableHomeRouterAmount = routerCostCheckbox.checked ? parseFloat(routerCostCheckbox.dataset.amount) : 0;
             const taxableHotspotAmount = dedicatedHotspot ? 49.99 : 0;
             const taxableAccessoryAmount = accessoryCost;
             const taxableAccessFee = (totalLines > 0 && document.getElementById('access').checked) ? accessFee : 0;
