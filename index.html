@@ -674,7 +674,8 @@
             const isAddingALine = upgradeType === 'add-a-line';
 
             // Calculate cost for new devices (promotional)
-            let newDevicePortsAvailable = portedLines - byodPorts;
+            let newDevicePortsAvailable = portIn ? (portedLines - byodPorts) : 0;
+            
             const motoGStylus2024Count = newDeviceKeys.filter(k => k === 'moto-g-stylus-5g-2024').length;
             const isMotoGStylusPromoActive = motoGStylus2024Count > 0 && motoGStylus2024Count === newDeviceLines && newDeviceLines <= 4 && idVerified && portedLines >= 1;
 
@@ -695,14 +696,16 @@
                     }
 
                     if (meetsPlanRequirement) {
-                        if (idVerified && portIn) { // This now represents "Switch"
+                        if (idVerified && newDevicePortsAvailable > 0) { // SWITCH logic
                             totalDeviceCost += currentDeal.promoPrice;
-                        } else if (idVerified) { // This now represents "Join"
+                            newDevicePortsAvailable--; // Consume a port
+                        } else if (idVerified) { // JOIN logic
                             totalDeviceCost += currentDeal.veriffOnlyPrice;
-                        } else { // This is "No Hassle"
+                        } else { // NO HASSLE logic
                             totalDeviceCost += currentDeal.noHasslePrice !== undefined ? currentDeal.noHasslePrice : currentDeal.retailPrice;
                         }
                     } else {
+                        // Fallback price if plan req not met
                         totalDeviceCost += currentDeal.noHasslePrice !== undefined ? currentDeal.noHasslePrice : currentDeal.retailPrice;
                     }
                 });
@@ -748,7 +751,7 @@
                     baseServiceCost = planPrices[totalLines - 1] || 0;
                     
                     if (portIn && byodPorts > 0) {
-                        const singleLineBasePrice = planBreakdownData[basePlanPrice.toString()][0];
+                        const singleLineBasePrice = planPrices[0];
                         const discountPerByodPort = singleLineBasePrice * 0.5;
                         baseServiceCost -= discountPerByodPort;
                     }
@@ -863,8 +866,8 @@
             const isMultiLine = totalLines > 0 || upgradeLines > 0 || currentLines > 0;
 
             if (homeInternet) {
-                internetLabel.textContent = isMultiLine ? 'Home Internet Promo (Router + 3mo Service)' : 'Home Internet Service (3 Months)';
                 const hiCost = isMultiLine ? 49.99 : (99.99 + 49.99);
+                internetLabel.textContent = `Home Internet (3 Months + Router)`;
                 homeInternetCheckbox.dataset.amount = hiCost.toFixed(2);
                 document.getElementById('internet-amount').textContent = `$${hiCost.toFixed(2)}`;
             } else {
