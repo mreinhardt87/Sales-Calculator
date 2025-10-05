@@ -473,6 +473,7 @@
             'iphone-12-cpo-pro-max': { name: 'CPO iPhone 12 Pro Max', retailPrice: 349.99, promoPrice: 99.99, veriffOnlyPrice: 199.99, noHasslePrice: 349.99, promoMonths: 2, requiredPlan: 50 },
             'iphone-12-cpo-pro': { name: 'CPO iPhone 12 Pro', retailPrice: 299.99, promoPrice: 49.99, veriffOnlyPrice: 149.99, noHasslePrice: 299.99, promoMonths: 2, requiredPlan: 50 },
             'iphone-12-cpo': { name: 'CPO iPhone 12', retailPrice: 249.99, promoPrice: 0.00, veriffOnlyPrice: 99.99, noHasslePrice: 249.99, promoMonths: 2, requiredPlan: 50 },
+            // Keep old devices not on the new promo sheet
             'iphone-13': { name: 'Apple iPhone 13 128GB', retailPrice: 529.00, promoPrice: 0.00, portOnlyPrice: 0.00, veriffOnlyPrice: 99.99, promoMonths: 3 },
             'iphone-13-cpo': { name: 'Apple iPhone 13 CPO 128GB', retailPrice: 349.99, promoPrice: 0.00, portOnlyPrice: 0.00, veriffOnlyPrice: 99.99, promoMonths: 2 },
             'iphone-14': { name: 'Apple iPhone 14 128GB', retailPrice: 629.00, promoPrice: 99.99, portOnlyPrice: 529.99, veriffOnlyPrice: 199.99, promoMonths: 3, requiredPlan: 40 },
@@ -494,8 +495,8 @@
         
         const planBreakdownData = {
             '40': [40, 80, 100, 100, 115],
-            '50': [50, 80, 110, 110, 115],
-            '60': [60, 90, 115, 115, 130]
+            '50': [55, 85, 110, 110, 125],
+            '60': [65, 95, 120, 120, 135]
         };
         
         // --- Login Logic ---
@@ -1089,10 +1090,7 @@
             const qualifiesForByodDiscount = portIn && byodPorts > 0;
 
             if (qualifiesForByodDiscount) {
-                let singleLineBasePrice = planBreakdownData[selectedPlan][0];
-                 if(selectedPlan === '50' || selectedPlan === '60') {
-                    singleLineBasePrice -= 5;
-                }
+                const singleLineBasePrice = planBreakdownData[selectedPlan][0];
                 discount = singleLineBasePrice * 0.5;
                 breakdownTitle.textContent = 'Monthly Cost (w/ BYOD Discount)';
             } else {
