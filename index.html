@@ -469,26 +469,30 @@
     <script>
         // Data for different phone promotions based on the provided PDF
         const dealData = {
+            'samsung-a16': { name: 'Samsung A16', retailPrice: 129.00, promoPrice: 0.00, veriffOnlyPrice: 0.00, noHasslePrice: 24.99, requiredPlan: 40 },
+            'moto-g-power-2025': { name: 'Moto G Power 2025', retailPrice: 149.99, promoPrice: 0.00, veriffOnlyPrice: 24.99, noHasslePrice: 49.99, requiredPlan: 40 },
+            'moto-edge-2025': { name: 'Moto Edge 2025', retailPrice: 259.99, promoPrice: 49.99, veriffOnlyPrice: 99.99, noHasslePrice: 149.99, requiredPlan: 50 },
+            'moto-g-stylus-2025': { name: 'Moto G Stylus 2025', retailPrice: 199.00, promoPrice: 0.00, veriffOnlyPrice: 49.99, noHasslePrice: 149.99, requiredPlan: 40 },
+            'moto-g-2025': { name: 'Moto G 2025', retailPrice: 79.99, promoPrice: 0.00, veriffOnlyPrice: 0.00, noHasslePrice: 9.99, requiredPlan: 40 },
+            'moto-g-power-2024': { name: 'Moto G Power 2024 (EOL)', retailPrice: 199.00, promoPrice: 0.00, veriffOnlyPrice: 0.00, noHasslePrice: 9.99 },
+            'moto-edge-2024': { name: 'Moto Edge 2024 (EOL)', retailPrice: 259.99, promoPrice: 0.00, veriffOnlyPrice: 0.00, noHasslePrice: 49.99 },
+            'moto-g-stylus-2024': { name: 'Moto G Stylus 2024 (EOL)', retailPrice: 249.99, promoPrice: 0.00, veriffOnlyPrice: 49.99, noHasslePrice: 149.99, requiredPlan: 40 },
+            'iphone-16': { name: 'Apple iPhone 16', retailPrice: 599.99, promoPrice: 479.99, veriffOnlyPrice: 579.99, noHasslePrice: 729.99, promoMonths: 2, requiredPlan: 50 },
+            'iphone-15': { name: 'Apple iPhone 15', retailPrice: 729.00, promoPrice: 379.99, veriffOnlyPrice: 479.99, noHasslePrice: 629.99, promoMonths: 2, requiredPlan: 50 },
+            'iphone-13-cpo-pro-max': { name: 'CPO iPhone 13 Pro Max', retailPrice: 529.00, promoPrice: 149.99, veriffOnlyPrice: 249.99, noHasslePrice: 399.99, promoMonths: 2, requiredPlan: 50 },
+            'iphone-12-cpo-pro-max': { name: 'CPO iPhone 12 Pro Max', retailPrice: 349.99, promoPrice: 99.99, veriffOnlyPrice: 199.99, noHasslePrice: 349.99, promoMonths: 2, requiredPlan: 50 },
+            'iphone-12-cpo-pro': { name: 'CPO iPhone 12 Pro', retailPrice: 299.99, promoPrice: 49.99, veriffOnlyPrice: 149.99, noHasslePrice: 299.99, promoMonths: 2, requiredPlan: 50 },
+            'iphone-12-cpo': { name: 'CPO iPhone 12', retailPrice: 249.99, promoPrice: 0.00, veriffOnlyPrice: 99.99, noHasslePrice: 249.99, promoMonths: 2, requiredPlan: 50 },
+            // Keep old devices not on the new promo sheet
             'iphone-13': { name: 'Apple iPhone 13 128GB', retailPrice: 529.00, promoPrice: 0.00, portOnlyPrice: 0.00, veriffOnlyPrice: 99.99, promoMonths: 3 },
             'iphone-13-cpo': { name: 'Apple iPhone 13 CPO 128GB', retailPrice: 349.99, promoPrice: 0.00, portOnlyPrice: 0.00, veriffOnlyPrice: 99.99, promoMonths: 2 },
             'iphone-14': { name: 'Apple iPhone 14 128GB', retailPrice: 629.00, promoPrice: 99.99, portOnlyPrice: 529.99, veriffOnlyPrice: 199.99, promoMonths: 3, requiredPlan: 40 },
             'iphone-14-plus': { name: 'Apple iPhone 14 Plus 128GB', retailPrice: 729.00, promoPrice: 199.99, portOnlyPrice: 499.99, veriffOnlyPrice: 199.99, noHasslePrice: 499.99, promoMonths: 1, requiredPlan: 40 },
-            'iphone-15': { name: 'Apple iPhone 15 128GB', retailPrice: 729.00, promoPrice: 379.99, veriffOnlyPrice: 479.99, noHasslePrice: 629.99, promoMonths: 2, requiredPlan: 50 },
-            'iphone-16e': { name: 'Apple iPhone 16e 128GB', retailPrice: 599.99, promoPrice: 299.99, portOnlyPrice: 599.99, veriffOnlyPrice: 399.99, noHasslePrice: 599.99, promoMonths: 2 },
             'samsung-a15': { name: 'Samsung Galaxy A15 5G', retailPrice: 79.99, promoPrice: 0.00, portOnlyPrice: 59.99, veriffOnlyPrice: 0.00, promoMonths: 1 },
-            'samsung-a16': { name: 'Samsung Galaxy A16 (5G)', retailPrice: 129.00, promoPrice: 0.00, portOnlyPrice: 0.00, veriffOnlyPrice: 0.00, noHasslePrice: 0.00, promoMonths: 1 },
             'samsung-a25': { name: 'Samsung Galaxy A25 5G', retailPrice: 199.99, promoPrice: 14.99, portOnlyPrice: 49.99, veriffOnlyPrice: 14.99, promoMonths: 1 },
             'samsung-a26': { name: 'Samsung Galaxy A26 5G', retailPrice: 199.99, promoPrice: 0.00, portOnlyPrice: 199.99, veriffOnlyPrice: 49.99, noHasslePrice: 149.99, promoMonths: 1 },
             'samsung-a36': { name: 'Samsung Galaxy A36 (5G)', retailPrice: 279.99, promoPrice: 0.00, portOnlyPrice: 199.99, veriffOnlyPrice: 99.99, promoMonths: 1 },
             'samsung-s24fe': { name: 'Samsung Galaxy S24FE (5G)', retailPrice: 699.99, promoPrice: 199.99, portOnlyPrice: 699.99, veriffOnlyPrice: 299.99, promoMonths: 2 },
-            'moto-g-5g-2025': { name: 'Motorola Moto G 5G 2025', retailPrice: 79.99, promoPrice: 0.00, portOnlyPrice: 0.00, veriffOnlyPrice: 0.00, noHasslePrice: 0.00, promoMonths: 1 },
-            'moto-g-stylus-5g-2024': { name: 'Moto G Stylus 5G 2024', retailPrice: 249.99, promoPrice: 0.00, portOnlyPrice: 49.99, veriffOnlyPrice: 24.99, promoMonths: 1, requiredPlan: 40 },
-            'moto-g-stylus-5g-2025': { name: 'Moto G Stylus 5G 2025', retailPrice: 199.00, promoPrice: 0.00, portOnlyPrice: 149.99, veriffOnlyPrice: 49.99, promoMonths: 1, requiredPlan: 40 },
-            'moto-edge-2024': { name: 'Motorola Edge 2024', retailPrice: 259.99, promoPrice: 0.00, portOnlyPrice: 149.99, veriffOnlyPrice: 49.99, promoMonths: 1 },
-            'moto-edge-2025': { name: 'Motorola Edge 2025', retailPrice: 259.99, promoPrice: 0.00, portOnlyPrice: 149.99, veriffOnlyPrice: 49.99, promoMonths: 1 },
-            'moto-razr-2025': { name: 'Motorola Razr 2025', retailPrice: 599.99, promoPrice: 199.99, portOnlyPrice: 599.99, veriffOnlyPrice: 299.99, promoMonths: 2 },
-            'moto-g-power-5g-2024': { name: 'Moto G Power 5G 2024', retailPrice: 199.00, promoPrice: 0.00, portOnlyPrice: 0.00, veriffOnlyPrice: 0.00, promoMonths: 1 },
-            'moto-g-power-5g-2025': { name: 'Moto G Power 5G 2025', retailPrice: 149.99, promoPrice: 0.00, portOnlyPrice: 49.99, veriffOnlyPrice: 0.00, promoMonths: 1 },
             'tcl-50xe': { name: 'TCL 50XE 5G', retailPrice: 79.99, promoPrice: 0.00, portOnlyPrice: 79.99, veriffOnlyPrice: 14.99, promoMonths: 1 },
             'tcl-50xl-nxtpaper': { name: 'TCL 50XL NXTPAPER 5G', retailPrice: 99.99, promoPrice: 0.00, portOnlyPrice: 49.99, veriffOnlyPrice: 14.99, promoMonths: 1 }
         };
@@ -701,15 +705,11 @@
                     }
 
                     if (meetsPlanRequirement) {
-                        if (idVerified && newDevicePortsAvailable > 0) {
+                        if (idVerified && portIn) { // This now represents "Switch"
                             totalDeviceCost += currentDeal.promoPrice;
-                            newDevicePortsAvailable--;
-                        } else if (newDevicePortsAvailable > 0) {
-                             totalDeviceCost += currentDeal.portOnlyPrice;
-                            newDevicePortsAvailable--;
-                        } else if (idVerified) {
+                        } else if (idVerified) { // This now represents "Join"
                             totalDeviceCost += currentDeal.veriffOnlyPrice;
-                        } else {
+                        } else { // This is "No Hassle"
                             totalDeviceCost += currentDeal.noHasslePrice !== undefined ? currentDeal.noHasslePrice : currentDeal.retailPrice;
                         }
                     } else {
@@ -757,11 +757,6 @@
                     const planPrices = planBreakdownData[basePlanPrice.toString()];
                     baseServiceCost = planPrices[totalLines - 1] || 0;
                     
-                    // Apply autopay discount for single lines on eligible plans for the first month
-                    if (totalLines === 1 && (basePlanPrice === 50 || basePlanPrice === 60)) {
-                        baseServiceCost -= 5;
-                    }
-
                     if (portIn && byodPorts > 0) {
                         const singleLineBasePrice = planBreakdownData[basePlanPrice.toString()][0];
                         const discountPerByodPort = singleLineBasePrice * 0.5;
