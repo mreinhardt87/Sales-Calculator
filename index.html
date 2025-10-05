@@ -859,10 +859,7 @@
             }
 
             // --- Handle Home Internet, Hotspot & Tablets ---
-            const routerCostContainer = document.getElementById('router-cost-container');
-            const routerCostCheckbox = document.getElementById('router-cost');
             const internetLabel = document.getElementById('internet-label');
-            const internetAmount = document.getElementById('internet-amount');
             
             if (homeInternet) {
                 const isMultiLine = totalLines > 0 || upgradeLines > 0 || currentLines > 0;
@@ -870,7 +867,7 @@
                 
                 internetLabel.textContent = 'Home Internet (3 Months + Router)';
                 homeInternetCheckbox.dataset.amount = hiCost.toFixed(2);
-                internetAmount.textContent = `$${hiCost.toFixed(2)}`;
+                document.getElementById('internet-amount').textContent = `$${hiCost.toFixed(2)}`;
                 
             } else {
                 internetLabel.textContent = 'Home Internet Service';
