@@ -320,16 +320,6 @@
                                 <span id="internet-amount" class="font-bold text-gray-800">$49.99</span>
                             </label>
                         </div>
-
-                         <!-- Home Router Device Cost (hidden by default) -->
-                        <div id="router-cost-container" class="hidden">
-                            <input type="checkbox" id="router-cost" data-amount="49.99" disabled>
-                            <label for="router-cost" class="checkbox-label">
-                                <span class="checkmark"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></span>
-                                <span id="router-cost-label" class="flex-grow">Home Router Device</span>
-                                <span id="router-cost-amount" class="font-bold text-gray-800">$49.99</span>
-                            </label>
-                        </div>
                         
                         <!-- [NEW] Dedicated Hotspot Section -->
                         <div>
@@ -875,26 +865,16 @@
             const internetAmount = document.getElementById('internet-amount');
             
             if (homeInternet) {
-                internetLabel.textContent = 'Home Internet Service (3 Months)';
-                homeInternetCheckbox.dataset.amount = '49.99';
-                internetAmount.textContent = '$49.99';
-
                 const isMultiLine = totalLines > 0 || upgradeLines > 0 || currentLines > 0;
-                const routerDeviceCost = isMultiLine ? 4.99 : 99.99;
-
-                routerCostContainer.style.display = 'block';
-                routerCostCheckbox.checked = true;
-                routerCostCheckbox.dataset.amount = routerDeviceCost.toFixed(2);
-                document.getElementById('router-cost-amount').textContent = `$${routerDeviceCost.toFixed(2)}`;
-                document.getElementById('router-cost-label').textContent = 'FWA 5G Router';
+                const hiCost = isMultiLine ? 49.99 : (99.99 + 49.99);
+                
+                internetLabel.textContent = 'Home Internet (3 Months + Router)';
+                homeInternetCheckbox.dataset.amount = hiCost.toFixed(2);
+                internetAmount.textContent = `$${hiCost.toFixed(2)}`;
                 
             } else {
-                // Reset everything if home internet is not selected
                 internetLabel.textContent = 'Home Internet Service';
                 homeInternetCheckbox.dataset.amount = '49.99';
-                routerCostContainer.style.display = 'none';
-                routerCostCheckbox.checked = false;
-                routerCostCheckbox.dataset.amount = '0';
             }
 
 
@@ -1043,8 +1023,12 @@
             }
 
             // --- Sales Tax Calculation ---
-            const homeRouterMsrp = 99.00;
-            const taxableHomeRouterAmount = routerCostCheckbox.checked ? parseFloat(routerCostCheckbox.dataset.amount) : 0;
+            const homeRouterMsrp = 99.99;
+            let taxableHomeRouterAmount = 0;
+            if (homeInternet) {
+                taxableHomeRouterAmount = homeRouterMsrp;
+            }
+            
             const taxableHotspotAmount = dedicatedHotspot ? 49.99 : 0;
             const taxableAccessoryAmount = accessoryCost;
             const taxableAccessFee = (totalLines > 0 && document.getElementById('access').checked) ? accessFee : 0;
