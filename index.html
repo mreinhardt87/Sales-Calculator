@@ -467,17 +467,16 @@
             'moto-g-power-2024': { name: 'Moto G Power 2024 (EOL)', retailPrice: 199.00, promoPrice: 0.00, veriffOnlyPrice: 0.00, noHasslePrice: 9.99 },
             'moto-edge-2024': { name: 'Moto Edge 2024 (EOL)', retailPrice: 259.99, promoPrice: 0.00, veriffOnlyPrice: 0.00, noHasslePrice: 49.99 },
             'moto-g-stylus-2024': { name: 'Moto G Stylus 2024 (EOL)', retailPrice: 249.99, promoPrice: 0.00, veriffOnlyPrice: 49.99, noHasslePrice: 149.99, requiredPlan: 40 },
-            'iphone-16': { name: 'Apple iPhone 16', retailPrice: 599.99, promoPrice: 479.99, veriffOnlyPrice: 579.99, noHasslePrice: 729.99, promoMonths: 2, requiredPlan: 50 },
+            'iphone-16e': { name: 'Apple iPhone 16e', retailPrice: 599.00, promoPrice: 479.99, veriffOnlyPrice: 579.99, noHasslePrice: 729.99, promoMonths: 2, requiredPlan: 50 },
             'iphone-15': { name: 'Apple iPhone 15', retailPrice: 729.00, promoPrice: 379.99, veriffOnlyPrice: 479.99, noHasslePrice: 629.99, promoMonths: 2, requiredPlan: 50 },
             'iphone-13-cpo-pro-max': { name: 'CPO iPhone 13 Pro Max', retailPrice: 529.00, promoPrice: 149.99, veriffOnlyPrice: 249.99, noHasslePrice: 399.99, promoMonths: 2, requiredPlan: 50 },
             'iphone-12-cpo-pro-max': { name: 'CPO iPhone 12 Pro Max', retailPrice: 349.99, promoPrice: 99.99, veriffOnlyPrice: 199.99, noHasslePrice: 349.99, promoMonths: 2, requiredPlan: 50 },
             'iphone-12-cpo-pro': { name: 'CPO iPhone 12 Pro', retailPrice: 299.99, promoPrice: 49.99, veriffOnlyPrice: 149.99, noHasslePrice: 299.99, promoMonths: 2, requiredPlan: 50 },
             'iphone-12-cpo': { name: 'CPO iPhone 12', retailPrice: 249.99, promoPrice: 0.00, veriffOnlyPrice: 99.99, noHasslePrice: 249.99, promoMonths: 2, requiredPlan: 50 },
-            // Keep old devices not on the new promo sheet
-            'iphone-13': { name: 'Apple iPhone 13 128GB', retailPrice: 529.00, promoPrice: 0.00, portOnlyPrice: 0.00, veriffOnlyPrice: 99.99, promoMonths: 3 },
-            'iphone-13-cpo': { name: 'Apple iPhone 13 CPO 128GB', retailPrice: 349.99, promoPrice: 0.00, portOnlyPrice: 0.00, veriffOnlyPrice: 99.99, promoMonths: 2 },
-            'iphone-14': { name: 'Apple iPhone 14 128GB', retailPrice: 629.00, promoPrice: 99.99, portOnlyPrice: 529.99, veriffOnlyPrice: 199.99, promoMonths: 3, requiredPlan: 40 },
-            'iphone-14-plus': { name: 'Apple iPhone 14 Plus 128GB', retailPrice: 729.00, promoPrice: 199.99, portOnlyPrice: 499.99, veriffOnlyPrice: 199.99, noHasslePrice: 499.99, promoMonths: 1, requiredPlan: 40 },
+            'iphone-13': { name: 'Apple iPhone 13 128GB', retailPrice: 529.00, promoPrice: 0.00, veriffOnlyPrice: 99.99, noHasslePrice: 529.00, promoMonths: 3 },
+            'iphone-13-cpo': { name: 'Apple iPhone 13 CPO 128GB', retailPrice: 349.99, promoPrice: 0.00, veriffOnlyPrice: 99.99, noHasslePrice: 349.99, promoMonths: 2 },
+            'iphone-14': { name: 'Apple iPhone 14 128GB', retailPrice: 629.00, promoPrice: 99.99, veriffOnlyPrice: 199.99, noHasslePrice: 629.00, promoMonths: 3, requiredPlan: 40 },
+            'iphone-14-plus': { name: 'Apple iPhone 14 Plus 128GB', retailPrice: 729.00, promoPrice: 199.99, veriffOnlyPrice: 199.99, noHasslePrice: 499.99, promoMonths: 1, requiredPlan: 40 },
             'samsung-a15': { name: 'Samsung Galaxy A15 5G', retailPrice: 79.99, promoPrice: 0.00, portOnlyPrice: 59.99, veriffOnlyPrice: 0.00, promoMonths: 1 },
             'samsung-a25': { name: 'Samsung Galaxy A25 5G', retailPrice: 199.99, promoPrice: 14.99, portOnlyPrice: 49.99, veriffOnlyPrice: 14.99, promoMonths: 1 },
             'samsung-a26': { name: 'Samsung Galaxy A26 5G', retailPrice: 199.99, promoPrice: 0.00, portOnlyPrice: 199.99, veriffOnlyPrice: 49.99, noHasslePrice: 149.99, promoMonths: 1 },
@@ -495,8 +494,8 @@
         
         const planBreakdownData = {
             '40': [40, 80, 100, 100, 115],
-            '50': [55, 85, 110, 110, 125],
-            '60': [65, 95, 120, 120, 135]
+            '50': [50, 80, 110, 110, 125],
+            '60': [60, 90, 120, 120, 135]
         };
         
         // --- Login Logic ---
@@ -1091,7 +1090,7 @@
 
             if (qualifiesForByodDiscount) {
                 const singleLineBasePrice = planBreakdownData[selectedPlan][0];
-                discount = singleLineBasePrice * 0.5;
+                discount = (singleLineBasePrice - 5) * 0.5;
                 breakdownTitle.textContent = 'Monthly Cost (w/ BYOD Discount)';
             } else {
                 breakdownTitle.textContent = 'Monthly Plan Cost';
