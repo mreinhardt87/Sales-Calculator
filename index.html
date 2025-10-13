@@ -748,10 +748,14 @@
                 if (totalLines > 0 && basePlanPrice > 0) {
                     const planPrices = planBreakdownData[basePlanPrice.toString()];
                     baseServiceCost = planPrices[totalLines - 1] || 0;
+
+                    if (totalLines === 1 && (basePlanPrice === 50 || basePlanPrice === 60)) {
+                        baseServiceCost -= 5;
+                    }
                     
                     if (portIn && byodPorts > 0) {
                         const singleLineBasePrice = planPrices[0];
-                        const discountPerByodPort = singleLineBasePrice * 0.5;
+                        const discountPerByodPort = (singleLineBasePrice - ( (basePlanPrice === 50 || basePlanPrice === 60) ? 5 : 0) ) * 0.5;
                         baseServiceCost -= discountPerByodPort;
                     }
                 }
@@ -862,8 +866,7 @@
 
             // --- Handle Home Internet, Hotspot & Tablets ---
             const internetLabel = document.getElementById('internet-label');
-            const isMultiLine = totalLines > 0 || upgradeLines > 0 || currentLines > 0;
-
+            
             if (homeInternet) {
                 const hiCost = isMultiLine ? 49.99 : (99.99 + 49.99);
                 internetLabel.textContent = `Home Internet (3 Months + Router)`;
@@ -1000,7 +1003,7 @@
             document.getElementById('access-label').textContent = `Access Fee (Mobile) (${totalLines} line${totalLines !== 1 ? 's' : ''})`;
             document.getElementById('access-amount').textContent = `$${accessFee.toFixed(2)}`;
             
-            const simCardFee = (byodLines + byotTabletLines) * 3;
+            const simCardFee = (byodLines + byotTabletLines) * 10;
             const totalSims = byodLines + byotTabletLines;
             simCardContainer.style.display = totalSims > 0 ? 'block' : 'none';
             simCardCheckbox.checked = totalSims > 0;
