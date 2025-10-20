@@ -494,8 +494,14 @@
         
         const planBreakdownData = {
             '40': [40, 80, 100, 100, 115],
-            '50': [50, 80, 110, 110, 125],
-            '60': [60, 90, 120, 120, 135]
+            '50': [50, 80, 110, 110, 115],
+            '60': [60, 95, 120, 120, 135]
+        };
+
+        const firstMonthPlanData = {
+            '40': [40, 80, 100, 100, 115],
+            '50': [55, 85, 110, 110, 125],
+            '60': [65, 95, 120, 120, 135]
         };
         
         // --- Login Logic ---
@@ -732,7 +738,7 @@
                 const newLines = totalLines;
 
                 if (basePlanPrice > 0 && currentLines > 0 && newLines > 0 && daysIntoCycle >= 0 && daysIntoCycle <= 30) {
-                    const planPrices = planBreakdownData[basePlanPrice.toString()];
+                    const planPrices = firstMonthPlanData[basePlanPrice.toString()];
                     if (planPrices && planPrices[currentLines - 1] !== undefined && planPrices[currentLines + newLines - 1] !== undefined) {
                         const originalCost = planPrices[currentLines - 1];
                         const newTotalCost = planPrices[currentLines + newLines - 1];
@@ -746,16 +752,12 @@
                 let baseServiceCost = 0;
                
                 if (totalLines > 0 && basePlanPrice > 0) {
-                    const planPrices = planBreakdownData[basePlanPrice.toString()];
+                    const planPrices = firstMonthPlanData[basePlanPrice.toString()];
                     baseServiceCost = planPrices[totalLines - 1] || 0;
-
-                    if (totalLines === 1 && (basePlanPrice === 50 || basePlanPrice === 60)) {
-                        baseServiceCost -= 5;
-                    }
                     
                     if (portIn && byodPorts > 0) {
                         const singleLineBasePrice = planPrices[0];
-                        const discountPerByodPort = (singleLineBasePrice - ( (basePlanPrice === 50 || basePlanPrice === 60) ? 5 : 0) ) * 0.5;
+                        const discountPerByodPort = singleLineBasePrice * 0.5;
                         baseServiceCost -= discountPerByodPort;
                     }
                 }
@@ -764,7 +766,7 @@
                 const canUseRedHotTicket = portedLines > 0 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus && !hasMotoStylus;
 
                 if (redHotTicket && canUseRedHotTicket) {
-                   const planPrices = planBreakdownData[basePlanPrice.toString()];
+                   const planPrices = firstMonthPlanData[basePlanPrice.toString()];
                    if(planPrices && portedLines > 0) {
                         let costOfPortedLines = planPrices[portedLines - 1];
                         const singleLineCost = planPrices[0];
