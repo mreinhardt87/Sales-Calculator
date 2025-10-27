@@ -494,10 +494,10 @@
         
         const planBreakdownData = {
             '40': [40, 80, 100, 100, 115],
-            '50': [50, 80, 110, 110, 115],
-            '60': [60, 95, 120, 120, 135]
+            '50': [50, 80, 110, 110, 125],
+            '60': [60, 90, 120, 120, 135]
         };
-
+        
         const firstMonthPlanData = {
             '40': [40, 80, 100, 100, 115],
             '50': [55, 85, 110, 110, 125],
@@ -701,12 +701,11 @@
                     }
 
                     if (meetsPlanRequirement) {
-                        if (idVerified && newDevicePortsAvailable > 0) { // SWITCH logic
+                        if (idVerified && portIn) { // This now represents "Switch"
                             totalDeviceCost += currentDeal.promoPrice;
-                            newDevicePortsAvailable--; // Consume a port
-                        } else if (idVerified) { // JOIN logic
+                        } else if (idVerified) { // This now represents "Join"
                             totalDeviceCost += currentDeal.veriffOnlyPrice;
-                        } else { // NO HASSLE logic
+                        } else { // This is "No Hassle"
                             totalDeviceCost += currentDeal.noHasslePrice !== undefined ? currentDeal.noHasslePrice : currentDeal.retailPrice;
                         }
                     } else {
@@ -868,7 +867,8 @@
 
             // --- Handle Home Internet, Hotspot & Tablets ---
             const internetLabel = document.getElementById('internet-label');
-            
+            const isMultiLine = totalLines > 0 || upgradeLines > 0 || currentLines > 0;
+
             if (homeInternet) {
                 const hiCost = isMultiLine ? 49.99 : (99.99 + 49.99);
                 internetLabel.textContent = `Home Internet (3 Months + Router)`;
@@ -1035,7 +1035,12 @@
             const taxableAccessoryAmount = accessoryCost;
             const taxableAccessFee = (totalLines > 0 && document.getElementById('access').checked) ? accessFee : 0;
             
-            const totalTaxableDeviceAmount = totalRetailForTax + taxableHomeRouterAmount + taxableAccessoryAmount + taxableHotspotAmount;
+            let taxableTabletAmount = 0;
+            if (selectedTabletKey !== 'none') {
+                taxableTabletAmount = currentTablet.msrp;
+            }
+
+            const totalTaxableDeviceAmount = totalRetailForTax + taxableHomeRouterAmount + taxableAccessoryAmount + taxableHotspotAmount + taxableTabletAmount;
             const totalTax = (totalTaxableDeviceAmount * taxRate) + (taxableAccessFee * taxRate);
             
             document.getElementById('sales-tax').dataset.amount = totalTax.toFixed(2);
@@ -1091,11 +1096,14 @@
             }
 
             let discount = 0;
-            const qualifiesForByodDiscount = portIn && byodPorts > 0;
+            const qualifiesForByodDiscount = portIn && (byodPorts > 0 || (byodLines > 0 && newDeviceLines === 0));
 
             if (qualifiesForByodDiscount) {
-                const singleLineBasePrice = planBreakdownData[selectedPlan][0];
-                discount = (singleLineBasePrice - 5) * 0.5;
+                let singleLineBasePrice = planBreakdownData[selectedPlan][0];
+                if (selectedPlan === '50' || selectedPlan === '60') {
+                    singleLineBasePrice -= 5;
+                }
+                discount = singleLineBasePrice * 0.5;
                 breakdownTitle.textContent = 'Monthly Cost (w/ BYOD Discount)';
             } else {
                 breakdownTitle.textContent = 'Monthly Plan Cost';
@@ -1111,7 +1119,7 @@
                 }
                 
                 // Apply BYOD discount if applicable
-                if (qualifiesForByodDiscount && lineCount >= byodPorts) {
+                if (qualifiesForByodDiscount && lineCount >= (byodPorts || 1) ) {
                      finalPrice -= discount;
                 }
 
