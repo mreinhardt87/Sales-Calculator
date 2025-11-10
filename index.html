@@ -1041,6 +1041,8 @@
             document.getElementById('access-label').textContent = `Access Fee (Mobile) (${totalLines} line${totalLines !== 1 ? 's' : ''})`;
             document.getElementById('access-amount').textContent = `$${accessFee.toFixed(2)}`;
             
+            console.log(`[DEBUG] BYOD Lines: ${byodLines}, BYOT Lines: ${byotTabletLines}`); // DEBUGGING
+            
             const simCardFee = (byodLines + byotTabletLines) * 10;
             const totalSims = byodLines + byotTabletLines;
             simCardContainer.style.display = totalSims > 0 ? 'block' : 'none';
