@@ -478,6 +478,7 @@
             'iphone-14': { name: 'Apple iPhone 14 128GB', retailPrice: 629.00, promoPrice: 99.99, veriffOnlyPrice: 199.99, noHasslePrice: 629.00, promoMonths: 3, requiredPlan: 40 },
             'iphone-14-plus': { name: 'Apple iPhone 14 Plus 128GB', retailPrice: 729.00, promoPrice: 199.99, veriffOnlyPrice: 199.99, noHasslePrice: 499.99, promoMonths: 1, requiredPlan: 40 },
             'moto-razr-2025': { name: 'Motorola Razr 2025', retailPrice: 599.00, promoPrice: 199.99, veriffOnlyPrice: 299.99, noHasslePrice: 599.00, promoMonths: 2, requiredPlan: 50 },
+            'samsung-s25fe': { name: 'Samsung S25FE', retailPrice: 599.99, promoPrice: 299.99, veriffOnlyPrice: 399.99, noHasslePrice: 599.99, promoMonths: 2, requiredPlan: 50, stackable: false },
             'samsung-a15': { name: 'Samsung Galaxy A15 5G', retailPrice: 79.99, promoPrice: 0.00, portOnlyPrice: 59.99, veriffOnlyPrice: 0.00, promoMonths: 1 },
             'samsung-a25': { name: 'Samsung Galaxy A25 5G', retailPrice: 199.99, promoPrice: 14.99, portOnlyPrice: 49.99, veriffOnlyPrice: 14.99, promoMonths: 1 },
             'samsung-a26': { name: 'Samsung Galaxy A26 5G', retailPrice: 199.99, promoPrice: 0.00, portOnlyPrice: 199.99, veriffOnlyPrice: 49.99, noHasslePrice: 149.99, promoMonths: 1 },
@@ -675,6 +676,7 @@
             const hasIphone14 = selectedDeviceKeys.includes('iphone-14');
             const hasIphone14Plus = selectedDeviceKeys.includes('iphone-14-plus');
             const hasMotoStylus = selectedDeviceKeys.some(key => key.includes('moto-g-stylus'));
+            const hasS25FE = selectedDeviceKeys.includes('samsung-s25fe');
 
             const isUpgradeOnly = upgradeType === 'upgrade-only' || upgradeType === 'upgrade-with-rewards';
             const isAddingALine = upgradeType === 'add-a-line';
@@ -765,7 +767,15 @@
                     const planPrices = firstMonthPlanData[basePlanPrice.toString()];
                     baseServiceCost = planPrices[totalLines - 1] || 0;
                     
-                    if (portIn && byodPorts > 0) {
+                    if (hasS25FE) {
+                         const s25fePlanPrice = (basePlanPrice === 50) ? 55 : (basePlanPrice === 60 ? 65 : 40);
+                         const otherLines = totalLines - newDeviceKeys.filter(k => k === 'samsung-s25fe').length;
+                         let otherLinesCost = 0;
+                         if (otherLines > 0) {
+                            otherLinesCost = planPrices[otherLines - 1] || 0;
+                         }
+                         baseServiceCost = (s25fePlanPrice * (totalLines - otherLines)) + otherLinesCost;
+                    } else if (portIn && byodPorts > 0) {
                         const singleLineBasePrice = planPrices[0];
                         const discountPerByodPort = singleLineBasePrice * 0.5;
                         baseServiceCost -= discountPerByodPort;
@@ -773,7 +783,7 @@
                 }
                 
                 let serviceDiscount = 0;
-                const canUseRedHotTicket = portedLines > 0 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus && !hasMotoStylus;
+                const canUseRedHotTicket = portedLines > 0 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus && !hasMotoStylus && !hasS25FE;
 
                 if (redHotTicket && canUseRedHotTicket) {
                    const planPrices = firstMonthPlanData[basePlanPrice.toString()];
@@ -811,7 +821,7 @@
             const isNewSingleLineAccount = upgradeType === 'new-account' && totalLines === 1;
             const hasExistingLines = (isAddingALine || upgradeType === 'upgrade-add-line') && currentLines >= 1;
             
-            if (basePlanPrice > 0 && isNewSingleLineAccount && promoDeviceKey) {
+            if (basePlanPrice > 0 && promoDeviceKey) {
                 const deal = dealData[promoDeviceKey];
                 let isPromoApplicable = true;
 
@@ -819,17 +829,24 @@
                     isPromoApplicable = false;
                 }
                 
-                if (isPromoApplicable) {
+                // Special check for S25FE (stackable: false) - it ALWAYS requires multi-month
+                if (isPromoApplicable && deal.stackable === false) { 
+                    promoMonthsRequired = true;
+                    promoMonthsCount = deal.promoMonths - 1;
+                    promoMonthsCost = (basePlanPrice === 50 ? 55 : 65) * promoMonthsCount; // Use non-autopay price
+                    promoMessages.push(`<b>${deal.name}</b> requires paying for ${deal.promoMonths} months of service upfront.`);
+                }
+                // Standard multi-month logic for other devices
+                else if (isPromoApplicable && isNewSingleLineAccount) {
                     promoMonthsRequired = true;
                     promoMonthsCount = deal.promoMonths - 1;
                     promoMonthsCost = basePlanPrice * promoMonthsCount;
                     promoMessages.push(`<b>${deal.name}</b> requires paying for ${deal.promoMonths} months of service upfront for a single line.`);
+                } else if (isPromoApplicable && (totalLines > 1 || hasExistingLines)) {
+                    if (!promoMessages.some(m => m.includes("waived"))) {
+                        promoMessages.push(`The upfront promotional month payment is waived for multi-line or existing accounts.`);
+                    }
                 }
-
-            } else if (promoDeviceKey && (totalLines > 1 || hasExistingLines)) {
-                 if (!promoMessages.some(m => m.includes("waived"))) {
-                    promoMessages.push(`The upfront promotional month payment is waived for multi-line or existing accounts.`);
-                 }
             }
 
             promoMonthsContainer.style.display = promoMonthsRequired ? 'block' : 'none';
@@ -843,8 +860,8 @@
             const redHotTicketContainer = document.getElementById('red-hot-ticket-container');
             const redHotTicketCheckbox = document.getElementById('red-hot-ticket');
             
-            const canUseRedHotTicket = upgradeType !== 'add-a-line' && portedLines > 0 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus && !hasMotoStylus;
-            const qualifiesForByodDiscount = portIn && byodPorts > 0;
+            const canUseRedHotTicket = upgradeType !== 'add-a-line' && portedLines > 0 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus && !hasMotoStylus && !hasS25FE;
+            const qualifiesForByodDiscount = portIn && byodPorts > 0 && !hasS25FE;
 
             if (canUseRedHotTicket) {
                 redHotTicketContainer.style.display = 'block';
@@ -1080,10 +1097,20 @@
             const breakdownContainer = document.getElementById('price-breakdown');
             const selectedPlan = document.getElementById('plan-select').value;
             const byodLines = parseInt(document.getElementById('byod-lines').value) || 0;
+            const newDeviceLines = parseInt(document.getElementById('new-device-lines').value) || 0;
             const byodPorts = parseInt(document.getElementById('byod-ports-select').value) || 0;
             const portIn = document.getElementById('port-in').checked;
             const breakdownTitle = document.getElementById('breakdown-title');
             
+            let newDeviceKeys = [];
+            if (newDeviceLines > 0) {
+                for (let i = 1; i <= newDeviceLines; i++) {
+                    newDeviceKeys.push(document.getElementById(`device-select-${i}`).value);
+                }
+            }
+            const hasS25FE = newDeviceKeys.includes('samsung-s25fe');
+            const s25feCount = newDeviceKeys.filter(k => k === 'samsung-s25fe').length;
+
             // Get addon values
             const protectLinesCount = parseInt(document.getElementById('protect-lines').value) || 0;
             const dedicatedHotspot = document.getElementById('dedicated-hotspot').checked;
@@ -1107,7 +1134,7 @@
             }
 
             let discount = 0;
-            const qualifiesForByodDiscount = portIn && (byodPorts > 0 || (byodLines > 0 && newDeviceLines === 0));
+            const qualifiesForByodDiscount = portIn && (byodPorts > 0 || (byodLines > 0 && newDeviceLines === 0)) && !hasS25FE;
 
             if (qualifiesForByodDiscount) {
                 let singleLineBasePrice = planBreakdownData[selectedPlan][0];
@@ -1122,16 +1149,37 @@
 
             prices.forEach((price, index) => {
                 const lineCount = index + 1;
-                let finalPrice = price; // Base price from new data object
+                let finalPrice; 
 
-                // Apply autopay discount ONLY for single line on eligible plans
-                if (lineCount === 1 && (selectedPlan === '50' || selectedPlan === '60')) {
-                    finalPrice -= 5;
-                }
+                if (hasS25FE) {
+                    // --- S25FE Non-Stackable Logic ---
+                    const otherLines = lineCount - s25feCount;
+                    let s25fePrice = 0;
+                    const singleLinePriceNoAutopay = planBreakdownData[selectedPlan][0];
+                    s25fePrice = singleLinePriceNoAutopay * s25feCount;
+
+                    let otherLinesPrice = 0;
+                    if (otherLines > 0) {
+                        otherLinesPrice = prices[otherLines - 1];
+                        if (otherLines === 1 && (selectedPlan === '50' || selectedPlan === '60')) {
+                            otherLinesPrice -= 5;
+                        }
+                    }
+                    finalPrice = s25fePrice + otherLinesPrice;
                 
-                // Apply BYOD discount if applicable
-                if (qualifiesForByodDiscount && lineCount >= (byodPorts || 1) ) {
-                     finalPrice -= discount;
+                } else {
+                    // --- Standard Logic ---
+                    finalPrice = price; // Base price from new data object
+
+                    // Apply autopay discount ONLY for single line on eligible plans
+                    if (lineCount === 1 && (selectedPlan === '50' || selectedPlan === '60')) {
+                        finalPrice -= 5;
+                    }
+                    
+                    // Apply BYOD discount if applicable
+                    if (qualifiesForByodDiscount && lineCount >= (byodPorts || 1) ) {
+                        finalPrice -= discount;
+                    }
                 }
 
                 const div = document.createElement('div');
@@ -1148,7 +1196,7 @@
                 spanPrice.textContent = `$${finalPrice.toFixed(2)}`;
                 priceContainer.appendChild(spanPrice);
                 
-                if (qualifiesForByodDiscount && lineCount >= 1) {
+                if (qualifiesForByodDiscount && lineCount >= 1 && !hasS25FE) {
                     let originalPrice = price;
                      if (lineCount === 1 && (selectedPlan === '50' || selectedPlan === '60')) {
                         originalPrice -= 5;
