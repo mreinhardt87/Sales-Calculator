@@ -684,14 +684,15 @@
             // Calculate cost for new devices (promotional)
             let newDevicePortsAvailable = portIn ? (portedLines - byodPorts) : 0;
             
-            const motoGStylus2024Count = newDeviceKeys.filter(k => k === 'moto-g-stylus-5g-2024').length;
-            const isMotoGStylusPromoActive = motoGStylus2024Count > 0 && motoGStylus2024Count === newDeviceLines && newDeviceLines <= 4 && idVerified && portedLines >= 1;
+            const portOneGetFourKeys = ['samsung-a16', 'moto-g-power-2025', 'moto-g-stylus-2025', 'moto-g-2025', 'moto-g-stylus-2024'];
+            const allDevicesEligibleForPortPromo = newDeviceKeys.length > 0 && newDeviceKeys.every(key => portOneGetFourKeys.includes(key));
+            const isPortOneGetFourActive = allDevicesEligibleForPortPromo && newDeviceLines <= 4 && byodLines === 0 && upgradeLines === 0 && idVerified && portedLines >= 1 && basePlanPrice >= 40;
 
-            if (isMotoGStylusPromoActive) {
-                for (let i = 0; i < newDeviceLines; i++) {
-                    const currentDeal = dealData['moto-g-stylus-5g-2024'];
-                    totalRetailForTax += currentDeal.retailPrice;
-                }
+            if (isPortOneGetFourActive) {
+                newDeviceKeys.forEach(selectedKey => {
+                    totalRetailForTax += dealData[selectedKey].retailPrice;
+                });
+                promoMessages.push("<b>Port 1, Get up to 4 Free!</b> promo is active.");
             } else {
                 newDeviceKeys.forEach(selectedKey => {
                     const currentDeal = dealData[selectedKey];
@@ -783,7 +784,7 @@
                 }
                 
                 let serviceDiscount = 0;
-                const canUseRedHotTicket = portedLines > 0 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus && !hasMotoStylus && !hasS25FE;
+                const canUseRedHotTicket = portedLines > 0 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus && !hasMotoStylus && !hasS25FE && !isPortOneGetFourActive;
 
                 if (redHotTicket && canUseRedHotTicket) {
                    const planPrices = firstMonthPlanData[basePlanPrice.toString()];
@@ -860,8 +861,8 @@
             const redHotTicketContainer = document.getElementById('red-hot-ticket-container');
             const redHotTicketCheckbox = document.getElementById('red-hot-ticket');
             
-            const canUseRedHotTicket = upgradeType !== 'add-a-line' && portedLines > 0 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus && !hasMotoStylus && !hasS25FE;
-            const qualifiesForByodDiscount = portIn && byodPorts > 0 && !hasS25FE;
+            const canUseRedHotTicket = upgradeType !== 'add-a-line' && portedLines > 0 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus && !hasMotoStylus && !hasS25FE && !isPortOneGetFourActive;
+            const qualifiesForByodDiscount = portIn && byodPorts > 0 && !hasS25FE && !isPortOneGetFourActive;
 
             if (canUseRedHotTicket) {
                 redHotTicketContainer.style.display = 'block';
