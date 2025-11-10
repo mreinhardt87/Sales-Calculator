@@ -686,13 +686,21 @@
             
             const portOneGetFourKeys = ['samsung-a16', 'moto-g-power-2025', 'moto-g-stylus-2025', 'moto-g-2025', 'moto-g-stylus-2024'];
             const allDevicesEligibleForPortPromo = newDeviceKeys.length > 0 && newDeviceKeys.every(key => portOneGetFourKeys.includes(key));
-            const isPortOneGetFourActive = allDevicesEligibleForPortPromo && newDeviceLines <= 4 && byodLines === 0 && upgradeLines === 0 && idVerified && portedLines >= 1 && basePlanPrice >= 40;
+            const isPortOneGetFourActive = (upgradeType === 'new-account' || upgradeType === 'add-a-line') &&
+                                           allDevicesEligibleForPortPromo &&
+                                           newDeviceLines <= 4 &&
+                                           byodLines === 0 &&
+                                           upgradeLines === 0 &&
+                                           idVerified &&
+                                           portedLines >= 1 &&
+                                           basePlanPrice >= 40;
 
             if (isPortOneGetFourActive) {
                 newDeviceKeys.forEach(selectedKey => {
                     totalRetailForTax += dealData[selectedKey].retailPrice;
                 });
                 promoMessages.push("<b>Port 1, Get up to 4 Free!</b> promo is active.");
+                totalDeviceCost = 0;
             } else {
                 newDeviceKeys.forEach(selectedKey => {
                     const currentDeal = dealData[selectedKey];
