@@ -496,8 +496,8 @@
         
         const planBreakdownData = {
             '40': [40, 80, 100, 100, 115],
-            '50': [50, 80, 110, 110, 125],
-            '60': [60, 90, 120, 120, 135]
+            '50': [55, 85, 110, 110, 125],
+            '60': [65, 95, 120, 120, 135]
         };
         
         const firstMonthPlanData = {
@@ -675,7 +675,6 @@
             const hasIphone13 = selectedDeviceKeys.includes('iphone-13') || selectedDeviceKeys.includes('iphone-13-cpo');
             const hasIphone14 = selectedDeviceKeys.includes('iphone-14');
             const hasIphone14Plus = selectedDeviceKeys.includes('iphone-14-plus');
-            const hasMotoStylus = selectedDeviceKeys.some(key => key.includes('moto-g-stylus'));
             const hasS25FE = selectedDeviceKeys.includes('samsung-s25fe');
 
             const isUpgradeOnly = upgradeType === 'upgrade-only' || upgradeType === 'upgrade-with-rewards';
@@ -688,7 +687,7 @@
             const allDevicesEligibleForPortPromo = newDeviceKeys.length > 0 && newDeviceKeys.every(key => portOneGetFourKeys.includes(key));
             const isPortOneGetFourActive = (upgradeType === 'new-account' || upgradeType === 'add-a-line') &&
                                            allDevicesEligibleForPortPromo &&
-                                           newDeviceLines <= 4 &&
+                                           newDeviceLines >= 2 && newDeviceLines <= 4 && // [FIX] Only active for 2-4 lines
                                            byodLines === 0 &&
                                            upgradeLines === 0 &&
                                            idVerified &&
@@ -792,7 +791,7 @@
                 }
                 
                 let serviceDiscount = 0;
-                const canUseRedHotTicket = portedLines > 0 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus && !hasMotoStylus && !hasS25FE && !isPortOneGetFourActive;
+                const canUseRedHotTicket = portedLines > 0 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus && !hasS25FE && !isPortOneGetFourActive;
 
                 if (redHotTicket && canUseRedHotTicket) {
                    const planPrices = firstMonthPlanData[basePlanPrice.toString()];
@@ -869,7 +868,7 @@
             const redHotTicketContainer = document.getElementById('red-hot-ticket-container');
             const redHotTicketCheckbox = document.getElementById('red-hot-ticket');
             
-            const canUseRedHotTicket = upgradeType !== 'add-a-line' && portedLines > 0 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus && !hasMotoStylus && !hasS25FE && !isPortOneGetFourActive;
+            const canUseRedHotTicket = upgradeType !== 'add-a-line' && portedLines > 0 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus && !hasS25FE && !isPortOneGetFourActive;
             const qualifiesForByodDiscount = portIn && byodPorts > 0 && !hasS25FE && !isPortOneGetFourActive;
 
             if (canUseRedHotTicket) {
@@ -1147,6 +1146,9 @@
 
             if (qualifiesForByodDiscount) {
                 let singleLineBasePrice = planBreakdownData[selectedPlan][0];
+                 if(selectedPlan === '50' || selectedPlan === '60') {
+                    singleLineBasePrice -= 5;
+                }
                 discount = singleLineBasePrice * 0.5;
                 breakdownTitle.textContent = 'Monthly Cost (w/ BYOD Discount)';
             } else {
@@ -1174,6 +1176,11 @@
                     // --- Standard Logic ---
                     finalPrice = price; // Base price from new data object
                     
+                    // Apply autopay discount ONLY for single line on eligible plans
+                    if (lineCount === 1 && (selectedPlan === '50' || selectedPlan === '60')) {
+                        finalPrice -= 5;
+                    }
+                    
                     // Apply BYOD discount if applicable
                     if (qualifiesForByodDiscount && lineCount >= (byodPorts || 1) ) {
                         finalPrice -= discount;
@@ -1196,6 +1203,9 @@
                 
                 if (qualifiesForByodDiscount && lineCount >= 1 && !hasS25FE) {
                     let originalPrice = price;
+                     if (lineCount === 1 && (selectedPlan === '50' || selectedPlan === '60')) {
+                        originalPrice -= 5;
+                    }
                     const originalPriceSpan = document.createElement('span');
                     originalPriceSpan.className = 'text-xs text-gray-400 line-through ml-2';
                     originalPriceSpan.textContent = `$${originalPrice.toFixed(2)}`;
