@@ -496,8 +496,8 @@
         
         const planBreakdownData = {
             '40': [40, 80, 100, 100, 115],
-            '50': [50, 80, 110, 110, 125],
-            '60': [60, 90, 120, 120, 135]
+            '50': [50, 85, 110, 110, 125],
+            '60': [60, 95, 120, 120, 135]
         };
         
         const firstMonthPlanData = {
@@ -752,6 +752,14 @@
             // --- Calculate Service Cost ---
             let finalServiceCost = 0;
             let serviceLabelText = 'First Month Mobile Service';
+            let byodPortsToUse = 0;
+            if (byodLines > 0 && newDeviceLines > 0) {
+                byodPortsToUse = byodPorts; // Use the dropdown value
+            } else if (byodLines > 0 && newDeviceLines === 0) {
+                byodPortsToUse = Math.min(byodLines, portedLines); // Use the total BYOD lines, capped by ported lines
+            }
+            const qualifiesForByodDiscount = portIn && (byodPortsToUse > 0) && !hasS25FE && !isPortOneGetFourActive;
+
 
             if (isAddingALine) {
                 const daysIntoCycle = parseInt(billingCycleDaysInput.value) || 0;
@@ -775,13 +783,7 @@
                     const planPrices = firstMonthPlanData[basePlanPrice.toString()];
                     baseServiceCost = planPrices[totalLines - 1] || 0;
                     
-                    const qualifiesForByodDiscount = portIn && (byodPorts > 0 || (byodLines > 0 && newDeviceLines === 0)) && !hasS25FE && !isPortOneGetFourActive;
-
-                    if (qualifiesForByodDiscount) {
-                        const singleLineBasePrice = planPrices[0];
-                        const discountPerByodPort = singleLineBasePrice * 0.5;
-                        baseServiceCost -= discountPerByodPort;
-                    } else if (hasS25FE) {
+                    if (hasS25FE) {
                          const s25fePlanPrice = (basePlanPrice === 50) ? 55 : (basePlanPrice === 60 ? 65 : basePlanPrice);
                          const otherLines = totalLines - newDeviceKeys.filter(k => k === 'samsung-s25fe').length;
                          let otherLinesCost = 0;
@@ -789,6 +791,10 @@
                             otherLinesCost = planPrices[otherLines - 1] || 0;
                          }
                          baseServiceCost = (s25fePlanPrice * (totalLines - otherLines)) + otherLinesCost;
+                    } else if (qualifiesForByodDiscount) {
+                        const singleLineBasePrice = planPrices[0];
+                        const discountPerByodPort = singleLineBasePrice * 0.5;
+                        baseServiceCost -= discountPerByodPort;
                     }
                 }
                 
@@ -871,7 +877,6 @@
             const redHotTicketCheckbox = document.getElementById('red-hot-ticket');
             
             const canUseRedHotTicket = upgradeType !== 'add-a-line' && portedLines > 0 && !isUpgradeOnly && !hasS25FE && !isPortOneGetFourActive;
-            const qualifiesForByodDiscount = portIn && byodPorts > 0 && !hasS25FE && !isPortOneGetFourActive;
 
             if (canUseRedHotTicket) {
                 redHotTicketContainer.style.display = 'block';
@@ -1144,7 +1149,8 @@
             }
 
             let discount = 0;
-            const qualifiesForByodDiscount = portIn && (byodPorts > 0 || (byodLines > 0 && newDeviceLines === 0)) && !hasS25FE;
+            const byodPortsToUse = (byodLines > 0 && newDeviceLines > 0) ? byodPorts : Math.min(byodLines, parseInt(document.getElementById('ported-lines').value) || 0);
+            const qualifiesForByodDiscount = portIn && (byodPortsToUse > 0 || (byodLines > 0 && newDeviceLines === 0)) && !hasS25FE;
 
             if (qualifiesForByodDiscount) {
                 let singleLineBasePrice = planBreakdownData[selectedPlan][0];
@@ -1184,7 +1190,7 @@
                     }
                     
                     // Apply BYOD discount if applicable
-                    if (qualifiesForByodDiscount && lineCount >= (byodPorts || 1) ) {
+                    if (qualifiesForByodDiscount && lineCount >= (byodPortsToUse || 1) ) {
                         finalPrice -= discount;
                     }
                 }
