@@ -1166,6 +1166,7 @@
             prices.forEach((price, index) => {
                 const lineCount = index + 1;
                 let finalPrice; 
+                let originalPrice = price;
 
                 if (hasS25FE) {
                     // --- S25FE Non-Stackable Logic ---
@@ -1210,7 +1211,6 @@
                 priceContainer.appendChild(spanPrice);
                 
                 if (qualifiesForByodDiscount && lineCount >= 1 && !hasS25FE) {
-                    let originalPrice = price;
                      if (lineCount === 1 && (selectedPlan === '50' || selectedPlan === '60')) {
                         originalPrice -= 5;
                     }
