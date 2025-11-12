@@ -1154,9 +1154,6 @@
 
             if (qualifiesForByodDiscount) {
                 let singleLineBasePrice = planBreakdownData[selectedPlan][0];
-                 if(selectedPlan === '50' || selectedPlan === '60') {
-                    singleLineBasePrice -= 5;
-                }
                 discount = singleLineBasePrice * 0.5;
                 breakdownTitle.textContent = 'Monthly Cost (w/ BYOD Discount)';
             } else {
