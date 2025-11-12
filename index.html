@@ -1184,11 +1184,6 @@
                     // --- Standard Logic ---
                     finalPrice = price; // Base price from new data object
                     
-                    // Apply autopay discount ONLY for single line on eligible plans
-                    if (lineCount === 1 && (selectedPlan === '50' || selectedPlan === '60')) {
-                        finalPrice -= 5;
-                    }
-                    
                     // Apply BYOD discount if applicable
                     if (qualifiesForByodDiscount && lineCount >= (byodPortsToUse || 1) ) {
                         finalPrice -= discount;
@@ -1210,9 +1205,7 @@
                 priceContainer.appendChild(spanPrice);
                 
                 if (qualifiesForByodDiscount && lineCount >= 1 && !hasS25FE) {
-                     if (lineCount === 1 && (selectedPlan === '50' || selectedPlan === '60')) {
-                        originalPrice -= 5;
-                    }
+                    let originalPrice = price;
                     const originalPriceSpan = document.createElement('span');
                     originalPriceSpan.className = 'text-xs text-gray-400 line-through ml-2';
                     originalPriceSpan.textContent = `$${originalPrice.toFixed(2)}`;
