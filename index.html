@@ -794,7 +794,7 @@
                          }
                          baseServiceCost = (s25fePlanPrice * (totalLines - otherLines)) + otherLinesCost;
                     } else if (qualifiesForByodDiscount) {
-                        const singleLineBasePrice = planBreakdownData[basePlanPrice.toString()][0]; // Use autopay price for 50% off
+                        const singleLineBasePrice = planPrices[0];
                         const discountPerByodPort = singleLineBasePrice * 0.5;
                         baseServiceCost -= discountPerByodPort;
                     }
