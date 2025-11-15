@@ -389,6 +389,15 @@
                             </label>
                         </div>
 
+                        <!-- [NEW] eSIM Toggle -->
+                        <div id="esim-toggle-container" class="hidden ml-8">
+                            <input type="checkbox" id="esim-toggle" onchange="updateCalculator()">
+                            <label for="esim-toggle" class="checkbox-label text-sm py-2">
+                                <span class="checkmark"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></span>
+                                <span>Use eSIM (Waive SIM Card Fee)</span>
+                            </label>
+                        </div>
+
                         <!-- [NEW] Rewards Credit -->
                          <div id="rewards-credit-container" class="hidden">
                             <input type="checkbox" id="rewards-credit" data-amount="0" disabled>
@@ -592,6 +601,8 @@
             const simCardCheckbox = document.getElementById('sim-card-fee');
             const simCardLabel = document.getElementById('sim-card-label');
             const simCardAmountSpan = document.getElementById('sim-card-amount');
+            const esimToggleContainer = document.getElementById('esim-toggle-container');
+            const esimToggle = document.getElementById('esim-toggle').checked;
             const hotspotPlanContainer = document.getElementById('hotspot-plan-container');
             const promoBox = document.getElementById('promo-box');
             const promoBoxText = document.getElementById('promo-box-text');
@@ -1050,10 +1061,22 @@
             document.getElementById('access-label').textContent = `Access Fee (Mobile) (${totalLines} line${totalLines !== 1 ? 's' : ''})`;
             document.getElementById('access-amount').textContent = `$${accessFee.toFixed(2)}`;
             
-            const simCardFee = (byodLines + byotTabletLines) * 10;
             const totalSims = byodLines + byotTabletLines;
-            simCardContainer.style.display = totalSims > 0 ? 'block' : 'none';
-            simCardCheckbox.checked = totalSims > 0;
+            let simCardFee = 0;
+
+            if (totalSims > 0) {
+                simCardContainer.style.display = 'block';
+                esimToggleContainer.style.display = 'block';
+                if (!esimToggle) {
+                    simCardFee = totalSims * 10;
+                }
+            } else {
+                simCardContainer.style.display = 'none';
+                esimToggleContainer.style.display = 'none';
+                document.getElementById('esim-toggle').checked = false; // Uncheck if no BYOD lines
+            }
+            
+            simCardCheckbox.checked = simCardFee > 0;
             simCardCheckbox.dataset.amount = simCardFee.toFixed(2);
             simCardLabel.textContent = `Sim Card (${totalSims} sim${totalSims !== 1 ? 's' : ''})`;
             simCardAmountSpan.textContent = `$${simCardFee.toFixed(2)}`;
@@ -1184,11 +1207,6 @@
                     // --- Standard Logic ---
                     finalPrice = price; // Base price from new data object
                     
-                    // Apply autopay discount ONLY for single line on eligible plans
-                    if (lineCount === 1 && (selectedPlan === '50' || selectedPlan === '60')) {
-                        finalPrice -= 5;
-                    }
-                    
                     // Apply BYOD discount if applicable
                     if (qualifiesForByodDiscount && lineCount >= (byodPortsToUse || 1) ) {
                         finalPrice -= discount;
@@ -1210,9 +1228,7 @@
                 priceContainer.appendChild(spanPrice);
                 
                 if (qualifiesForByodDiscount && lineCount >= 1 && !hasS25FE) {
-                     if (lineCount === 1 && (selectedPlan === '50' || selectedPlan === '60')) {
-                        originalPrice -= 5;
-                    }
+                     let originalPrice = price;
                     const originalPriceSpan = document.createElement('span');
                     originalPriceSpan.className = 'text-xs text-gray-400 line-through ml-2';
                     originalPriceSpan.textContent = `$${originalPrice.toFixed(2)}`;
