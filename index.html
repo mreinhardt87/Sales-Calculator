@@ -805,9 +805,9 @@
                          }
                          baseServiceCost = (s25fePlanPrice * (totalLines - otherLines)) + otherLinesCost;
                     } else if (qualifiesForByodDiscount) {
-                        const singleLineBasePrice = firstMonthPlanData[basePlanPrice.toString()][0];
-                        const discountPerByodPort = singleLineBasePrice * 0.5;
-                        baseServiceCost -= discountPerByodPort;
+                        const singleLineBasePrice = planBreakdownData[basePlanPrice.toString()][0]; // [FIX] Use autopay price ($50 or $60)
+                        const discountPerByodPort = singleLineBasePrice * 0.5; // [FIX] Calculate discount from base autopay price
+                        baseServiceCost -= discountPerByodPort; // [FIX] Subtract from first month price (which includes $5 fee)
                     }
                 }
                 
@@ -1207,6 +1207,11 @@
                     // --- Standard Logic ---
                     finalPrice = price; // Base price from new data object
                     
+                    // Apply autopay discount ONLY for single line on eligible plans
+                    if (lineCount === 1 && (selectedPlan === '50' || selectedPlan === '60')) {
+                        finalPrice -= 5;
+                    }
+                    
                     // Apply BYOD discount if applicable
                     if (qualifiesForByodDiscount && lineCount >= (byodPortsToUse || 1) ) {
                         finalPrice -= discount;
@@ -1229,6 +1234,9 @@
                 
                 if (qualifiesForByodDiscount && lineCount >= 1 && !hasS25FE) {
                      let originalPrice = price;
+                     if (lineCount === 1 && (selectedPlan === '50' || selectedPlan === '60')) {
+                        originalPrice -= 5;
+                    }
                     const originalPriceSpan = document.createElement('span');
                     originalPriceSpan.className = 'text-xs text-gray-400 line-through ml-2';
                     originalPriceSpan.textContent = `$${originalPrice.toFixed(2)}`;
