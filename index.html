@@ -177,7 +177,7 @@
                             </select>
                         </div>
                         <div>
-                            <label for="new-device-lines" class="block text-sm font-medium text-gray-700">New Device Lines:</label>
+                            <label for="new-device-lines" class="block to-sm font-medium text-gray-700">New Device Lines:</label>
                             <select id="new-device-lines" class="mt-1 w-full p-2 border border-gray-300 rounded-md" onchange="updateLineDropdowns('new')">
                                 <!-- Options dynamically populated -->
                             </select>
@@ -469,7 +469,7 @@
         // Data for different phone promotions based on the provided PDF
         const dealData = {
             'samsung-a16': { name: 'Samsung A16', retailPrice: 129.00, promoPrice: 0.00, veriffOnlyPrice: 0.00, noHasslePrice: 24.99, requiredPlan: 40 },
-            'moto-g-power-2025': { name: 'Moto G Power 2025', retailPrice: 149.99, promoPrice: 0.00, veriffOnlyPrice: 24.99, noHasslePrice: 49.99, requiredPlan: 40 },
+            'moto-g-power-2025': { name: 'Moto G Power 2025', retailPrice: 149.99, promoPrice: 0.00, veriffOnlyPrice: 24.99, noHasslePrice: 49.99, requiredPlan: 50 },
             'moto-edge-2025': { name: 'Moto Edge 2025', retailPrice: 259.99, promoPrice: 49.99, veriffOnlyPrice: 99.99, noHasslePrice: 149.99, requiredPlan: 50 },
             'moto-g-stylus-2025': { name: 'Moto G Stylus 2025', retailPrice: 199.00, promoPrice: 0.00, veriffOnlyPrice: 49.99, noHasslePrice: 149.99, requiredPlan: 40 },
             'moto-g-2025': { name: 'Moto G 2025', retailPrice: 79.99, promoPrice: 0.00, veriffOnlyPrice: 0.00, noHasslePrice: 9.99, requiredPlan: 40 },
@@ -486,8 +486,8 @@
             'iphone-13-cpo': { name: 'Apple iPhone 13 CPO 128GB', retailPrice: 349.99, promoPrice: 0.00, veriffOnlyPrice: 99.99, noHasslePrice: 349.99, promoMonths: 2 },
             'iphone-14': { name: 'Apple iPhone 14 128GB', retailPrice: 629.00, promoPrice: 99.99, veriffOnlyPrice: 199.99, noHasslePrice: 629.00, promoMonths: 3, requiredPlan: 40 },
             'iphone-14-plus': { name: 'Apple iPhone 14 Plus 128GB', retailPrice: 729.00, promoPrice: 199.99, veriffOnlyPrice: 199.99, noHasslePrice: 499.99, promoMonths: 1, requiredPlan: 40 },
-            'moto-razr-2025': { name: 'Motorola Razr 2025', retailPrice: 599.00, promoPrice: 199.99, veriffOnlyPrice: 299.99, noHasslePrice: 599.00, promoMonths: 2, requiredPlan: 50 },
-            'samsung-s25fe': { name: 'Samsung S25FE', retailPrice: 599.99, promoPrice: 299.99, veriffOnlyPrice: 399.99, noHasslePrice: 599.99, promoMonths: 2, requiredPlan: 50, stackable: false },
+            'moto-razr-2025': { name: 'Motorola Razr 2025', retailPrice: 599.00, promoPrice: 199.99, veriffOnlyPrice: 299.99, noHasslePrice: 599.00, promoMonths: 2, requiredPlan: 50, excludeFromRHT: true },
+            'samsung-s25fe': { name: 'Samsung S25FE', retailPrice: 599.99, promoPrice: 0.00, veriffOnlyPrice: 99.99, noHasslePrice: 599.99, promoMonths: 3, requiredPlan: 50, stackable: false },
             'samsung-a15': { name: 'Samsung Galaxy A15 5G', retailPrice: 79.99, promoPrice: 0.00, portOnlyPrice: 59.99, veriffOnlyPrice: 0.00, promoMonths: 1 },
             'samsung-a25': { name: 'Samsung Galaxy A25 5G', retailPrice: 199.99, promoPrice: 14.99, portOnlyPrice: 49.99, veriffOnlyPrice: 14.99, promoMonths: 1 },
             'samsung-a26': { name: 'Samsung Galaxy A26 5G', retailPrice: 199.99, promoPrice: 0.00, portOnlyPrice: 199.99, veriffOnlyPrice: 49.99, noHasslePrice: 149.99, promoMonths: 1 },
@@ -500,7 +500,8 @@
         const tabletData = {
             'none': { name: 'None', msrp: 0, serviceCost: 0, upfrontMonths: 0 },
             'samsung-a9-plus': { name: 'Samsung A9+', msrp: 239.99, serviceCost: 20, upfrontMonths: 6 },
-            'tcl-tab-10': { name: 'TCL Tab 10 NXTPAPER 5G', msrp: 219.99, serviceCost: 20, upfrontMonths: 3 }
+            'tcl-tab-10': { name: 'TCL Tab 10 NXTPAPER 5G', msrp: 219.99, serviceCost: 20, upfrontMonths: 3 },
+            'tcl-tab-8-plus': { name: 'TCL Tab 8 Plus', msrp: 159.99, serviceCost: 10, upfrontMonths: 1, devicePromoPrice: 34.99 }
         };
         
         // Prices for MONTH 2 AND BEYOND (AutoPay enabled)
@@ -689,6 +690,7 @@
             const hasIphone14 = selectedDeviceKeys.includes('iphone-14');
             const hasIphone14Plus = selectedDeviceKeys.includes('iphone-14-plus');
             const hasS25FE = selectedDeviceKeys.includes('samsung-s25fe');
+            const hasRazr2025 = selectedDeviceKeys.includes('moto-razr-2025'); // NEW: Check for RAZR
 
             const isUpgradeOnly = upgradeType === 'upgrade-only' || upgradeType === 'upgrade-with-rewards';
             const isAddingALine = upgradeType === 'add-a-line';
@@ -805,14 +807,14 @@
                          }
                          baseServiceCost = (s25fePlanPrice * (totalLines - otherLines)) + otherLinesCost;
                     } else if (qualifiesForByodDiscount) {
-                        const singleLineBasePrice = planBreakdownData[basePlanPrice.toString()][0]; // [FIX] Use autopay price ($50 or $60)
+                        const singleLineBasePrice = planBreakdownData[basePlanPrice.toString()][0]; // Use autopay price ($50 or $60)
                         const discountPerByodPort = singleLineBasePrice * 0.5; // [FIX] Calculate discount from base autopay price
                         baseServiceCost -= discountPerByodPort; // [FIX] Subtract from first month price (which includes $5 fee)
                     }
                 }
                 
                 let serviceDiscount = 0;
-                const canUseRedHotTicket = portedLines > 0 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus && !hasS25FE && !isPortOneGetFourActive;
+                const canUseRedHotTicket = portedLines > 0 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus && !hasS25FE && !hasRazr2025 && !isPortOneGetFourActive;
 
                 if (redHotTicket && canUseRedHotTicket) {
                    const planPrices = firstMonthPlanData[basePlanPrice.toString()];
@@ -889,7 +891,7 @@
             const redHotTicketContainer = document.getElementById('red-hot-ticket-container');
             const redHotTicketCheckbox = document.getElementById('red-hot-ticket');
             
-            const canUseRedHotTicket = upgradeType !== 'add-a-line' && portedLines > 0 && !isUpgradeOnly && !hasS25FE && !isPortOneGetFourActive;
+            const canUseRedHotTicket = upgradeType !== 'add-a-line' && portedLines > 0 && !isUpgradeOnly && !hasS25FE && !hasRazr2025 && !isPortOneGetFourActive;
 
             if (canUseRedHotTicket) {
                 redHotTicketContainer.style.display = 'block';
@@ -989,7 +991,7 @@
                     tabletDeviceCostContainer.style.display = 'none';
                     tabletDeviceCostCheckbox.checked = false;
                 }
-                // totalRetailForTax += currentTablet.msrp; // [FIX] This line was removed to prevent double-taxing tablets
+                totalRetailForTax += currentTablet.msrp;
 
             } else {
                 document.getElementById('tablet-service-container').style.display = 'none';
@@ -1178,7 +1180,8 @@
             const qualifiesForByodDiscount = portIn && (byodPortsToUse > 0 || (byodLines > 0 && newDeviceLines === 0)) && !hasS25FE;
 
             if (qualifiesForByodDiscount) {
-                let singleLineBasePrice = planBreakdownData[selectedPlan][0];
+                // Determine the single line base price for the discount calculation (e.g., 40, 50, or 60)
+                let singleLineBasePrice = parseInt(selectedPlan); 
                 discount = singleLineBasePrice * 0.5;
                 breakdownTitle.textContent = 'Monthly Cost (w/ BYOD Discount)';
             } else {
@@ -1187,8 +1190,8 @@
 
             prices.forEach((price, index) => {
                 const lineCount = index + 1;
-                let finalPrice; 
-                let originalPrice = price;
+                let finalPrice = price; 
+                let originalPrice = price; // This is the base Autopay price
 
                 if (hasS25FE) {
                     // --- S25FE Non-Stackable Logic ---
@@ -1202,10 +1205,10 @@
                         otherLinesPrice = prices[otherLines - 1];
                     }
                     finalPrice = s25fePrice + otherLinesPrice;
+                    originalPrice = finalPrice;
                 
                 } else {
-                    // --- Standard Logic ---
-                    finalPrice = price; // Base price from new data object
+                    // --- Standard Logic (Autopay discount is included in the base price array) ---
                     
                     // Apply BYOD discount if applicable
                     if (qualifiesForByodDiscount && lineCount >= (byodPortsToUse || 1) ) {
@@ -1228,7 +1231,6 @@
                 priceContainer.appendChild(spanPrice);
                 
                 if (qualifiesForByodDiscount && lineCount >= 1 && !hasS25FE) {
-                     let originalPrice = price;
                     const originalPriceSpan = document.createElement('span');
                     originalPriceSpan.className = 'text-xs text-gray-400 line-through ml-2';
                     originalPriceSpan.textContent = `$${originalPrice.toFixed(2)}`;
