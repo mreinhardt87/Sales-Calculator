@@ -1195,27 +1195,16 @@
                 let finalPrice = price; 
                 let originalPrice = price; // This is the base Autopay price
 
-                if (hasS25FE) {
-                    // --- S25FE Non-Stackable Logic ---
-                    const otherLines = lineCount - s25feCount;
-                    let s25fePrice = 0;
-                    const singleLinePriceNoAutopay = planBreakdownData[selectedPlan][0];
-                    s25fePrice = singleLinePriceNoAutopay * s25feCount;
-
-                    let otherLinesPrice = 0;
-                    if (otherLines > 0) {
-                        otherLinesPrice = prices[otherLines - 1];
-                    }
-                    finalPrice = s25fePrice + otherLinesPrice;
-                    originalPrice = finalPrice;
+                // [FIX] REMOVED the specific S25FE block that was forcing separate pricing.
+                // The "No Multi-Line Discount" rule for S25FE applies to the promo credit/device cost,
+                // NOT the standard rate plan pricing for Month 2+.
                 
-                } else {
-                    // --- Standard Logic (Autopay discount is included in the base price array) ---
-                    
-                    // Apply BYOD discount if applicable
-                    if (qualifiesForByodDiscount && lineCount >= (byodPortsToUse || 1) ) {
-                        finalPrice -= discount;
-                    }
+                // --- Standard Logic (Autopay discount is included in the base price array) ---
+                
+                // Apply BYOD discount if applicable
+                // Note: S25FE is still excluded from BYOD discount eligibility
+                if (qualifiesForByodDiscount && lineCount >= (byodPortsToUse || 1) ) {
+                    finalPrice -= discount;
                 }
 
                 const div = document.createElement('div');
