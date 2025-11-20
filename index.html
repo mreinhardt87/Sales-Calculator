@@ -971,10 +971,22 @@
                     tabletServiceCost = tabletPlanCost; // Use selected tablet plan
                     tabletUpfrontMonths = currentTablet.upfrontMonths;
                     
+                    // Special logic for Samsung A9+
+                    if (selectedTabletKey === 'samsung-a9-plus') {
+                        if (tabletPlanCost === 10) {
+                            tabletDeviceCost = currentTablet.msrp;
+                            tabletUpfrontMonths = 1; // No 6-month upfront requirement if paying retail
+                            if (!promoMessages.some(m => m.includes("Samsung A9+"))) {
+                                promoMessages.push("<b>Samsung A9+</b> requires the $20 plan for the promotion. Full retail price applies on the $10 plan.");
+                            }
+                        } else {
+                            tabletDeviceCost = 0; // Promo applied
+                        }
+                    }
                     // Special logic for TCL Tab 8 Plus pricing based on selected plan is not needed if its purely plan selection
                     // However, if the device price changes based on plan, that would go here.
                     // For now assuming device promo price applies regardless of $10/$20 plan unless specified.
-                    if(selectedTabletKey === 'tcl-tab-8-plus') {
+                    else if(selectedTabletKey === 'tcl-tab-8-plus') {
                         tabletDeviceCost = currentTablet.devicePromoPrice;
                          // Recalculate total upfront to verify match ($34.99)
                          // If plan is $10, cost is $24.99 + $10 = $34.99.
