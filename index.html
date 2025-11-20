@@ -92,12 +92,12 @@
                         <label for="passcode" class="block text-sm font-medium text-gray-700">Passcode</label>
                         <input type="password" id="passcode" class="mt-1 w-full p-2 border border-gray-300 rounded-md" required>
                     </div>
-                    <button type="submit" class="w-full p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                        Login
+                    <button type="submit" id="login-btn" class="w-full p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex justify-center items-center">
+                        <span>Login</span>
                     </button>
                     <p id="login-error" class="text-red-500 text-sm text-center mt-2 hidden">Invalid Passcode.</p>
                 </form>
-                <p class="text-xs text-gray-400 text-center mt-4">Note: Backend API is mocked for demo purposes. Enter any code.</p>
+                <p class="text-xs text-gray-400 text-center mt-4">Secured by Firebase</p>
             </div>
         </div>
     </div>
@@ -474,7 +474,18 @@
 
     </div>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+        import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+        import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+
+        // Firebase Config
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'sales-calculator-default';
+
         // Data for different phone promotions based on the provided PDF
         const dealData = {
             'samsung-a16': { name: 'Samsung A16', retailPrice: 129.00, promoPrice: 0.00, veriffOnlyPrice: 0.00, noHasslePrice: 24.99, requiredPlan: 40 },
@@ -532,27 +543,66 @@
             event.preventDefault(); // Prevent page refresh
             const passcode = document.getElementById('passcode').value;
             const errorElement = document.getElementById('login-error');
+            const loginBtn = document.getElementById('login-btn');
 
-            // MOCK LOGIN FOR DEMO PURPOSES
-            if (passcode) {
-                sessionStorage.setItem('userPasscode', passcode); // Store passcode for logout
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('calculator-container').classList.remove('hidden');
-                document.getElementById('calculator-container').classList.add('grid');
-                document.getElementById('logout-button').classList.remove('hidden');
-                initializeApp();
-            } else {
+            if (!passcode) {
                 errorElement.textContent = 'Please enter a passcode.';
                 errorElement.classList.remove('hidden');
+                return;
+            }
+            
+            // UI Loading state
+            loginBtn.innerHTML = `<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                  </svg>`;
+            loginBtn.disabled = true;
+
+            try {
+                // 1. Anonymous Auth first
+                await signInAnonymously(auth);
+                
+                // 2. Check Firestore for config
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'config');
+                let docSnap = await getDoc(docRef);
+
+                // 3. Safety Net: If doc doesn't exist (first run), create it with default
+                if (!docSnap.exists()) {
+                    await setDoc(docRef, { passcode: '1234' });
+                    docSnap = await getDoc(docRef);
+                    alert("Setup Mode: Passcode configured to '1234' as no configuration was found.");
+                }
+
+                const data = docSnap.data();
+                
+                if (data && data.passcode === passcode) {
+                    sessionStorage.setItem('userPasscode', passcode);
+                    document.getElementById('login-screen').classList.add('hidden');
+                    document.getElementById('calculator-container').classList.remove('hidden');
+                    document.getElementById('calculator-container').classList.add('grid');
+                    document.getElementById('logout-button').classList.remove('hidden');
+                    initCalculator();
+                } else {
+                     errorElement.textContent = 'Invalid Passcode.';
+                     errorElement.classList.remove('hidden');
+                     loginBtn.innerHTML = '<span>Login</span>';
+                     loginBtn.disabled = false;
+                }
+
+            } catch (error) {
+                console.error("Login Error:", error);
+                errorElement.textContent = 'Connection failed. Check network.';
+                errorElement.classList.remove('hidden');
+                loginBtn.innerHTML = '<span>Login</span>';
+                loginBtn.disabled = false;
             }
         });
 
         // --- Logout Logic ---
-        document.getElementById('logout-button').addEventListener('click', async () => {
-            // Mock logout
+        window.logout = async () => {
             sessionStorage.removeItem('userPasscode');
-            location.reload(); // Reload the page to show the login screen
-        });
+            location.reload(); 
+        };
 
 
         // Main function to update the entire calculator UI and totals
@@ -964,7 +1014,14 @@
 
                     tabletServiceCost = proratedFirstMonthCost + remainingMonthsCost;
                     tabletUpfrontMonths = 0; // It's a custom calculation now
-                    tabletDeviceCost = 0; 
+                    
+                    // Apply device promo price if it exists (e.g. TCL Tablets)
+                    if (currentTablet.devicePromoPrice) {
+                        tabletDeviceCost = currentTablet.devicePromoPrice;
+                    } else {
+                        tabletDeviceCost = 0;
+                    }
+
                     tabletServiceLabel = `${currentTablet.name} (Prorated + ${remainingFullMonths} mo)`;
                 }
                 else {
@@ -1395,7 +1452,7 @@
 
 
         // --- Initial Load ---
-        function initializeApp() {
+        function initCalculator() {
             const tabletSelect = document.getElementById('tablet-select');
             Object.keys(tabletData).forEach(key => {
                 const option = document.createElement('option');
@@ -1438,6 +1495,13 @@
             byotTabletSelect.value = 0;
             updateLineDropdowns('new');
         }
+
+        // Attach functions to window so HTML onclick handlers can find them
+        window.updateCalculator = updateCalculator;
+        window.resetCalculator = resetCalculator;
+        window.updateLineDropdowns = updateLineDropdowns;
+        window.generateUpgradeDeviceSelectors = generateUpgradeDeviceSelectors;
+        window.initCalculator = initCalculator;
 
     </script>
 
