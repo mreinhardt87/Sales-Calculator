@@ -97,6 +97,7 @@
                     </button>
                     <p id="login-error" class="text-red-500 text-sm text-center mt-2 hidden">Invalid Passcode.</p>
                 </form>
+                <p class="text-xs text-gray-400 text-center mt-4">Note: Backend API is mocked for demo purposes. Enter any code.</p>
             </div>
         </div>
     </div>
@@ -532,45 +533,23 @@
             const passcode = document.getElementById('passcode').value;
             const errorElement = document.getElementById('login-error');
 
-            try {
-                const response = await fetch('/api/verify', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ passcode })
-                });
-
-                if (response.ok) {
-                    sessionStorage.setItem('userPasscode', passcode); // Store passcode for logout
-                    document.getElementById('login-screen').classList.add('hidden');
-                    document.getElementById('calculator-container').classList.remove('hidden');
-                    document.getElementById('calculator-container').classList.add('grid');
-                    document.getElementById('logout-button').classList.remove('hidden');
-                    initializeApp();
-                } else {
-                    const data = await response.json();
-                    errorElement.textContent = data.message || 'Invalid Passcode.';
-                    errorElement.classList.remove('hidden');
-                }
-            } catch (error) {
-                errorElement.textContent = 'An error occurred. Please try again.';
+            // MOCK LOGIN FOR DEMO PURPOSES
+            if (passcode) {
+                sessionStorage.setItem('userPasscode', passcode); // Store passcode for logout
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('calculator-container').classList.remove('hidden');
+                document.getElementById('calculator-container').classList.add('grid');
+                document.getElementById('logout-button').classList.remove('hidden');
+                initializeApp();
+            } else {
+                errorElement.textContent = 'Please enter a passcode.';
                 errorElement.classList.remove('hidden');
             }
         });
 
         // --- Logout Logic ---
         document.getElementById('logout-button').addEventListener('click', async () => {
-            const passcode = sessionStorage.getItem('userPasscode');
-            if (passcode) {
-                try {
-                    await fetch('/api/logout', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ passcode })
-                    });
-                } catch (error) {
-                    console.error('Logout failed:', error);
-                }
-            }
+            // Mock logout
             sessionStorage.removeItem('userPasscode');
             location.reload(); // Reload the page to show the login screen
         });
@@ -810,7 +789,7 @@
                 }
             } else {
                 let baseServiceCost = 0;
-               
+                
                 if (totalLines > 0 && basePlanPrice > 0) {
                     const planPrices = firstMonthPlanData[basePlanPrice.toString()];
                     baseServiceCost = planPrices[totalLines - 1] || 0;
@@ -843,7 +822,7 @@
                         if (byodPortsAmongTotalPorts > 0) {
                            costOfPortedLines -= (singleLineCost * 0.5);
                         }
-                       
+                        
                         serviceDiscount = Math.min(costOfPortedLines, 120);
                    }
                 }
@@ -1225,31 +1204,12 @@
                 let finalPrice = price; 
                 let originalPrice = price; // This is the base Autopay price
 
-                if (hasS25FE) {
-                    // --- S25FE Non-Stackable Logic ---
-                    const otherLines = lineCount - s25feCount;
-                    let s25fePrice = 0;
-                    const singleLinePriceNoAutopay = planBreakdownData[selectedPlan][0];
-                    s25fePrice = singleLinePriceNoAutopay * s25feCount;
-
-                    let otherLinesPrice = 0;
-                    if (otherLines > 0) {
-                        otherLinesPrice = prices[otherLines - 1];
-                    }
-                    finalPrice = s25fePrice + otherLinesPrice;
-                    originalPrice = finalPrice;
+                // --- Standard Logic ---
+                finalPrice = price; // Base price from new data object
                 
-                } else {
-                    // --- Standard Logic ---
-                    finalPrice = price; // Base price from new data object
-                    
-                    // [FIX] Removed the extra $5 subtraction here.
-                    // The prices in planBreakdownData are already the correct Autopay prices.
-                    
-                    // Apply BYOD discount if applicable
-                    if (qualifiesForByodDiscount && lineCount >= (byodPortsToUse || 1) ) {
-                        finalPrice -= discount;
-                    }
+                // Apply BYOD discount if applicable
+                if (qualifiesForByodDiscount && lineCount >= (byodPortsToUse || 1) ) {
+                    finalPrice -= discount;
                 }
 
                 const div = document.createElement('div');
