@@ -1128,12 +1128,9 @@
             const taxableAccessoryAmount = accessoryCost;
             const taxableAccessFee = (totalLines > 0 && document.getElementById('access').checked) ? accessFee : 0;
             
-            let taxableTabletAmount = 0;
-            if (selectedTabletKey !== 'none') {
-                taxableTabletAmount = currentTablet.msrp;
-            }
+            // Tablet MSRP is already included in totalRetailForTax, so we don't add it again here.
 
-            const totalTaxableDeviceAmount = totalRetailForTax + taxableHomeRouterAmount + taxableAccessoryAmount + taxableHotspotAmount + taxableTabletAmount;
+            const totalTaxableDeviceAmount = totalRetailForTax + taxableHomeRouterAmount + taxableAccessoryAmount + taxableHotspotAmount;
             const totalTax = (totalTaxableDeviceAmount * taxRate) + (taxableAccessFee * taxRate);
             
             document.getElementById('sales-tax').dataset.amount = totalTax.toFixed(2);
