@@ -177,7 +177,7 @@
                             </select>
                         </div>
                         <div>
-                            <label for="new-device-lines" class="block to-sm font-medium text-gray-700">New Device Lines:</label>
+                            <label for="new-device-lines" class="block text-sm font-medium text-gray-700">New Device Lines:</label>
                             <select id="new-device-lines" class="mt-1 w-full p-2 border border-gray-300 rounded-md" onchange="updateLineDropdowns('new')">
                                 <!-- Options dynamically populated -->
                             </select>
@@ -864,7 +864,9 @@
                 if (isPromoApplicable && deal.stackable === false) { 
                     promoMonthsRequired = true;
                     promoMonthsCount = deal.promoMonths - 1;
-                    promoMonthsCost = (basePlanPrice === 50 ? 55 : 65) * promoMonthsCount; // Use non-autopay price
+                    // [FIX] Use basePlanPrice (50/60) instead of adding $5 fee. 
+                    // User confirmed Autopay fee is waived for upfront months.
+                    promoMonthsCost = basePlanPrice * promoMonthsCount; 
                     promoMessages.push(`<b>${deal.name}</b> requires paying for ${deal.promoMonths} months of service upfront.`);
                 }
                 // Standard multi-month logic for other devices
@@ -1190,18 +1192,30 @@
 
             prices.forEach((price, index) => {
                 const lineCount = index + 1;
-                let finalPrice = price; // Base price from new data object
+                let finalPrice = price; 
                 let originalPrice = price; // This is the base Autopay price
 
-                // --- Standard Logic ---
-                // Apply autopay discount ONLY for single line on eligible plans
-                if (lineCount === 1 && (selectedPlan === '50' || selectedPlan === '60')) {
-                    finalPrice -= 5;
-                }
+                if (hasS25FE) {
+                    // --- S25FE Non-Stackable Logic ---
+                    const otherLines = lineCount - s25feCount;
+                    let s25fePrice = 0;
+                    const singleLinePriceNoAutopay = planBreakdownData[selectedPlan][0];
+                    s25fePrice = singleLinePriceNoAutopay * s25feCount;
+
+                    let otherLinesPrice = 0;
+                    if (otherLines > 0) {
+                        otherLinesPrice = prices[otherLines - 1];
+                    }
+                    finalPrice = s25fePrice + otherLinesPrice;
+                    originalPrice = finalPrice;
                 
-                // Apply BYOD discount if applicable
-                if (qualifiesForByodDiscount && lineCount >= (byodPortsToUse || 1) ) {
-                    finalPrice -= discount;
+                } else {
+                    // --- Standard Logic (Autopay discount is included in the base price array) ---
+                    
+                    // Apply BYOD discount if applicable
+                    if (qualifiesForByodDiscount && lineCount >= (byodPortsToUse || 1) ) {
+                        finalPrice -= discount;
+                    }
                 }
 
                 const div = document.createElement('div');
