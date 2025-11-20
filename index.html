@@ -97,7 +97,7 @@
                     </button>
                     <p id="login-error" class="text-red-500 text-sm text-center mt-2 hidden">Invalid Passcode.</p>
                 </form>
-                <p class="text-xs text-gray-400 text-center mt-4">Powered by Vercel Functions</p>
+                <p class="text-xs text-gray-400 text-center mt-4">Note: Backend API is mocked for demo purposes. Enter any code.</p>
             </div>
         </div>
     </div>
@@ -495,7 +495,7 @@
             'iphone-13-cpo': { name: 'Apple iPhone 13 CPO 128GB', retailPrice: 349.99, promoPrice: 0.00, veriffOnlyPrice: 99.99, noHasslePrice: 349.99, promoMonths: 2 },
             'iphone-14': { name: 'Apple iPhone 14 128GB', retailPrice: 629.00, promoPrice: 99.99, veriffOnlyPrice: 199.99, noHasslePrice: 629.00, promoMonths: 3, requiredPlan: 40 },
             'iphone-14-plus': { name: 'Apple iPhone 14 Plus 128GB', retailPrice: 729.00, promoPrice: 199.99, veriffOnlyPrice: 199.99, noHasslePrice: 499.99, promoMonths: 1, requiredPlan: 40 },
-            'moto-razr-2025': { name: 'Motorola Razr 2025', retailPrice: 599.00, promoPrice: 199.99, veriffOnlyPrice: 299.99, noHasslePrice: 599.00, promoMonths: 2, requiredPlan: 50, excludeFromRHT: true },
+            'moto-razr-2025': { name: 'Motorola Razr 2025', retailPrice: 599.99, promoPrice: 0.00, veriffOnlyPrice: 99.99, noHasslePrice: 599.99, promoMonths: 3, requiredPlan: 50, excludeFromRHT: true },
             'samsung-s25fe': { name: 'Samsung S25FE', retailPrice: 599.99, promoPrice: 0.00, veriffOnlyPrice: 99.99, noHasslePrice: 599.99, promoMonths: 3, requiredPlan: 50, stackable: false },
             'samsung-a15': { name: 'Samsung Galaxy A15 5G', retailPrice: 79.99, promoPrice: 0.00, portOnlyPrice: 59.99, veriffOnlyPrice: 0.00, promoMonths: 1 },
             'samsung-a25': { name: 'Samsung Galaxy A25 5G', retailPrice: 199.99, promoPrice: 14.99, portOnlyPrice: 49.99, veriffOnlyPrice: 14.99, promoMonths: 1 },
@@ -532,55 +532,27 @@
             event.preventDefault(); // Prevent page refresh
             const passcode = document.getElementById('passcode').value;
             const errorElement = document.getElementById('login-error');
-            const loginBtn = document.getElementById('login-btn');
 
-            if (!passcode) {
+            // MOCK LOGIN FOR DEMO PURPOSES
+            if (passcode) {
+                sessionStorage.setItem('userPasscode', passcode); // Store passcode for logout
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('calculator-container').classList.remove('hidden');
+                document.getElementById('calculator-container').classList.add('grid');
+                document.getElementById('logout-button').classList.remove('hidden');
+                initializeApp();
+            } else {
                 errorElement.textContent = 'Please enter a passcode.';
                 errorElement.classList.remove('hidden');
-                return;
-            }
-            
-            // UI Loading state
-            loginBtn.textContent = 'Verifying...';
-            loginBtn.disabled = true;
-
-            try {
-                // Secure Vercel Serverless Function call
-                const response = await fetch('/api/verify', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ passcode })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    sessionStorage.setItem('userPasscode', passcode);
-                    document.getElementById('login-screen').classList.add('hidden');
-                    document.getElementById('calculator-container').classList.remove('hidden');
-                    document.getElementById('calculator-container').classList.add('grid');
-                    document.getElementById('logout-button').classList.remove('hidden');
-                    initializeApp();
-                } else {
-                    errorElement.textContent = data.message || 'Invalid Passcode.';
-                    errorElement.classList.remove('hidden');
-                    loginBtn.textContent = 'Login';
-                    loginBtn.disabled = false;
-                }
-            } catch (error) {
-                console.error("Login Error:", error);
-                errorElement.textContent = 'Connection failed. Please try again.';
-                errorElement.classList.remove('hidden');
-                loginBtn.textContent = 'Login';
-                loginBtn.disabled = false;
             }
         });
 
         // --- Logout Logic ---
-        window.logout = async () => {
+        document.getElementById('logout-button').addEventListener('click', async () => {
+            // Mock logout
             sessionStorage.removeItem('userPasscode');
-            location.reload(); 
-        };
+            location.reload(); // Reload the page to show the login screen
+        });
 
 
         // Main function to update the entire calculator UI and totals
@@ -992,14 +964,7 @@
 
                     tabletServiceCost = proratedFirstMonthCost + remainingMonthsCost;
                     tabletUpfrontMonths = 0; // It's a custom calculation now
-                    
-                    // Apply device promo price if it exists (e.g. TCL Tablets)
-                    if (currentTablet.devicePromoPrice) {
-                        tabletDeviceCost = currentTablet.devicePromoPrice;
-                    } else {
-                        tabletDeviceCost = 0;
-                    }
-
+                    tabletDeviceCost = 0; 
                     tabletServiceLabel = `${currentTablet.name} (Prorated + ${remainingFullMonths} mo)`;
                 }
                 else {
@@ -1474,14 +1439,8 @@
             updateLineDropdowns('new');
         }
 
-        // Attach functions to window so HTML onclick handlers can find them
-        window.updateCalculator = updateCalculator;
-        window.resetCalculator = resetCalculator;
-        window.updateLineDropdowns = updateLineDropdowns;
-        window.generateUpgradeDeviceSelectors = generateUpgradeDeviceSelectors;
-        window.initializeApp = initializeApp;
-
     </script>
 
 </body>
 </html>
+
