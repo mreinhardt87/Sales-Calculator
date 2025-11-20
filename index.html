@@ -97,7 +97,6 @@
                     </button>
                     <p id="login-error" class="text-red-500 text-sm text-center mt-2 hidden">Invalid Passcode.</p>
                 </form>
-                <!-- Removed the 'Powered by Vercel Functions' paragraph here -->
             </div>
         </div>
     </div>
@@ -1003,21 +1002,39 @@
                 } else if (isAddingALine) {
                     const daysIntoCycle = parseInt(billingCycleDaysInput.value) || 0;
                     const remainingDays = 30 - daysIntoCycle;
-                    const proratedFirstMonthCost = (currentTablet.serviceCost / 30) * remainingDays;
-                    const remainingFullMonths = currentTablet.upfrontMonths - 1;
-                    const remainingMonthsCost = remainingFullMonths > 0 ? currentTablet.serviceCost * remainingFullMonths : 0;
-
-                    tabletServiceCost = proratedFirstMonthCost + remainingMonthsCost;
-                    tabletUpfrontMonths = 0; // It's a custom calculation now
                     
-                    // Apply device promo price if it exists (e.g. TCL Tablets)
-                    if (currentTablet.devicePromoPrice) {
+                    let effectiveUpfrontMonths = currentTablet.upfrontMonths;
+                    let effectiveMonthlyCost = tabletPlanCost; // Use selected plan
+                    
+                    // Special Logic for A9+ on $10 plan
+                    if (selectedTabletKey === 'samsung-a9-plus' && tabletPlanCost === 10) {
+                        tabletDeviceCost = currentTablet.msrp;
+                        effectiveUpfrontMonths = 1; // Paying retail, so only 1 month (prorated) needed
+                        
+                        if (!promoMessages.some(m => m.includes("Samsung A9+"))) {
+                            promoMessages.push("<b>Samsung A9+</b> requires the $20 plan for the promotion. Full retail price applies on the $10 plan.");
+                        }
+                    } 
+                    // Logic for TCL
+                    else if (currentTablet.devicePromoPrice) {
                         tabletDeviceCost = currentTablet.devicePromoPrice;
-                    } else {
+                    } 
+                    // Standard Promo (A9+ on $20)
+                    else {
                         tabletDeviceCost = 0;
                     }
 
-                    tabletServiceLabel = `${currentTablet.name} (Prorated + ${remainingFullMonths} mo)`;
+                    const proratedFirstMonthCost = (effectiveMonthlyCost / 30) * remainingDays;
+                    const remainingFullMonths = Math.max(0, effectiveUpfrontMonths - 1);
+                    const remainingMonthsCost = remainingFullMonths > 0 ? effectiveMonthlyCost * remainingFullMonths : 0; // Use effectiveMonthlyCost
+
+                    tabletServiceCost = proratedFirstMonthCost + remainingMonthsCost;
+                    tabletUpfrontMonths = 0; 
+                    
+                    // Build label, ensuring remainingFullMonths is correct for display
+                     const displayMonths = remainingFullMonths; // Capture for label
+
+                    tabletServiceLabel = `${currentTablet.name} (Prorated${displayMonths > 0 ? ' + ' + displayMonths + ' mo' : ''})`;
                 }
                 else {
                     tabletServiceCost = tabletPlanCost; // Use selected tablet plan
@@ -1033,6 +1050,11 @@
                             }
                         } else {
                             tabletDeviceCost = 0; // Promo applied
+                             // *** THIS IS WHERE YOU WOULD ADD THE NEW CODE ***
+                            if (!promoMessages.some(m => m.includes("rebate"))) {
+                                promoMessages.push("<b>Samsung A9+</b> requires 6 month plan to get rebate.");
+                            }
+                            // ************************************************
                         }
                     }
                     // Special logic for TCL Tablets (Tab 8 Plus & Tab 10)
@@ -1502,4 +1524,3 @@
 
 </body>
 </html>
-
