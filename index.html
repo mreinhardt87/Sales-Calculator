@@ -900,19 +900,8 @@
                     isPromoApplicable = false;
                 }
                 
-                // Special check for S25FE (stackable: false) - it ALWAYS requires multi-month
-                if (isPromoApplicable && deal.stackable === false) { 
-                    promoMonthsRequired = true;
-                    promoMonthsCount = deal.promoMonths - 1;
-                    // [FIX] Use basePlanPrice (50/60) directly. 
-                    // The basePlanPrice variable holds the raw plan value (40, 50, 60).
-                    // Previously, we were inferring pricing that might have included the $5 fee.
-                    // Since the user selected "50" in the dropdown, basePlanPrice is 50.
-                    promoMonthsCost = basePlanPrice * promoMonthsCount; 
-                    promoMessages.push(`<b>${deal.name}</b> requires paying for ${deal.promoMonths} months of service upfront.`);
-                }
-                // Standard multi-month logic for other devices
-                else if (isPromoApplicable && isNewSingleLineAccount) {
+                // Standard multi-month logic for other devices (and S25FE now)
+                if (isPromoApplicable && isNewSingleLineAccount) {
                     promoMonthsRequired = true;
                     promoMonthsCount = deal.promoMonths - 1;
                     promoMonthsCost = basePlanPrice * promoMonthsCount;
