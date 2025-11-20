@@ -509,7 +509,7 @@
         const tabletData = {
             'none': { name: 'None', msrp: 0, serviceCost: 0, upfrontMonths: 0 },
             'samsung-a9-plus': { name: 'Samsung A9+', msrp: 239.99, serviceCost: 20, upfrontMonths: 6 },
-            'tcl-tab-10': { name: 'TCL Tab 10 NXTPAPER 5G', msrp: 219.99, serviceCost: 20, upfrontMonths: 3 },
+            'tcl-tab-10': { name: 'TCL Tab 10 NXTPAPER 5G', msrp: 219.99, serviceCost: 20, upfrontMonths: 1, devicePromoPrice: 34.99 },
             'tcl-tab-8-plus': { name: 'TCL Tab 8 Plus', msrp: 159.99, serviceCost: 10, upfrontMonths: 1, devicePromoPrice: 34.99 }
         };
         
@@ -983,14 +983,9 @@
                             tabletDeviceCost = 0; // Promo applied
                         }
                     }
-                    // Special logic for TCL Tab 8 Plus pricing based on selected plan is not needed if its purely plan selection
-                    // However, if the device price changes based on plan, that would go here.
-                    // For now assuming device promo price applies regardless of $10/$20 plan unless specified.
-                    else if(selectedTabletKey === 'tcl-tab-8-plus') {
+                    // Special logic for TCL Tablets (Tab 8 Plus & Tab 10)
+                    else if(selectedTabletKey === 'tcl-tab-8-plus' || selectedTabletKey === 'tcl-tab-10') {
                         tabletDeviceCost = currentTablet.devicePromoPrice;
-                         // Recalculate total upfront to verify match ($34.99)
-                         // If plan is $10, cost is $24.99 + $10 = $34.99.
-                         // If plan is $20, cost is likely still $24.99 + $20? Assuming device cost fixed.
                     } else {
                          tabletDeviceCost = 0; // Device is free (promo) with a voice line for others
                     }
