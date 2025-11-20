@@ -213,6 +213,14 @@
                                 <!-- Options dynamically populated -->
                             </select>
                         </div>
+                        <!-- [NEW] Tablet Plan Dropdown -->
+                        <div id="tablet-plan-selection-container" class="hidden col-span-2 md:col-span-1">
+                             <label for="tablet-plan-select" class="block text-sm font-medium text-gray-700 mb-1">Tablet Plan:</label>
+                             <select id="tablet-plan-select" class="w-full p-2 border border-gray-300 rounded-md" onchange="updateCalculator()">
+                                <option value="10">$10 Unlimited</option>
+                                <option value="20">$20 Unlimited</option>
+                            </select>
+                        </div>
                         <div>
                             <label for="byot-lines" class="block text-sm font-medium text-gray-700">Bring Your Own Tablet:</label>
                             <select id="byot-tablet-lines" class="mt-1 w-full p-2 border border-gray-300 rounded-md" onchange="updateCalculator()">
@@ -596,6 +604,7 @@
             const redHotTicket = document.getElementById('red-hot-ticket').checked;
             const accessoryBundles = parseInt(document.getElementById('accessory-bundles').value) || 0;
             const currentLines = parseInt(document.getElementById('current-lines-select').value) || 0;
+            const tabletPlanCost = parseInt(document.getElementById('tablet-plan-select').value);
 
             // --- Get all DOM elements ---
             const simCardContainer = document.getElementById('sim-card-container');
@@ -616,6 +625,7 @@
             const byotServiceCheckbox = document.getElementById('byot-service');
             const tabletDeviceCostContainer = document.getElementById('tablet-device-cost-container'); 
             const tabletDeviceCostCheckbox = document.getElementById('tablet-device-cost'); 
+            const tabletPlanSelectionContainer = document.getElementById('tablet-plan-selection-container');
             const planSelectLabel = document.getElementById('plan-select-label');
             const addALineControls = document.getElementById('add-a-line-controls');
             const currentLinesSelect = document.getElementById('current-lines-select');
@@ -657,6 +667,13 @@
                 planSelectLabel.textContent = 'Select Plan:';
                 addALineControls.classList.add('hidden');
                 billingCycleContainer.classList.add('hidden');
+            }
+
+            // Show Tablet Plan Dropdown if a tablet is selected OR BYOT > 0
+            if (selectedTabletKey !== 'none' || byotTabletLines > 0) {
+                tabletPlanSelectionContainer.classList.remove('hidden');
+            } else {
+                tabletPlanSelectionContainer.classList.add('hidden');
             }
 
 
@@ -970,9 +987,20 @@
                     tabletServiceLabel = `${currentTablet.name} (Prorated + ${remainingFullMonths} mo)`;
                 }
                 else {
-                    tabletServiceCost = currentTablet.serviceCost;
+                    tabletServiceCost = tabletPlanCost; // Use selected tablet plan
                     tabletUpfrontMonths = currentTablet.upfrontMonths;
-                    tabletDeviceCost = 0; // Device is free (promo) with a voice line
+                    
+                    // Special logic for TCL Tab 8 Plus pricing based on selected plan is not needed if its purely plan selection
+                    // However, if the device price changes based on plan, that would go here.
+                    // For now assuming device promo price applies regardless of $10/$20 plan unless specified.
+                    if(selectedTabletKey === 'tcl-tab-8-plus') {
+                        tabletDeviceCost = currentTablet.devicePromoPrice;
+                         // Recalculate total upfront to verify match ($34.99)
+                         // If plan is $10, cost is $24.99 + $10 = $34.99.
+                         // If plan is $20, cost is likely still $24.99 + $20? Assuming device cost fixed.
+                    } else {
+                         tabletDeviceCost = 0; // Device is free (promo) with a voice line for others
+                    }
                 }
 
                 const upfrontServiceCost = tabletUpfrontMonths > 0 ? tabletServiceCost * tabletUpfrontMonths : tabletServiceCost;
@@ -1002,7 +1030,7 @@
                 tabletDeviceCostCheckbox.checked = false;
             }
             
-            const byotServiceCost = byotTabletLines * 20;
+            const byotServiceCost = byotTabletLines * tabletPlanCost; // Use selected plan cost
             byotServiceContainer.style.display = byotServiceCost > 0 ? 'block' : 'none';
             byotServiceCheckbox.checked = byotServiceCost > 0;
             byotServiceCheckbox.dataset.amount = byotServiceCost.toFixed(2);
@@ -1161,7 +1189,8 @@
             const hotspotPlanCost = dedicatedHotspot ? parseInt(document.getElementById('hotspot-plan-select').value) : 0;
             const totalProtectCost = protectLinesCount * 5;
             const byotTabletLines = parseInt(document.getElementById('byot-tablet-lines').value) || 0;
-            const byotMonthlyCost = byotTabletLines * 20;
+            const tabletPlanCost = parseInt(document.getElementById('tablet-plan-select').value);
+            const byotMonthlyCost = byotTabletLines * tabletPlanCost; // Updated to use selected plan
 
             const prices = planBreakdownData[selectedPlan];
             
@@ -1182,8 +1211,7 @@
             const qualifiesForByodDiscount = portIn && (byodPortsToUse > 0 || (byodLines > 0 && newDeviceLines === 0)) && !hasS25FE;
 
             if (qualifiesForByodDiscount) {
-                // Determine the single line base price for the discount calculation (e.g., 40, 50, or 60)
-                let singleLineBasePrice = parseInt(selectedPlan); 
+                let singleLineBasePrice = planBreakdownData[selectedPlan][0];
                 discount = singleLineBasePrice * 0.5;
                 breakdownTitle.textContent = 'Monthly Cost (w/ BYOD Discount)';
             } else {
@@ -1193,18 +1221,30 @@
             prices.forEach((price, index) => {
                 const lineCount = index + 1;
                 let finalPrice = price; 
-                let originalPrice = price; // This is the base Autopay price
+                let originalPrice = price;
 
-                // [FIX] REMOVED the specific S25FE block that was forcing separate pricing.
-                // The "No Multi-Line Discount" rule for S25FE applies to the promo credit/device cost,
-                // NOT the standard rate plan pricing for Month 2+.
+                if (hasS25FE) {
+                    // --- S25FE Non-Stackable Logic ---
+                    const otherLines = lineCount - s25feCount;
+                    let s25fePrice = 0;
+                    const singleLinePriceNoAutopay = planBreakdownData[selectedPlan][0];
+                    s25fePrice = singleLinePriceNoAutopay * s25feCount;
+
+                    let otherLinesPrice = 0;
+                    if (otherLines > 0) {
+                        otherLinesPrice = prices[otherLines - 1];
+                    }
+                    finalPrice = s25fePrice + otherLinesPrice;
+                    originalPrice = finalPrice;
                 
-                // --- Standard Logic (Autopay discount is included in the base price array) ---
-                
-                // Apply BYOD discount if applicable
-                // Note: S25FE is still excluded from BYOD discount eligibility
-                if (qualifiesForByodDiscount && lineCount >= (byodPortsToUse || 1) ) {
-                    finalPrice -= discount;
+                } else {
+                    // --- Standard Logic ---
+                    finalPrice = price; 
+                    
+                    // Apply BYOD discount if applicable
+                    if (qualifiesForByodDiscount && lineCount >= (byodPortsToUse || 1) ) {
+                        finalPrice -= discount;
+                    }
                 }
 
                 const div = document.createElement('div');
@@ -1248,7 +1288,7 @@
                 if (byotMonthlyCost > 0) {
                     const byotDiv = document.createElement('div');
                     byotDiv.className = 'flex justify-between items-center text-sm text-gray-500';
-                    byotDiv.innerHTML = `<span>BYOT Service (${byotTabletLines} lines)</span><span class="font-medium">+$${byotMonthlyCost.toFixed(2)}</span>`;
+                    byotDiv.innerHTML = `<span>BYOT Service (${byotTabletLines} lines @ $${tabletPlanCost})</span><span class="font-medium">+$${byotMonthlyCost.toFixed(2)}</span>`;
                     addonsContainer.appendChild(byotDiv);
                 }
 
@@ -1434,4 +1474,3 @@
 
 </body>
 </html>
-
