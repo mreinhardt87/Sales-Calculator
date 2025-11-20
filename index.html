@@ -92,12 +92,12 @@
                         <label for="passcode" class="block text-sm font-medium text-gray-700">Passcode</label>
                         <input type="password" id="passcode" class="mt-1 w-full p-2 border border-gray-300 rounded-md" required>
                     </div>
-                    <button type="submit" class="w-full p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                        Login
+                    <button type="submit" id="login-btn" class="w-full p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex justify-center items-center">
+                        <span>Login</span>
                     </button>
                     <p id="login-error" class="text-red-500 text-sm text-center mt-2 hidden">Invalid Passcode.</p>
                 </form>
-                <p class="text-xs text-gray-400 text-center mt-4">Note: Backend API is mocked for demo purposes. Enter any code.</p>
+                <!-- Removed the 'Powered by Vercel Functions' paragraph here -->
             </div>
         </div>
     </div>
@@ -532,27 +532,72 @@
             event.preventDefault(); // Prevent page refresh
             const passcode = document.getElementById('passcode').value;
             const errorElement = document.getElementById('login-error');
+            const loginBtn = document.getElementById('login-btn');
 
-            // MOCK LOGIN FOR DEMO PURPOSES
-            if (passcode) {
-                sessionStorage.setItem('userPasscode', passcode); // Store passcode for logout
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('calculator-container').classList.remove('hidden');
-                document.getElementById('calculator-container').classList.add('grid');
-                document.getElementById('logout-button').classList.remove('hidden');
-                initializeApp();
-            } else {
+            if (!passcode) {
                 errorElement.textContent = 'Please enter a passcode.';
                 errorElement.classList.remove('hidden');
+                return;
+            }
+            
+            // UI Loading state
+            loginBtn.textContent = 'Verifying...';
+            loginBtn.disabled = true;
+
+            try {
+                // Secure Vercel Serverless Function call
+                const response = await fetch('/api/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ passcode })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    sessionStorage.setItem('userPasscode', passcode);
+                    document.getElementById('login-screen').classList.add('hidden');
+                    document.getElementById('calculator-container').classList.remove('hidden');
+                    document.getElementById('calculator-container').classList.add('grid');
+                    document.getElementById('logout-button').classList.remove('hidden');
+                    initializeApp();
+                } else if (response.status === 409) {
+                    errorElement.textContent = data.message || 'Passcode already in use.';
+                    errorElement.classList.remove('hidden');
+                    loginBtn.textContent = 'Login';
+                    loginBtn.disabled = false;
+                } else {
+                    errorElement.textContent = data.message || 'Invalid Passcode.';
+                    errorElement.classList.remove('hidden');
+                    loginBtn.textContent = 'Login';
+                    loginBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error("Login Error:", error);
+                errorElement.textContent = 'Connection failed. Please try again.';
+                errorElement.classList.remove('hidden');
+                loginBtn.textContent = 'Login';
+                loginBtn.disabled = false;
             }
         });
 
         // --- Logout Logic ---
-        document.getElementById('logout-button').addEventListener('click', async () => {
-            // Mock logout
+        window.logout = async () => {
+            const passcode = sessionStorage.getItem('userPasscode');
+            if (passcode) {
+                try {
+                    await fetch('/api/logout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ passcode })
+                    });
+                } catch (error) {
+                    console.error('Logout failed:', error);
+                }
+            }
             sessionStorage.removeItem('userPasscode');
-            location.reload(); // Reload the page to show the login screen
-        });
+            location.reload(); 
+        };
 
 
         // Main function to update the entire calculator UI and totals
@@ -964,7 +1009,14 @@
 
                     tabletServiceCost = proratedFirstMonthCost + remainingMonthsCost;
                     tabletUpfrontMonths = 0; // It's a custom calculation now
-                    tabletDeviceCost = 0; 
+                    
+                    // Apply device promo price if it exists (e.g. TCL Tablets)
+                    if (currentTablet.devicePromoPrice) {
+                        tabletDeviceCost = currentTablet.devicePromoPrice;
+                    } else {
+                        tabletDeviceCost = 0;
+                    }
+
                     tabletServiceLabel = `${currentTablet.name} (Prorated + ${remainingFullMonths} mo)`;
                 }
                 else {
@@ -1439,8 +1491,14 @@
             updateLineDropdowns('new');
         }
 
+        // Attach functions to window so HTML onclick handlers can find them
+        window.updateCalculator = updateCalculator;
+        window.resetCalculator = resetCalculator;
+        window.updateLineDropdowns = updateLineDropdowns;
+        window.generateUpgradeDeviceSelectors = generateUpgradeDeviceSelectors;
+        window.initializeApp = initializeApp;
+
     </script>
 
 </body>
 </html>
-
