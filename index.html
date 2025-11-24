@@ -807,13 +807,9 @@
             // --- Calculate Service Cost ---
             let finalServiceCost = 0;
             let serviceLabelText = 'First Month Mobile Service';
-            let byodPortsToUse = 0;
-            if (byodLines > 0 && newDeviceLines > 0) {
-                byodPortsToUse = byodPorts; // Use the dropdown value
-            } else if (byodLines > 0 && newDeviceLines === 0) {
-                byodPortsToUse = Math.min(byodLines, portedLines); // Use the total BYOD lines, capped by ported lines
-            }
-            const qualifiesForByodDiscount = portIn && (byodPortsToUse > 0) && !hasS25FE && !isPortOneGetFourActive;
+            
+            // [UPDATED] BYOD Discount no longer requires port-in
+            const qualifiesForByodDiscount = (byodLines > 0) && !hasS25FE && !isPortOneGetFourActive;
 
 
             if (isAddingALine) {
@@ -854,6 +850,7 @@
                 }
                 
                 let serviceDiscount = 0;
+                // [REVERTED] Red Hot Ticket checks for portedLines > 0 again
                 const canUseRedHotTicket = portedLines > 0 && !isUpgradeOnly && !hasIphone13 && !hasIphone14 && !hasIphone14Plus && !hasS25FE && !hasRazr2025 && !isPortOneGetFourActive;
 
                 if (redHotTicket && canUseRedHotTicket) {
@@ -924,6 +921,7 @@
             const redHotTicketContainer = document.getElementById('red-hot-ticket-container');
             const redHotTicketCheckbox = document.getElementById('red-hot-ticket');
             
+            // [REVERTED] Red Hot Ticket eligibility check (Ported Lines required)
             const canUseRedHotTicket = upgradeType !== 'add-a-line' && portedLines > 0 && !isUpgradeOnly && !hasS25FE && !hasRazr2025 && !isPortOneGetFourActive;
 
             if (canUseRedHotTicket) {
@@ -943,8 +941,8 @@
             }
 
             if (qualifiesForByodDiscount && !canUseRedHotTicket) {
-                if (!promoMessages.some(m => m.includes("50% off"))) { // Avoid duplicate message
-                    promoMessages.push("50% off first BYOD line for Port-in.");
+                if (!promoMessages.some(m => m.includes("50% off"))) {
+                    promoMessages.push("50% off first BYOD line."); // Removed "for Port-in"
                 }
             }
             
