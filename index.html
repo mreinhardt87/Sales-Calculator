@@ -1130,13 +1130,21 @@
             document.getElementById('accessory-bundle-label').textContent = `Accessory Bundle (${document.getElementById('accessory-bundles').value} bundle${(parseInt(document.getElementById('accessory-bundles').value) || 0) !== 1 ? 's' : ''})`;
             document.getElementById('accessory-bundle-amount').textContent = `$${accessoryCost.toFixed(2)}`;
 
+            // --- Access Fee Logic ---
+            // CHANGE THIS TO 'false' TO TURN ACCESS FEES BACK ON
+            const PROMO_WAIVE_ACCESS_FEES = true; 
+
             let accessFee = 0;
-            if (!isUpgradeOnly && upgradeType !== 'add-a-line') {
-                accessFee = Math.min(totalLines, 2) * 25;
-            } else if (upgradeType === 'add-a-line') {
-                accessFee = Math.min(totalLines, 2) * 25; // Access fee still applies for AAL
+            if (!PROMO_WAIVE_ACCESS_FEES) {
+                if (!isUpgradeOnly && upgradeType !== 'add-a-line') {
+                    accessFee = Math.min(totalLines, 2) * 25;
+                } else if (upgradeType === 'add-a-line') {
+                    accessFee = Math.min(totalLines, 2) * 25; 
+                }
             }
-            document.getElementById('access-fee-container').style.display = (totalLines > 0 && !isUpgradeOnly) ? 'block' : 'none';
+
+            // Updated display logic: Hide container if fee is 0 (waived), unless you prefer showing $0.00
+            document.getElementById('access-fee-container').style.display = (totalLines > 0 && !isUpgradeOnly && accessFee > 0) ? 'block' : 'none';
             document.getElementById('access').checked = accessFee > 0;
             document.getElementById('access').dataset.amount = accessFee.toFixed(2);
             document.getElementById('access-label').textContent = `Access Fee (Mobile) (${totalLines} line${totalLines !== 1 ? 's' : ''})`;
@@ -1511,4 +1519,3 @@
 
 </body>
 </html>
-
