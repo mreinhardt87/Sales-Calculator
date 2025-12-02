@@ -835,13 +835,9 @@
                     baseServiceCost = planPrices[totalLines - 1] || 0;
                     
                     if (hasS25FE) {
-                         const s25fePlanPrice = (basePlanPrice === 50) ? 55 : (basePlanPrice === 60 ? 65 : basePlanPrice);
-                         const otherLines = totalLines - newDeviceKeys.filter(k => k === 'samsung-s25fe').length;
-                         let otherLinesCost = 0;
-                         if (otherLines > 0) {
-                            otherLinesCost = planPrices[otherLines - 1] || 0;
-                         }
-                         baseServiceCost = (s25fePlanPrice * (totalLines - otherLines)) + otherLinesCost;
+                         // This logic was incorrect as it treated s25fe lines as individual lines even when bundled
+                         // Reverting to standard bundling for first month service cost
+                         baseServiceCost = planPrices[totalLines - 1] || 0; 
                     } else if (qualifiesForByodDiscount) {
                         const singleLineBasePrice = planBreakdownData[basePlanPrice.toString()][0]; // Use autopay price ($50 or $60)
                         const discountPerByodPort = singleLineBasePrice * 0.5; // [FIX] Calculate discount from base autopay price
