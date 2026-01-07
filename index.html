@@ -476,7 +476,6 @@
     <script>
         // Data for different phone promotions based on the provided PDF
         const dealData = {
-            'samsung-a16': { name: 'Samsung A16', retailPrice: 129.00, promoPrice: 0.00, veriffOnlyPrice: 0.00, noHasslePrice: 24.99, requiredPlan: 40 },
             'moto-g-power-2025': { name: 'Moto G Power 2025', retailPrice: 149.99, promoPrice: 0.00, veriffOnlyPrice: 24.99, noHasslePrice: 49.99, requiredPlan: 50 },
             'moto-edge-2025': { name: 'Moto Edge 2025', retailPrice: 259.99, promoPrice: 49.99, veriffOnlyPrice: 99.99, noHasslePrice: 149.99, requiredPlan: 50 },
             'moto-g-stylus-2025': { name: 'Moto G Stylus 2025', retailPrice: 199.00, promoPrice: 0.00, veriffOnlyPrice: 49.99, noHasslePrice: 149.99, requiredPlan: 40 },
@@ -484,8 +483,10 @@
             'moto-g-power-2024': { name: 'Moto G Power 2024 (EOL)', retailPrice: 199.00, promoPrice: 0.00, veriffOnlyPrice: 0.00, noHasslePrice: 9.99 },
             'moto-edge-2024': { name: 'Moto Edge 2024 (EOL)', retailPrice: 259.99, promoPrice: 0.00, veriffOnlyPrice: 0.00, noHasslePrice: 49.99 },
             'moto-g-stylus-2024': { name: 'Moto G Stylus 2024 (EOL)', retailPrice: 249.99, promoPrice: 0.00, veriffOnlyPrice: 49.99, noHasslePrice: 149.99, requiredPlan: 40 },
+            'moto-razr-2025': { name: 'Motorola Razr 2025', retailPrice: 599.99, promoPrice: 99.99, veriffOnlyPrice: 199.99, noHasslePrice: 599.99, promoMonths: 2, requiredPlan: 50, excludeFromRHT: true },
             'iphone-16e': { name: 'Apple iPhone 16e', retailPrice: 599.99, promoPrice: 0.00, veriffOnlyPrice: 99.99, noHasslePrice: 599.99, promoMonths: 3, requiredPlan: 60 },
             'iphone-15': { name: 'Apple iPhone 15', retailPrice: 729.00, promoPrice: 379.99, veriffOnlyPrice: 479.99, noHasslePrice: 629.99, promoMonths: 2, requiredPlan: 50 },
+            'iphone-14-cpo-pro': { name: 'CPO iPhone 14 Pro', retailPrice: 449.99, promoPrice: 149.99, veriffOnlyPrice: 249.99, noHasslePrice: 399.99, promoMonths: 3, requiredPlan: 50 },
             'iphone-13-cpo-pro-max': { name: 'CPO iPhone 13 Pro Max', retailPrice: 529.00, promoPrice: 149.99, veriffOnlyPrice: 249.99, noHasslePrice: 399.99, promoMonths: 2, requiredPlan: 50 },
             'iphone-12-cpo-pro-max': { name: 'CPO iPhone 12 Pro Max', retailPrice: 349.99, promoPrice: 99.99, veriffOnlyPrice: 199.99, noHasslePrice: 349.99, promoMonths: 2, requiredPlan: 50 },
             'iphone-12-cpo-pro': { name: 'CPO iPhone 12 Pro', retailPrice: 299.99, promoPrice: 49.99, veriffOnlyPrice: 149.99, noHasslePrice: 299.99, promoMonths: 2, requiredPlan: 50 },
@@ -494,23 +495,24 @@
             'iphone-13-cpo': { name: 'Apple iPhone 13 CPO 128GB', retailPrice: 349.99, promoPrice: 0.00, veriffOnlyPrice: 99.99, noHasslePrice: 349.99, promoMonths: 2 },
             'iphone-14': { name: 'Apple iPhone 14 128GB', retailPrice: 599.99, promoPrice: 49.99, veriffOnlyPrice: 149.99, noHasslePrice: 499.99, promoMonths: 3, requiredPlan: 50 },
             'iphone-14-plus': { name: 'Apple iPhone 14 Plus 128GB', retailPrice: 729.00, promoPrice: 199.99, veriffOnlyPrice: 199.99, noHasslePrice: 499.99, promoMonths: 1, requiredPlan: 40 },
-            'moto-razr-2025': { name: 'Motorola Razr 2025', retailPrice: 599.99, promoPrice: 99.99, veriffOnlyPrice: 199.99, noHasslePrice: 599.99, promoMonths: 2, requiredPlan: 50, excludeFromRHT: true },
-            'samsung-s25fe': { name: 'Samsung S25FE', retailPrice: 599.99, promoPrice: 99.99, veriffOnlyPrice: 199.99, noHasslePrice: 599.99, promoMonths: 2, requiredPlan: 50, stackable: false },
             'samsung-a15': { name: 'Samsung Galaxy A15 5G', retailPrice: 79.99, promoPrice: 0.00, portOnlyPrice: 59.99, veriffOnlyPrice: 0.00, promoMonths: 1 },
+            'samsung-a16': { name: 'Samsung A16', retailPrice: 129.00, promoPrice: 0.00, veriffOnlyPrice: 0.00, noHasslePrice: 24.99, requiredPlan: 40 },
             'samsung-a25': { name: 'Samsung Galaxy A25 5G', retailPrice: 199.99, promoPrice: 14.99, portOnlyPrice: 49.99, veriffOnlyPrice: 14.99, promoMonths: 1 },
-            'samsung-a26': { name: 'Samsung Galaxy A26 5G', retailPrice: 199.99, promoPrice: 0.00, portOnlyPrice: 199.99, veriffOnlyPrice: 49.99, noHasslePrice: 149.99, promoMonths: 1 },
+            'samsung-a26': { name: 'Samsung Galaxy A26 5G', retailPrice: 199.99, promoPrice: 0.00, veriffOnlyPrice: 49.99, noHasslePrice: 149.99, promoMonths: 1 },
             'samsung-a36': { name: 'Samsung Galaxy A36 (5G)', retailPrice: 279.99, promoPrice: 0.00, portOnlyPrice: 199.99, veriffOnlyPrice: 99.99, promoMonths: 1 },
             'samsung-s24fe': { name: 'Samsung Galaxy S24FE (5G)', retailPrice: 699.99, promoPrice: 199.99, portOnlyPrice: 699.99, veriffOnlyPrice: 299.99, promoMonths: 2 },
+            'samsung-s25fe': { name: 'Samsung S25FE', retailPrice: 599.99, promoPrice: 99.99, veriffOnlyPrice: 199.99, noHasslePrice: 599.99, promoMonths: 2, requiredPlan: 50, stackable: false },
             'tcl-50xe': { name: 'TCL 50XE 5G', retailPrice: 79.99, promoPrice: 0.00, portOnlyPrice: 79.99, veriffOnlyPrice: 14.99, promoMonths: 1 },
-            'tcl-50xl-nxtpaper': { name: 'TCL 50XL NXTPAPER 5G', retailPrice: 99.99, promoPrice: 0.00, portOnlyPrice: 49.99, veriffOnlyPrice: 14.99, promoMonths: 1 },
-            'tcl-k33': { name: 'TCL K33 5G', retailPrice: 79.99, promoPrice: 0.00, portOnlyPrice: 4.99, veriffOnlyPrice: 4.99, promoMonths: 1 }
+            'tcl-50xl-nxtpaper': { name: 'TCL 50XL NXTPAPER 5G', retailPrice: 99.99, promoPrice: 0.00, veriffOnlyPrice: 0.00, noHasslePrice: 19.99, promoMonths: 1 },
+            'tcl-k33': { name: 'TCL K33 5G', retailPrice: 79.99, promoPrice: 0.00, veriffOnlyPrice: 0.00, noHasslePrice: 4.99, promoMonths: 1 }
         };
 
         const tabletData = {
             'none': { name: 'None', msrp: 0, serviceCost: 0, upfrontMonths: 0 },
             'samsung-a9-plus': { name: 'Samsung A9+', msrp: 239.99, serviceCost: 20, upfrontMonths: 6 },
-            'tcl-tab-10': { name: 'TCL Tab 10 NXTPAPER 5G', msrp: 219.99, serviceCost: 20, upfrontMonths: 1, devicePromoPrice: 34.99 },
+            'tcl-tab-10 NXT': { name: 'TCL Tab 10 NXTPAPER 5G', msrp: 219.99, serviceCost: 10, upfrontMonths: 1, devicePromoPrice: 34.99 },
             'tcl-tab-8-plus': { name: 'TCL Tab 8 Plus', msrp: 159.99, serviceCost: 10, upfrontMonths: 1, devicePromoPrice: 34.99 }
+            'tcl-tab-8-NXT': { name: 'TCL Tab 8 NXTPAPER 5G', msrp: 179.99, serviceCost: 20, upfrontMonths: 1, devicePromoPrice: 34.99 }
         };
         
         // Prices for MONTH 2 AND BEYOND (AutoPay enabled)
@@ -1516,5 +1518,6 @@
 
 </body>
 </html>
+
 
 
